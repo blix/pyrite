@@ -1,3 +1,3 @@
 
-def load(commands):
+def load(commands, ext):
     pass
