@@ -1,9 +1,8 @@
 
 from gettext import gettext as _
 import configuration, extensions, options, UI, repository
-from standard import help
 from standard.help import HelpError
-import sys
+import sys, imp
 
 config = None
 
@@ -130,7 +129,7 @@ commands = {
             _('launch the graphical interface or history browser'),
             _('pyt gui [OPTION]')],
 "help": ['help', 1,
-            [],
+            [('v', 'verbose', _('print full help and aliases'))],
             _('view the general help or help for a command'),
             _('pyt help [command]')],
 "init": ['init', 1,
@@ -253,7 +252,20 @@ modules = {}
 
 aliases_map = {}
 
+def dyn_import(module, is_extension=False, path=None):
+    if module in modules: return
+    package = None
+    if extensions.is_extension(module):
+        package = exensions.get_package(module)
+    else:
+        package = 'pyrite.standard'
+    m = __import__(package, fromlist=module)
+    f, p, d = imp.find_module(module, m.__path__)
+    modules[module] = m = imp.load_module(package + '.' + module, f, p, d)
+    return m
+
 def run():
+    help = dyn_import('help')
     try:
         global repo
         repo = repository.Repo()
@@ -268,17 +280,10 @@ def run():
             raise HelpError, {'basic': 1}
             
         module_name = commands[cmd][0]
-        args = options.parse(commands)
-        if module_name in modules:
-            modules[module_name].run(**args)
-        else:
-            m = __import__('pyrite.standard', fromlist=[module_name])
-            import imp
-            f, p, d = imp.find_module(module_name, m.__path__)
-            m = imp.load_module('pyrite.standard.init', f, p, d)
-            modules[module_name] = m
-            m.run(**args)
+        flags,args = options.parse(commands[cmd][2], sys.argv[2:], cmd)
+        m = dyn_import(module_name)
+        modules[module_name].run(*args, **flags)
         
     except HelpError, inst:
-        help.run(**inst.args[0])
+        help.run(None, **inst.args[0])
 
