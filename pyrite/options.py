@@ -56,12 +56,12 @@ def expand_aliases(commands, aliases_map):
     for c, options in items.iteritems():
         aliases = c.split('|')
         if len(aliases) > 1:
-            aliases_map[c] = []
+            aliases_map[aliases[0]] = []
             for a in aliases:
                 o = copy(options)
                 o[1] = 2
                 commands[a] = o
             commands[aliases[0]][1] = options[1]
-            aliases_map[c].append(a)
+            aliases_map[aliases[0]].append(a)
             del commands[c]
 

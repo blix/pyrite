@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# golden taking the best from git an hg
+# Pyrite taking the best from git an hg
 #
 # Copyright 2008 Govind Salinas <blix@sophiasuchtig.com>
 #

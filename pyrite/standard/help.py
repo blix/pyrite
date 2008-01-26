@@ -12,12 +12,12 @@ def show_help(prefix, template, threshold, suffix):
     for c in sorted(pyrite.commands.keys()):
         options = pyrite.commands[c]
         if 2 > options[1] >= threshold:
-            pyrite.ui.info(template % (c, options[3]))
+            pyrite.ui.info(template % (c.ljust(10), options[3]))
     pyrite.ui.info(suffix)
     
 def show_full_help():
-    show_help(pyrite.help_str + _('\nAll commands...\n\n'),
-                _('%s\t%s'),
+    show_help(pyrite.help_str + _('\n\nAll commands...\n'),
+                _(' %s %s'),
                 0,
                 '\n' + _('For more aliases type "%s"') % 'pyt help -v')
                 
@@ -34,17 +34,17 @@ def show_command_help(cmd):
         pyrite.ui.info(_('options:\n'))
         for s, l, m in o[2]:
             if len(s) > 0:
-                pyrite.ui.info('-%s\t--%s\t%s' % (s, l, m))
+                pyrite.ui.info(' -%s --%s %s' % (s.ljust(2), l.ljust(10), m))
             else:
-                pyrite.ui.info('  \t--%s\t%s' % (l, m))
+                pyrite.ui.info('  --%s %s' % (l.ljust(10), m))
     pyrite.ui.info('\n' + _('For more options type "pyt help"'))
 
 def run(*args, **flags):
     if flags.has_key('basic'):
-        show_help(pyrite.help_str + _('\n\nBasic commands...\n\n'),
-                    _('%s\t%s'),
+        show_help(pyrite.help_str + _('\n\nBasic commands...\n'),
+                    _(' %s %s'),
                     1,
-                    _('\n\n' + _('For more options type "pyt help"')))
+                    _('\n' + _('For more options type "pyt help"')))
     elif flags.has_key('command'):
         cmd = flags['command']
         if cmd == 'help':
@@ -52,15 +52,16 @@ def run(*args, **flags):
             return
         show_command_help(flags['command'])
     elif flags.has_key('verbose'):
-        print 'v'
+        pyrite.ui.info(pyrite.help_str + '\n')
         for c in sorted(pyrite.commands.keys()):
             cmd = c
             options = pyrite.commands[c]
+            if options[1] == 2: continue
             if c in pyrite.aliases_map:
-                for a in aliases_map[c]:
+                for a in pyrite.aliases_map[c]:
                     cmd = cmd + ', ' + a
-            pyrite.ui.info(cmd)
-            pyrite.ui.info('\t%s' % options[3])
+            pyrite.ui.info(cmd + ':')
+            pyrite.ui.info('    %s' % options[3])
     elif len(args) == 1:
         try:
             show_command_help(args[0])

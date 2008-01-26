@@ -1,5 +1,8 @@
 
-from gettext import gettext as _
+import gettext
+t = gettext.translation('pyt', fallback=1)
+_ = t.gettext
+
 import configuration, extensions, options, UI, repository
 from standard.help import HelpError
 import sys, imp
@@ -24,7 +27,7 @@ commands = {
             _('pyt archive [OPTIONS]... [PATHS]...')],
 "bisect": ['bisect', 0,
             [],
-            _('Find the change that introduced a bug by binary search. (see "pyt help bisect" for more info")'),
+            _('Find the change that introduced a bug by binary search.'),
             _('pyt bisect <subcommand> <options>')],
 "blame|annotate": ['blame', 0,
             [(_('l'), _('long'), _('show long rev')),
@@ -58,7 +61,7 @@ commands = {
             _('pyt commit [OPTIONS]...')],
 "cherry": ['cherry', 0,
             [(_('e'), _('--edit'), _('edit the commit message before commiting')),
-            (_('n'), _('--no-commit'), _('apply changes to working directory but do not commit'))],
+            (_('n'), _('--no-commit'), _('apply changes to working set but do not commit'))],
             _('Apply the change introduced by an existing commit'),
             _('pyt cherry [OPTIONS]... <commit>')],
 "clone": ['clone', 1,
@@ -82,7 +85,7 @@ commands = {
             (_('d'), _('--detect'), _('detect renames and copies')),
             (_(''), _('--ignore-eol'), _('ignore end of line whitespace differences')),
             (_('w'), _('--ignore-whitespace'), _('ignore all whitespace'))],
-            _('Show changes between to commits or a commit and the working directory'),
+            _('diff between to commits or a commit and the working set'),
             _('pyt diff [OPTIONS] [commit1[commit2]] [PATHS]...')],
 "email": ['email', 0,
             [(_(''), _('--bcc'), _('Specify bcc recipients')),
@@ -155,7 +158,7 @@ commands = {
             (_('n'), _('--no-tags'), _('do not download any tags')),
             (_('e'), _('--extra-tags'), _('download tags thier related objects even if they would not be reachable otherwise')),
             (_('d'), _('--depth'), _('maximum number of commits to fetch')),
-            (_(''), _('--no-commit'), _('merge the files in the working directory but do not commit the change')),
+            (_(''), _('--no-commit'), _('merge the files in the working set but do not commit the change')),
             (_('s'), _('--summary'), _('show a diffstat at the end of the merge'))],
             _('Fetch and merge in one operation'),
             _('pyt pull [OPTIONS]... <repository> [[+]srccommit[:destcommit]]')],
@@ -181,7 +184,7 @@ commands = {
             [(_('f'), _('--force'), _('override the up-to-date check')),
             (_('n'), _('--no-remove'), _('do not actually remove the file(s)')),
             (_('r'), _('--recursive'), _('remove recursively when leading directory is given'))],
-            _('Remove files from the working directory and tell pyt about it'),
+            _('Remove files from the working set and tell pyt about it'),
             _('pyt remove [OPTIONS] file')],
 "rename|mv": ['rename', 0,
             [(_('f'), _('--force'), _('force rename even if target exists')),
@@ -191,7 +194,7 @@ commands = {
             _('pyt rename [OPTIONS]... <source>... <destination>')],
 "revert": ['revert', 0,
             [(_('e'), _('--edit'), _('edit the commit message before commiting')),
-            (_('n'), _('--no-commit'), _('prepare the working directory but do not commit'))],
+            (_('n'), _('--no-commit'), _('prepare the working set but do not commit'))],
             _('Revert a change in the history by applying a new commit'),
             _('pyt revert [OPTIONS] <commit>')],
 "show": ['show', 0,
@@ -207,11 +210,11 @@ commands = {
             (_('n'), _('--no-verify'), _('bypass precommit hooks')),
             (_(''), _('--ammend'), _('Replace the current tip with the new commit')),
             (_('v'), _('--verbose'), _('show diff at the bottom of the commit message'))],
-            _('Show status of the working directory'),
+            _('Show status of the working set'),
             _('pyt status [OPTIONS]')],
 "squash": ['squash', 0,
             [],
-            _('merge all changes into the working directory and create a new commit'),
+            _('merge all changes into the working set and create a new commit'),
             _('pyt squash <commit>')],
 "tag": ['tag', 0,
             [(_('d'), _('--delete'), _('delete the given tag')),
@@ -225,7 +228,7 @@ commands = {
 "update|addremove": ['addremove', 1,
                 [(_('r'), _('--remove'), _('only remove deleted files')),
                  (_('a'), _('--add'), _('only add new files'))],
-                 _('look for files that need to be added or removed from the repository'),
+                 _('look for added or removed files from the repository'),
                  _('pyt update [OPTION]... [FILE]...')],
 "verify|fsck": ['verify', 0,
             [(_('t'), _('--tags'), _('')),
