@@ -84,7 +84,7 @@ def run(cmd, *args, **flags):
             pyrite.ui.info('    %s' % options[3])
     elif len(args) == 1:
         try:
-            show_command_help(args[0])
+            show_command_help(args[0], None)
         except HelpError:
             show_full_help()    
     else:
