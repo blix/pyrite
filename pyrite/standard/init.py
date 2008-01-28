@@ -13,13 +13,15 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import pyrite
 
-help_str = """This command creates an empty pyt repository. An initial HEAD
+help_str = """
+This command creates an empty pyt repository. An initial HEAD
 file that references the HEAD of the master branch is also created.
 
 Running pyt init in an existing repository is safe. It will not
 overwrite things that are already there."""
             
-def run(**args):
-    pass
+def run(cmd, *args, **flags):
+    pyrite.repo.init()
 

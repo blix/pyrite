@@ -310,7 +310,7 @@ def run():
         options.expand_aliases(commands, aliases_map)
         
         if len(sys.argv) < 2:
-            raise HelpError, {'basic': 1}
+            raise help.HelpError, {'basic': 1}
         cmd = sys.argv[1]
         if not commands.has_key(cmd):
             raise HelpError, {'unknown': 1, 'command': cmd}

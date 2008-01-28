@@ -61,7 +61,8 @@ class Config:
         self.user_config = ConfigParser.SafeConfigParser()
         self.user_config.readfp(self._get_file())
         if pyrite.repo.is_repo():
-            self.repo_config_path = os.path.join(repo.get_repo_dir(), 'pytrc')
+            self.repo_config_path = os.path.join(pyrite.repo.get_repo_dir(),
+                                                    'pytrc')
             self.repo_config = ConfigParser.SafeConfigParser()
             self.repo_config.readfp(self._get_file(True))
 
