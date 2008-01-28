@@ -1,6 +1,20 @@
+#Copyright 2008 Govind Salinas <blix@sophiasuchtig.com>
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 2 of the License, or
+#(at your option) any later version.
+
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+
+#You should have received a copy of the GNU General Public License
+#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import pyrite
-from gettext import gettext as _
 
 help_str='Show help'
 
@@ -21,7 +35,7 @@ def show_full_help():
                 0,
                 '\n' + _('For more aliases type "%s"') % 'pyt help -v')
                 
-def show_command_help(cmd):
+def show_command_help(cmd, message):
     if not pyrite.commands.has_key(cmd): raise HelpError
     o = pyrite.commands[cmd]
     pyrite.dyn_import(o[0])
@@ -32,16 +46,22 @@ def show_command_help(cmd):
     pyrite.ui.info(mod.help_str + '\n')
     if len(o[2]) > 0:
         pyrite.ui.info(_('options:\n'))
-        for s, l, m in o[2]:
+        for s, l, m, f in o[2]:
             if len(s) > 0:
                 pyrite.ui.info(' -%s --%s %s' % (s.ljust(2), l.ljust(10), m))
             else:
-                pyrite.ui.info('  --%s %s' % (l.ljust(10), m))
+                pyrite.ui.info('     --%s %s' % (l.ljust(10), m))
     pyrite.ui.info('\n' + _('For more options type "pyt help"'))
+    if message: pyrite.ui.info(message)
 
-def run(*args, **flags):
+def run(cmd, *args, **flags):
     if flags.has_key('basic'):
         show_help(pyrite.help_str + _('\n\nBasic commands...\n'),
+                    _(' %s %s'),
+                    1,
+                    _('\n' + _('For more options type "pyt help"')))
+    elif flags.has_key('unknown'):
+        show_help(pyrite.help_str + _('\n\nUnknown command %s\nBasic commands...\n') % cmd,
                     _(' %s %s'),
                     1,
                     _('\n' + _('For more options type "pyt help"')))
@@ -50,7 +70,7 @@ def run(*args, **flags):
         if cmd == 'help':
             show_full_help()
             return
-        show_command_help(flags['command'])
+        show_command_help(flags['command'], flags.get('message', None))
     elif flags.has_key('verbose'):
         pyrite.ui.info(pyrite.help_str + '\n')
         for c in sorted(pyrite.commands.keys()):
