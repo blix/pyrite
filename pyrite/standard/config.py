@@ -52,7 +52,7 @@ option=value
 class ConfigError(Exception):
     """Raised when unable to load config"""
 
-class Config:
+class Config(object):
     _not_under_repo_error = _("Not under a repository")
     _cant_load_user_config = _("User config not available")
     _missing_config_arg = _("Category and Name must be supplied")

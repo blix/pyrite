@@ -16,7 +16,11 @@
 
 import pyrite
 
-help_str='Show help'
+help_str="""
+pyt help <command>
+
+Shows list of commands or help for a command.
+"""
 
 class HelpError(Exception):
     """Raised to show help"""
@@ -30,7 +34,7 @@ def show_help(prefix, template, threshold, suffix):
     pyrite.ui.info(suffix)
     
 def show_full_help():
-    show_help(pyrite.help_str + _('\n\nAll commands...\n'),
+    show_help(pyrite.help_str + _('\nAll commands...\n'),
                 _(' %s %s'),
                 0,
                 '\n' + _('For more aliases type "%s"') % 'pyt help -v')
@@ -39,11 +43,9 @@ def show_command_help(cmd, message):
     if not pyrite.commands.has_key(cmd): raise HelpError
     o = pyrite.commands[cmd]
     pyrite.dyn_import(o[0])
-    
     mod = pyrite.modules[o[0]]
-    pyrite.ui.info(o[4] + '\n')
-    pyrite.ui.info(o[3] + '\n')
-    pyrite.ui.info(mod.help_str + '\n')
+    pyrite.ui.info(o[3])
+    pyrite.ui.info(mod.help_str)
     if len(o[2]) > 0:
         pyrite.ui.info(_('options:\n'))
         for s, l, m, f in o[2]:

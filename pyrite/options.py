@@ -20,7 +20,7 @@ import pyrite
 class ParseError(Exception):
     """Could Not Parse Argument"""
 
-class OptionParser:
+class OptionParser(object):
     def __init__(self, command):
         self._options = {}
         self._args = []
