@@ -84,7 +84,7 @@ class Config(object):
     def del_user_option(self, item, is_all):
         self._del_option(self.user_config, self.user_config_path, item, is_all)
 
-    def get_option(self, item, is_all):
+    def get_option(self, item, is_all=False):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise ConfigError(_missing_config_arg)
