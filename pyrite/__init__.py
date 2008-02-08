@@ -1,15 +1,15 @@
 #Copyright 2008 Govind Salinas <blix@sophiasuchtig.com>
-
+#
 #This program is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
 #the Free Software Foundation, either version 2 of the License, or
 #(at your option) any later version.
-
+#
 #This program is distributed in the hope that it will be useful,
 #but WITHOUT ANY WARRANTY; without even the implied warranty of
 #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #GNU General Public License for more details.
-
+#
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -64,7 +64,7 @@ commands = {
             ('a', 'all', _('show all branches'), 0),
             ('n', 'no-track', _('do not automatically track remote branches'), 0)],
             _('list, switch to, or delete branches')],
-"checkout|reset|co": ['checkout', 1,
+"checkout|co": ['checkout', 1,
             [('b', 'branch', _('Create a new branch starting at this commit and switch to it'), 1),
             ('f', 'force', _('Force operation'), 0),
             ('m', 'merge', _('Merge files if working set is not clean'), 0)],
@@ -228,13 +228,12 @@ commands = {
             ('v', 'verify', _('verify the signature of the tag'), 0),
             ('l', 'list', _('list tags with an optional matching pattern'), 0),],
             _('create, list or delete tags')],
-"update|addremove": ['addremove', 1,
-                [('r', 'remove', _('only remove deleted files'), 0),
-                 ('a', 'add', _('only add new files'), 0)],
+"track|add": ['track', 1,
+                [('f', 'force', _('Add file even if it is ignored'), 0),
+                ('v', 'verbose', _('show added files'), 0)],
                  _('look for added or removed files from the repository')],
 "verify|fsck": ['verify', 0,
-            [('t', 'tags', _(''), 0),
-            ('v', 'verbose', _('output extra information'), 0)],
+            [('v', 'verbose', _('output extra information'), 0)],
             _('verify integrity of the repository')],
 "web": ['web', 0,
             [('l', 'log', _(''), 0),
@@ -246,7 +245,7 @@ commands = {
             ('s', 'style', _(''), 0),
             ('t', 'template', _(''), 0),
             ('6', 'ipv6', _(''), 0)],
-            _('export a repository over http')],
+            _('export a repository over http')]
 }
 
 global_options = [(_(''), _('debug-show-trace'), _('print stacktraces on errors'), 0)]

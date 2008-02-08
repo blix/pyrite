@@ -13,7 +13,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from subprocess import Popen, PIPE
+import subprocess
 import os
 
 class RepoError(Exception):
@@ -24,12 +24,20 @@ class Repo(object):
         if location: self._location = os.path.expanduser(location)
         else: self._location = os.getcwd()
         self.refresh()
+        
+    def _popen(self, args, cwd=None, stdin=False):
+        if not cwd: cwd = self._location
+        if stdin: stdin = subprocess.PIPE
+        else: stdin = None
+        return subprocess.Popen(args, cwd=cwd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    stdin=stdin)
 
     def refresh(self):
         self._branches = None
         self._remotes = None
-        proc = Popen(('git-rev-parse', '--git-dir', '--show-cdup'),
-                        cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-rev-parse', '--git-dir', '--show-cdup'))
         if proc.wait(): self._is_repo = False
         else:
             self._is_repo = True
@@ -48,7 +56,7 @@ class Repo(object):
         if not self._is_repo: raise RepoError(_('Not under a repo')) 
 
     def init(self):
-        proc = Popen(('git-init'), cwd=self._location)
+        proc = self._popen(('git-init'), cwd=self._location)
         if proc.wait():
             raise RepoError(_('Failed to init repo'))
 
@@ -59,7 +67,7 @@ class Repo(object):
         if force: args.append('-D')
         else: args.append('-d')
         for n in names: args.append(n)
-        proc = Popen(args, cwd=self._location, stderr=PIPE)
+        proc = self._popen(args)
         if proc.wait(): raise RepoError(_('Failed to delete branch %s') % names)
 
     def rename_branch(self, oldname, newname, force):
@@ -67,11 +75,9 @@ class Repo(object):
         self.validate()
         proc = None
         if force:
-            proc = Popen(('git-branch', '-M', oldname, newname),
-                            cwd=self._location, stderr=PIPE)
+            proc = self._popen(('git-branch', '-M', oldname, newname))
         else:
-            proc = Popen(('git-branch', '-m', oldname, newname),
-                            cwd=self._location, stderr=PIPE)
+            proc = self._popen(('git-branch', '-m', oldname, newname))
         if proc.wait():
             raise RepoError(_('Failed to rename branch %s to %s') % (oldname,
                                 newname))
@@ -83,7 +89,7 @@ class Repo(object):
         if track: args.append('--track')
         else: args.append('--no-track')
         args.append(name)
-        proc = Popen(args, cwd=self._location)
+        proc = self._popen(args)
         if proc.wait():
             if not force and name in self.branches():
                  raise RepoError(_('Could not create branch, branch exists'))
@@ -95,14 +101,14 @@ class Repo(object):
         if is_merge: args.append('-m')
         args.append(commit)
         if paths: args.extend(paths)
-        proc = Popen(args, cwd=self._location, stderr=PIPE)
+        proc = self._popen(args)
         if proc.wait(): raise RepoError(_('Failed to switch to %s'), commit)
         
     def _read_remotes(self):
         self._remotes = []
         if not self.is_repo:
             return
-        proc = Popen(('git-branch', '-r'), cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-branch', '-r'))
         if proc.wait(): raise RepoError('Could not get remotes list')
         for b in proc.stdout.readlines():
              self._remotes.append(b.strip())
@@ -112,7 +118,7 @@ class Repo(object):
         self._current_branch = None
         if not self.is_repo:
             return
-        proc = Popen(('git-branch'), cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-branch'))
         if proc.wait(): raise RepoError('Could not get branch list')
         for b in proc.stdout.readlines():
             tokens = b.split()
@@ -147,16 +153,14 @@ class Repo(object):
 
     def get_head_sha(self):
         self.validate()
-        proc = Popen(('git-rev-list', '--max-count=1', 'HEAD'),
-                        cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-rev-list', '--max-count=1', 'HEAD'))
         if proc.wait(): raise RepoError(_('Count not find HEAD sha'))
         return proc.stdout.readline().strip()
 
     def get_commit_info(self, commit):
         self.validate()
-        proc = Popen(('git-rev-list', '--max-count=1',
-                        '--pretty=format:%an %ae%n%b', commit),
-                        cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-rev-list', '--max-count=1',
+                        '--pretty=format:%an %ae%n%b', commit))
         if proc.wait(): return None, None, None
         lines = proc.stdout.readlines()
         if len(lines) < 3: return None, None, None
@@ -164,13 +168,12 @@ class Repo(object):
 
     def update_index(self):
         self.validate()
-        proc = Popen(('git-add', '-u'), cwd=self._location)
+        proc = self._popen(('git-add', '-u'))
         if proc.wait(): raise RepoError(_('Failed to update index'))
 
     def changed_files(self):
         self.validate()
-        proc = Popen(('git-diff-index', '--name-status', 'HEAD'),
-                        cwd=self._location, stdout=PIPE)
+        proc = self._popen(('git-diff-index', '--name-status', 'HEAD'))
         if proc.wait(): raise RepoError(_('Failed to get changed files'))
         for line in proc.stdout.readlines():
             parts = line.split()
@@ -189,6 +192,37 @@ class Repo(object):
         else:
             args.append('-m')
             args.append(use_message)
-        proc = Popen(args, cwd=self._location)
+        proc = self._popen(args)
         if proc.wait(): raise RepoError(_('Failed to commit change'))
+
+    def gc(self, prune, aggressive):
+        self.validate()
+        args = ['git-gc']
+        if prune: args.append('--prune')
+        if aggressive: args.append('--aggressive')
+        proc = self._popen(args)
+        if proc.wait(): raise RepoError(_('Failed to gc'))
+
+    def verify(self, verbose):
+        self.validate()
+        if verbose:
+            proc = self._popen(('git-fsck', '--verbose'))
+        else:
+            proc = self._popen(('git-fsck'))
+        if proc.wait():
+            raise RepoError(_('Verify failed.'))
+        return proc.stdout.readlines()
+
+    def add(self, is_force, is_verbose, files):
+        self.validate()
+        args = ['git-add']
+        if is_force: args.append('-f')
+        if is_verbose: args.append('-v')
+        if len(files) > 0: args.extend(files)
+        else: args.append('.')
+        proc = self._popen(args, cwd=os.getcwd())
+        if proc.wait():
+            raise RepoError(_('Could not add files'))
+        for line in proc.stdout.readlines():
+            yield line
 
