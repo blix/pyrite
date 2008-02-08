@@ -18,10 +18,10 @@ import os
 from pyrite.standard.help import HelpError
 
 help_str = """
-pyt -d | --delete <tagname>
-pyt -l | --list [pattern]
-pyt -v | --verify <tagname>
-pyt [-s | -a | -k <key-id>] [-m <message>] <tagname>
+pyt tag -d | --delete <tagname>
+pyt tag -l | --list [pattern]
+pyt tag -v | --verify <tagname>
+pyt tag [-s | -a | -k <key-id>] [-m <message>] <tagname>
 
 The tag command is used to create, list or delete tags.  The --verify
 option will verify the gpg signature.  The --sign, -annotate and --key options
