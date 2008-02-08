@@ -28,5 +28,5 @@ def run(cmd, *args, **flags):
     is_verbose = flags.has_key('verbose')
     
     for line in pyrite.repo.add(is_force, is_verbose, args):
-        print line,	
+        pyrite.ui.info(line)	
 

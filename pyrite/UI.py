@@ -23,7 +23,17 @@ class UI(object):
         pass
         
     def info(self, msg):
-        print msg
+        if msg.__class__ == ''.__class__:
+            if msg[-1] == '\n':
+                print msg,
+            else:
+                print msg
+        else:
+            for l in msg:
+                if l[-1] == '\n':
+                    print l,
+                else:
+                    print l
        
     def error_out(self, msg):
         sys.stderr.write(str(msg) + '\n')
@@ -34,7 +44,7 @@ class UI(object):
         
     def get_platform_editor(self):
         if platform.system() == 'Windows': return ['write.exe']
-        else: return ['/bin/env', 'vi']
+        else: return ['/usr/bin/env', 'vi']
 
     def edit(self, message, extra, tmpfile, strip_prefix='#'):
         msg = ''
@@ -50,7 +60,6 @@ class UI(object):
         finally: f.close()
         tmpfile = os.path.abspath(tmpfile)
         editor.append(tmpfile)
-        print editor
         proc = Popen(editor)
         if proc.wait(): return message
         msg = None

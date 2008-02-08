@@ -224,8 +224,9 @@ commands = {
             [('d', 'delete', _('delete the given tag'), 0),
             ('s', 'sign', _('make a signed tag'), 0),
             ('a', 'annotated', _('make an annotaged tag'), 0),
-            ('k', 'key', _('use as the signing key'), 0),
+            ('k', 'key', _('use as the signing key'), 1),
             ('v', 'verify', _('verify the signature of the tag'), 0),
+            ('m', 'message', _('specify the message to use for the tag'), 0),
             ('l', 'list', _('list tags with an optional matching pattern'), 0),],
             _('create, list or delete tags')],
 "track|add": ['track', 1,
@@ -284,7 +285,7 @@ def run():
             raise help.HelpError, {'basic': 1}
         cmd = sys.argv[1]
         if not commands.has_key(cmd):
-            raise HelpError, {'unknown': 1, 'command': cmd}
+            raise HelpError({'unknown': 1, 'command': cmd})
             
         module_name = commands[cmd][0]
         opts = []
@@ -295,7 +296,7 @@ def run():
         m = dyn_import(module_name)
         modules[module_name].run(cmd, *args, **flags)
         
-    except help.HelpError, inst:
+    except HelpError, inst:
         if show_trace: raise
         help.run(None, None, **inst.args[0])
     except options.ParseError, inst:

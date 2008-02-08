@@ -37,7 +37,7 @@ class Repo(object):
     def refresh(self):
         self._branches = None
         self._remotes = None
-        proc = self._popen(('git-rev-parse', '--git-dir', '--show-cdup'))
+        proc = self._popen(('git', 'rev-parse', '--git-dir', '--show-cdup'))
         if proc.wait(): self._is_repo = False
         else:
             self._is_repo = True
@@ -56,14 +56,14 @@ class Repo(object):
         if not self._is_repo: raise RepoError(_('Not under a repo')) 
 
     def init(self):
-        proc = self._popen(('git-init'), cwd=self._location)
+        proc = self._popen(('git', 'init'), cwd=self._location)
         if proc.wait():
             raise RepoError(_('Failed to init repo'))
 
     def del_branch(self, names, force):
     #TODO: need to give better error when branch exists
         self.validate()
-        args = ['git-branch']
+        args = ['git', 'branch']
         if force: args.append('-D')
         else: args.append('-d')
         for n in names: args.append(n)
@@ -75,16 +75,16 @@ class Repo(object):
         self.validate()
         proc = None
         if force:
-            proc = self._popen(('git-branch', '-M', oldname, newname))
+            proc = self._popen(('git', 'branch', '-M', oldname, newname))
         else:
-            proc = self._popen(('git-branch', '-m', oldname, newname))
+            proc = self._popen(('git', 'branch', '-m', oldname, newname))
         if proc.wait():
             raise RepoError(_('Failed to rename branch %s to %s') % (oldname,
                                 newname))
 
     def create_branch(self, name, force, track=True):
         self.validate()
-        args = ['git-branch']
+        args = ['git', 'branch']
         if force: args.append('-f')
         if track: args.append('--track')
         else: args.append('--no-track')
@@ -97,7 +97,7 @@ class Repo(object):
 
     def checkout(self, commit, is_merge, paths=None):
         self.validate()
-        args = ['git-checkout']
+        args = ['git', 'checkout']
         if is_merge: args.append('-m')
         args.append(commit)
         if paths: args.extend(paths)
@@ -108,7 +108,7 @@ class Repo(object):
         self._remotes = []
         if not self.is_repo:
             return
-        proc = self._popen(('git-branch', '-r'))
+        proc = self._popen(('git', 'branch', '-r'))
         if proc.wait(): raise RepoError('Could not get remotes list')
         for b in proc.stdout.readlines():
              self._remotes.append(b.strip())
@@ -118,7 +118,7 @@ class Repo(object):
         self._current_branch = None
         if not self.is_repo:
             return
-        proc = self._popen(('git-branch'))
+        proc = self._popen(('git', 'branch'))
         if proc.wait(): raise RepoError('Could not get branch list')
         for b in proc.stdout.readlines():
             tokens = b.split()
@@ -153,13 +153,13 @@ class Repo(object):
 
     def get_head_sha(self):
         self.validate()
-        proc = self._popen(('git-rev-list', '--max-count=1', 'HEAD'))
+        proc = self._popen(('git', 'rev-list', '--max-count=1', 'HEAD'))
         if proc.wait(): raise RepoError(_('Count not find HEAD sha'))
         return proc.stdout.readline().strip()
 
     def get_commit_info(self, commit):
         self.validate()
-        proc = self._popen(('git-rev-list', '--max-count=1',
+        proc = self._popen(('git', 'rev-list', '--max-count=1',
                         '--pretty=format:%an %ae%n%b', commit))
         if proc.wait(): return None, None, None
         lines = proc.stdout.readlines()
@@ -168,12 +168,12 @@ class Repo(object):
 
     def update_index(self):
         self.validate()
-        proc = self._popen(('git-add', '-u'))
+        proc = self._popen(('git', 'add', '-u'))
         if proc.wait(): raise RepoError(_('Failed to update index'))
 
     def changed_files(self):
         self.validate()
-        proc = self._popen(('git-diff-index', '--name-status', 'HEAD'))
+        proc = self._popen(('git', 'diff-index', '--name-status', 'HEAD'))
         if proc.wait(): raise RepoError(_('Failed to get changed files'))
         for line in proc.stdout.readlines():
             parts = line.split()
@@ -181,7 +181,7 @@ class Repo(object):
 
     def commit(self, use_message, use_author, verify=True, commit=None):
         self.validate()
-        args = ['git-commit']
+        args = ['git', 'commit']
         if not verify: args.append('--no-verify')
         if use_author:
             args.append('--author')
@@ -197,7 +197,7 @@ class Repo(object):
 
     def gc(self, prune, aggressive):
         self.validate()
-        args = ['git-gc']
+        args = ['git', 'gc']
         if prune: args.append('--prune')
         if aggressive: args.append('--aggressive')
         proc = self._popen(args)
@@ -206,16 +206,16 @@ class Repo(object):
     def verify(self, verbose):
         self.validate()
         if verbose:
-            proc = self._popen(('git-fsck', '--verbose'))
+            proc = self._popen(('git', 'fsck', '--verbose'))
         else:
-            proc = self._popen(('git-fsck'))
+            proc = self._popen(('git', 'fsck'))
         if proc.wait():
             raise RepoError(_('Verify failed.'))
         return proc.stdout.readlines()
 
     def add(self, is_force, is_verbose, files):
         self.validate()
-        args = ['git-add']
+        args = ['git', 'add']
         if is_force: args.append('-f')
         if is_verbose: args.append('-v')
         if len(files) > 0: args.extend(files)
@@ -225,4 +225,54 @@ class Repo(object):
             raise RepoError(_('Could not add files'))
         for line in proc.stdout.readlines():
             yield line
+            
+    def list_tags(self, pattern):
+        self.validate()
+        proc = None
+        if pattern:
+            proc = self._popen(('git', 'tag', '-l', pattern))
+        else:
+            proc = self._popen(('git', 'tag', '-l'))
+        if proc.wait():
+            raise RepoError(_('Failed to list tags'))
+        for line in proc.stdout.readlines():
+            yield line
 
+    def verify_tag(self, tag):
+        self.validate()
+        proc = self._popen(('git', 'tag', '-v', tag))
+        if proc.wait():
+            raise RepoError(_('Failed to verify tag'))
+        for line in proc.stdout.readlines():
+            yield line
+        for line in proc.stderr.readlines():
+            yield line
+
+    def delete_tags(self, tags):
+        self.validate()
+        args = ['git', 'tag', '-d']
+        args.extend(tags)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to delete tag(s)'))
+        return proc.stdout.readlines()
+
+    def create_tag(self, name, message, key=None, sign=False):
+        self.validate()
+        args = ['git', 'tag']
+        if message:
+            args.append('-m')
+            args.append(message)
+        if key:
+            args.append('-u')
+            args.append(key)
+        elif sign: args.append('-s')
+        args.append(name)
+        proc = self._popen(args)
+        if proc.wait():
+            print proc.stderr.readlines()
+            raise RepoError(_('Failed to create tag'))
+        return proc.stdout.readlines()
+
+    
+        
