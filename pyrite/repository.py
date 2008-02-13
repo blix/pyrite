@@ -270,9 +270,22 @@ class Repo(object):
         args.append(name)
         proc = self._popen(args)
         if proc.wait():
-            print proc.stderr.readlines()
             raise RepoError(_('Failed to create tag'))
         return proc.stdout.readlines()
 
-    
-        
+    def push(self, repo, source, target, force=False, all_branches=False,
+                all_tags=False, verbose=False):
+        self.validate()
+        args = ['git', 'push',  repo]
+        if force: args.append('f')
+        if all_branches: args.append('--all')
+        if all_tags: args.append('--tags')
+        if verbose: args.append('-v')
+        if source: args.append(source)
+        if target: args.append(':' + target)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to push'))
+        for line in proc.stdout.readlines():
+            yield line
+

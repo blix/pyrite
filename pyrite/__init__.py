@@ -296,7 +296,7 @@ def run():
         m = dyn_import(module_name)
         modules[module_name].run(cmd, *args, **flags)
         
-    except HelpError, inst:
+    except help.HelpError, inst:
         if show_trace: raise
         help.run(None, None, **inst.args[0])
     except options.ParseError, inst:
