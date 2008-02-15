@@ -27,6 +27,6 @@ def run(cmd, *args, **flags):
     is_force = flags.has_key('force')
     is_verbose = flags.has_key('verbose')
     
-    for line in pyrite.repo.add(is_force, is_verbose, args):
+    for line in pyrite.repo.add_files(is_force, is_verbose, args):
         pyrite.ui.info(line)	
 

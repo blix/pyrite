@@ -57,6 +57,7 @@ class Config(object):
     _cant_load_user_config = _("User config not available")
     _missing_config_arg = _("Category and Name must be supplied")
     def __init__(self):
+        self.user = None
         self.user_config_path = os.path.expanduser('~/.pytrc')
         self.user_config = ConfigParser.SafeConfigParser()
         self.user_config.readfp(self._get_file())
@@ -155,6 +156,18 @@ class Config(object):
         except IOError:
             try: return open(f, "w+")
             except: raise ConfigError()
+            
+    def get_user(self):
+        if self.user:
+            return self.user
+        user = self.get_option('user.name')
+        if not user:
+            user = os.getlogin()
+        email = self.get_option('user.email')
+        if not email:
+            email = os.getlogin() + '@' + os.uname()[1]
+        self.user = user + ' ' + email
+        return self.user
 
 def run(cmd, *args, **flags):
     is_user = True

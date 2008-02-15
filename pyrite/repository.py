@@ -213,7 +213,7 @@ class Repo(object):
             raise RepoError(_('Verify failed.'))
         return proc.stdout.readlines()
 
-    def add(self, is_force, is_verbose, files):
+    def add_files(self, is_force, is_verbose, files):
         self.validate()
         args = ['git', 'add']
         if is_force: args.append('-f')
@@ -326,6 +326,28 @@ class Repo(object):
         proc = self._popen(args)
         if proc.wait():
             raise RepoError(_('Failed to clone'))
+        for line in proc.stdout.readlines():
+            yield line
+
+    def diff(self, start, end, paths, stat=False, color=False, template=None,
+                detect=False, ignorewhite='none'):
+        self.validate()
+        args = ['git', 'diff', '-p']
+        if stat: args.append('--stat')
+        if color: args.append('--color')
+        if detect: args.extend(['-B', '-M', '-C'])
+        if ignorewhite == 'all': args.append('-w')
+        elif ignorewhite == 'eol': args.append('--ignore-space-at-eol')
+        spec = start
+        if not start: spec = 'HEAD'
+        elif end: spec = start + '..' + end
+        args.append(spec)
+        if paths:
+            args.append('--')
+            args.extend(paths)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to diff'))
         for line in proc.stdout.readlines():
             yield line
 

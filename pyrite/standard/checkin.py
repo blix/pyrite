@@ -70,6 +70,9 @@ def run(cmd, *args, **flags):
     for x in pyrite.repo.changed_files():
         extra.append('  ' + ' '.join(x))
 
+    if sign:
+        if not use_message: use_message = ''
+        use_message+= _('\n\nSigned-off-by: %s\n\n') % pyrite.config.get_user()
     if edit:
         if not use_message: use_message = '\n'
         f = os.path.join(pyrite.repo.get_repo_dir(),
@@ -82,9 +85,8 @@ def run(cmd, *args, **flags):
 
     if not use_message: raise HelpError({'command': cmd, 'message': 
                                             _('No commit message')})
-    if sign:
-        use_message += '\n\tSigned-off-by:' + pyrite.config.get_user() + '\n'
 
     pyrite.repo.update_index()
-    pyrite.repo.commit(use_message, use_author, verify=verify, commit=use_commit)
+    pyrite.repo.commit(use_message, use_author, verify=verify,
+                        commit=use_commit)
 
