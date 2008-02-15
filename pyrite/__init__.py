@@ -167,17 +167,18 @@ commands = {
             ('m', 'message', _('specify the message to use for the commit'), 0)],
             _('join two or more development histories together')],
 "pull": ['pull', 1,
-            [('f', 'force', _('force fetch even if the local branch does not decend from the remote one'), 0),
+            [('f', 'force', _('allow local branch to not decend from the remote one'), 0),
             ('n', 'no-tags', _('do not download any tags'), 0),
-            ('e', 'extra-tags', _('download tags thier related objects even if they would not be reachable otherwise'), 0),
-            ('d', 'depth', _('maximum number of commits to fetch'), 0),
-            ('', 'no-commit', _('merge the files in the working set but do not commit the change'), 0),
-            ('s', 'summary', _('show a diffstat at the end of the merge'), 0)],
+            ('e', 'extra-tags', _('download all tags even those not tracked'), 0),
+            ('d', 'depth', _('maximum number of commits to fetch'), 1),
+            ('', 'no-commit', _('merge the working set but do not commit the change'), 0),
+            ('s', 'summary', _('show a diffstat at the end of the merge'), 0),
+            ('r', 'rebase', _('Rebase your changes on top of the changes you pull down'), 0)],
             _('Fetch and merge in one operation')],
 "push": ['push', 1,
             [('a', 'all', _('push all heads'), 0),
             ('t', 'all-tags', _('push all tags'), 0),
-            ('f', 'force', _('update the remote branch even if it does not decend from the local branch'), 0),
+            ('f', 'force', _('allow remote branch to not decend from the local one'), 0),
             ('v', 'verbose', _('show extra output'), 0)],
             _('Update remote refs and their associated objects')],
 "rebase": ['rebase', 0,
@@ -285,7 +286,7 @@ def run():
             raise help.HelpError, {'basic': 1}
         cmd = sys.argv[1]
         if not commands.has_key(cmd):
-            raise HelpError({'unknown': 1, 'command': cmd})
+            raise help.HelpError({'unknown': 1, 'command': cmd})
             
         module_name = commands[cmd][0]
         opts = []

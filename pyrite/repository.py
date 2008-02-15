@@ -276,16 +276,42 @@ class Repo(object):
     def push(self, repo, source, target, force=False, all_branches=False,
                 all_tags=False, verbose=False):
         self.validate()
-        args = ['git', 'push',  repo]
+        args = ['git', 'push']
         if force: args.append('f')
         if all_branches: args.append('--all')
         if all_tags: args.append('--tags')
         if verbose: args.append('-v')
-        if source: args.append(source)
-        if target: args.append(':' + target)
+        args.append(repo)
+        if source: 
+            arg = source
+            if target: arg += ':' + target
+            args.append(arg)
         proc = self._popen(args)
         if proc.wait():
             raise RepoError(_('Failed to push'))
+        for line in proc.stdout.readlines():
+            yield line
+            
+    def pull(self, repo, source, target, force=False, tags="normal",
+                commit=True, depth=-1, rebase=False):
+        self.validate()
+        args = ['git', 'pull']
+        if force: args.append('-f')
+        if tags == 'none': args.append('--no-tags')
+        elif tags == 'extra': args.append('--tags')
+        if depth > -1: args.append('--depth=%d' % depth)
+        if not commit: args.append('--no-commit')
+        if rebase: args.append('--rebase')
+        args.append(repo)
+        if source: 
+            arg = source
+            if target: arg += ':' + target
+            args.append(arg)
+        #print args
+        proc = self._popen(args)
+        if proc.wait():
+            print '\n'.join(proc.stderr.readlines())    
+            raise RepoError(_('Failed to pull'))
         for line in proc.stdout.readlines():
             yield line
 
