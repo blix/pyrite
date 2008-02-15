@@ -307,11 +307,25 @@ class Repo(object):
             arg = source
             if target: arg += ':' + target
             args.append(arg)
-        #print args
+
         proc = self._popen(args)
         if proc.wait():
             print '\n'.join(proc.stderr.readlines())    
             raise RepoError(_('Failed to pull'))
+        for line in proc.stdout.readlines():
+            yield line
+
+    def clone(self, repo, directory, bare=False, checkout=True, depth=-1):
+        args = ['git', 'clone']
+        if bare: args.append('--bare')
+        if not checkout: args.append('--no-checkout')
+        if depth > -1: args.append('--depth=%d' % depth)
+        args.append(repo)
+        if directory: args.append(directory)
+
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to clone'))
         for line in proc.stdout.readlines():
             yield line
 

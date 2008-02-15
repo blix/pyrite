@@ -14,6 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite
+from pyrite.standard.help import HelpError
 
 help_str =_("""
 pyt push [-a] [-t] [-f] [-v] [targetrepo] [localsource[:targetbranch]]
