@@ -16,7 +16,7 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
-help_str="""
+help_str=_("""
 pyt branch [option] -d | --delete <branch>
 pyt branch [option] -m | --move <oldname> <newname>
 pyt branch [-f | --force] <newbranch> [startpoint]
@@ -34,7 +34,7 @@ The --track and --no-track optons override configuration options.
 
 The branch command will not switch to the new branch, use checkout.
 'pyt help checkout' for more.
-"""
+""")
 
 def run(cmd, *args, **flags):
     is_verbose = False

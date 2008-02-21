@@ -160,26 +160,36 @@ class Repo(object):
     def get_commit_info(self, commit):
         self.validate()
         proc = self._popen(('git', 'rev-list', '--max-count=1',
-                        '--pretty=format:%an %ae%n%b', commit))
+                        '--pretty=format:%an <%ae>%n%s%n%b', commit))
         if proc.wait(): return None, None, None
         lines = proc.stdout.readlines()
         if len(lines) < 3: return None, None, None
-        return lines[2:].join('\n'), lines[1].strip()
+        return ''.join(lines[2:]), lines[1].strip()
 
-    def update_index(self):
+    def update_index(self, paths=None):
         self.validate()
-        proc = self._popen(('git', 'add', '-u'))
+        proc = self._popen(('git', 'reset', '--mixed'))
+        proc.wait()
+        args = ['git', 'add']
+        if paths:
+            args.append('--')
+            args.extend(paths)
+        else:
+            args.append('-u')
+        proc = self._popen(args)
         if proc.wait(): raise RepoError(_('Failed to update index'))
 
     def changed_files(self):
         self.validate()
-        proc = self._popen(('git', 'diff-index', '--name-status', 'HEAD'))
+        proc = self._popen(('git', 'diff-index', '--cached', '--name-status',
+                                'HEAD'))
         if proc.wait(): raise RepoError(_('Failed to get changed files'))
         for line in proc.stdout.readlines():
             parts = line.split()
             yield parts[0], parts[1]
 
-    def commit(self, use_message, use_author, verify=True, commit=None):
+    def commit(self, use_message, use_author, verify=True, commit=None,
+                paths=None):
         self.validate()
         args = ['git', 'commit']
         if not verify: args.append('--no-verify')
@@ -192,8 +202,12 @@ class Repo(object):
         else:
             args.append('-m')
             args.append(use_message)
+        if paths:
+            args.append('--')
+            args.extend(paths)
         proc = self._popen(args)
-        if proc.wait(): raise RepoError(_('Failed to commit change'))
+        if proc.wait():
+            raise RepoError(_('Failed to commit change') + proc.stderr.read())
 
     def gc(self, prune, aggressive):
         self.validate()
@@ -350,4 +364,47 @@ class Repo(object):
             raise RepoError(_('Failed to diff'))
         for line in proc.stdout.readlines():
             yield line
+
+    def list(self):
+        self.validate()
+        args = ['git', 'ls-files', '-c', '-d', '-m', '-o', '-k', '-t', '-z']
+        proc = self._popen(args)
+        files = {}
+        for item in proc.stdout.read().split('\0'):
+            item = item.strip()
+            if len(item) < 3:
+                continue
+            status = item[0]
+            filename = item[2:]
+            files[filename] = Repo.Status[status]
+        return files
+        
+    def get_history(self, commit_range, limit, show_patch=False, follow=False,
+                    paths=None):
+        #TODO: In the future, this should return a list of commit objects
+        # The commit objects can have some simple information in them and
+        # fetch the rest when asked for it.  For now we will not show the
+        # "body" information.
+        
+        self.validate()
+        args = ['git', 'log', '--pretty=format:%H %P\t%an\t%ae\t%ad\t%s']
+        if limit > -1:
+            args.append('-' + str(limit))
+        #if show_patch: args.append('-p')
+        # Ignore patch parameter for now to simplfy the parse
+        if follow: args.append('--follow')
+        if commit_range: args.append(commit_range)
+        if paths:
+            args.append('--')
+            args.extend(paths)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to get log'))
+        for line in proc.stdout.readlines():
+            idx = line.find(' ')
+            ID = line[:idx]
+            idx2 = line.find('\t')
+            parents = line[idx+1:idx2].split(' ')
+            name, email, date, subj = line[idx2+1:].split('\t')
+            yield ID, parents, name, email, date, subj
 

@@ -22,10 +22,10 @@ pyt checkin [-m | --message <message>]
             [-a | --author <author>] [-s | --signoff] [-s | --signoff]
             [-v | --verbose] [-n | --no-verify] [--no-edit]
             
-            [-c | --commit <commit>]
+            [-c | --commit <commit>] [ [--] paths]..
             
 pyt checkin [-s | --signoff] [-v | --verbose] [-n | --no-verify]
-            [-a | --author] --amend
+            [-a | --author] --amend [ [--] paths]..
 
 Check-in your changes to the repository so they become part of the history.
 Options allow you to specify a message, author such as
@@ -55,9 +55,9 @@ def run(cmd, *args, **flags):
         raise HelpError({'command': cmd, 'message':
                          _('Cannot specify commit and message')})
     elif use_commit:
-        use_message, use_author = repo.get_commit_info(use_commit)
+        use_message, use_author = pyrite.repo.get_commit_info(use_commit)
     elif amend:
-        use_message, use_author = repo.get_commit_info('HEAD')
+        use_message, use_author = pyrite.repo.get_commit_info('HEAD')
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -67,6 +67,7 @@ def run(cmd, *args, **flags):
             _('Changed Files...'),
             _('  ')]
 
+    pyrite.repo.update_index(args)
     for x in pyrite.repo.changed_files():
         extra.append('  ' + ' '.join(x))
 
@@ -86,7 +87,6 @@ def run(cmd, *args, **flags):
     if not use_message: raise HelpError({'command': cmd, 'message': 
                                             _('No commit message')})
 
-    pyrite.repo.update_index()
     pyrite.repo.commit(use_message, use_author, verify=verify,
-                        commit=use_commit)
+                        commit=use_commit, paths=args)
 
