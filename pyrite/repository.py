@@ -346,8 +346,8 @@ class Repo(object):
     def diff(self, start, end, paths, stat=False, color=False, template=None,
                 detect=False, ignorewhite='none'):
         self.validate()
-        args = ['git', 'diff', '-p']
-        if stat: args.append('--stat')
+        args = ['git', 'diff', '--stat']
+        if not stat: args.append('-p')
         if color: args.append('--color')
         if detect: args.extend(['-B', '-M', '-C'])
         if ignorewhite == 'all': args.append('-w')
@@ -407,4 +407,22 @@ class Repo(object):
             parents = line[idx+1:idx2].split(' ')
             name, email, date, subj = line[idx2+1:].split('\t')
             yield ID, parents, name, email, date, subj
+
+    def merge(self, branch, show_summary=False, merge_strategy=None,
+                message=None):
+        self.validate()
+        args = ['git', 'merge']
+        if show_summary: args.append('--summary')
+        if merge_strategy:
+            args.append('-s')
+            args.append(merge_strategy)
+        if message: 
+            args.append('-m')
+            args.append(message)
+        args.append(branch)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to merge: %s') % proc.stderr.read())
+        for line in proc.stdout.readlines():
+            yield line
 

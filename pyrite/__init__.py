@@ -76,7 +76,7 @@ commands = {
             ('s', 'signoff', _('Add a Signed-off-by line to the message'), 0),
             ('n', 'no-verify', _('bypass precommit hooks'), 0),
             ('', 'amend', _('Replace the current tip with the new commit'), 0),
-            ('', 'no-edit', _('Does not invoke the editor for the commit message'), 0),
+            ('e', 'edit', _('Force invoking the editor for the commit message'), 0),
             ('v', 'verbose', _('show diff at the bottom of the commit message'), 0)],
             _('Record changes to the repository')],
 "cherry": ['cherry', 0,

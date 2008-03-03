@@ -47,8 +47,8 @@ class UI(object):
         else: return ['/usr/bin/env', 'vi']
 
     def edit(self, message, extra, tmpfile, strip_prefix='#'):
-        msg = ''
-        if message: msg = message
+        msg = '\n'
+        if message: msg = message + '\n'
         if extra:
             for line in extra:
                 msg += strip_prefix + ' ' + line + '\n'

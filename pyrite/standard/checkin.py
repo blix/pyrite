@@ -45,7 +45,9 @@ def run(cmd, *args, **flags):
     use_commit = flags.get('commit', None)
     use_author = flags.get('author', None)
     use_message = flags.get('message', None)
-    edit = not flags.has_key('no-edit')
+    #need to decide if ament or use_commit mean that editor should not
+    #be invoked by default
+    edit = not use_message or flags.has_key('edit')
     amend = flags.has_key('amend')
     sign = flags.has_key('signoff')
     verify = not flags.has_key('no-verify')
