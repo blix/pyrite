@@ -45,14 +45,21 @@ def run(cmd, *args, **flags):
     if flags.has_key('limit') and flags.has_key('all'):
         raise HelpError({'command': cmd, 'message':
                         _('"limit" and "all" conflict.')})
-    commit_range = None
+
+    first = last = None
     paths = None
     if len(args) > 0:
-        commit_range = args[0]
+        idx = args[0].find('..')
+        if idx < 0:
+            first = args[0]
+        else:
+            first = args[0][:idx]
+            last = args[0][idx + 2:]
+            
     if len(args) > 1:
         paths = args[1:]
 
-    output = pyrite.repo.get_history(commit_range, limit, show_patch=show_patch,
+    output = pyrite.repo.get_history(first, last, limit, show_patch=show_patch,
                                        follow=follow, paths=paths)
     for line in output:
         pyrite.ui.info(line)

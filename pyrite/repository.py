@@ -378,8 +378,15 @@ class Repo(object):
             filename = item[2:]
             files[filename] = Repo.Status[status]
         return files
-        
-    def get_history(self, commit_range, limit, show_patch=False, follow=False,
+
+    def _convert_range(self, first, last):
+        first += '^'
+        if not last:
+            last = 'HEAD'
+        first = first + '..' + last
+        return first
+    
+    def get_history(self, first, last, limit, show_patch=False, follow=False,
                     paths=None):
         #TODO: In the future, this should return a list of commit objects
         # The commit objects can have some simple information in them and
@@ -393,7 +400,8 @@ class Repo(object):
         #if show_patch: args.append('-p')
         # Ignore patch parameter for now to simplfy the parse
         if follow: args.append('--follow')
-        if commit_range: args.append(commit_range)
+        if first:
+            args.append(self._convert_range(first, last))
         if paths:
             args.append('--')
             args.extend(paths)
@@ -425,4 +433,5 @@ class Repo(object):
             raise RepoError(_('Failed to merge: %s') % proc.stderr.read())
         for line in proc.stdout.readlines():
             yield line
+
 
