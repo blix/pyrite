@@ -51,10 +51,10 @@ def run(cmd, *args, **flags):
         #here we look up the style in the pyrite/styles directory
         #if it is a full path then we look at the path
         #we then read the file into the template variable
-        
+
+    pyrite.repo.update_index(None)
     output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
                                 color=color, template=template, detect=detect,
                                 ignorewhite=ignorewhite)
 
-    for line in output:
-        pyrite.ui.info(line)
+    pyrite.ui.info(line)

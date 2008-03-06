@@ -180,10 +180,15 @@ class Repo(object):
         proc = self._popen(args)
         if proc.wait(): raise RepoError(_('Failed to update index'))
 
-    def changed_files(self):
+    def changed_files(self, commit=None):
         self.validate()
-        proc = self._popen(('git', 'diff-index', '--cached', '--name-status',
-                                'HEAD'))
+        proc = None
+        if commit:
+            proc = self._popen(('git', 'diff', '--name-status', commit,
+                                commit + '^'))
+        else:
+            proc = self._popen(('git', 'diff-index', '--cached',
+                                '--name-status', 'HEAD'))
         if proc.wait(): raise RepoError(_('Failed to get changed files'))
         for line in proc.stdout.readlines():
             parts = line.split()
