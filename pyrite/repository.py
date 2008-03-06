@@ -168,8 +168,9 @@ class Repo(object):
 
     def update_index(self, paths=None):
         self.validate()
-        proc = self._popen(('git', 'reset', '--mixed'))
-        proc.wait()
+        if paths:
+            proc = self._popen(('git', 'reset', '--mixed'))
+            proc.wait()
         args = ['git', 'add']
         if paths:
             args.append('--')
