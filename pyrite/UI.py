@@ -21,8 +21,8 @@ from subprocess import Popen, PIPE
 class UI(object):
     def __init__(self):
         pass
-        
-    def info(self, msg):
+
+    def _write(self, stream, msg):
         if msg.__class__ == ''.__class__:
             if msg[-1] == '\n':
                 print msg,
@@ -34,9 +34,15 @@ class UI(object):
                     print l,
                 else:
                     print l
-       
+
+    def info(self, msg):
+        self._write(sys.stdout, msg)
+
+    def error(self, msg):
+        self._write(sys.stderr, msg)
+
     def error_out(self, msg):
-        sys.stderr.write(str(msg) + '\n')
+        self.error(_('Error: ') + str(msg) + '\n')
         sys.exit(2)
         
     def debug(self, msg):

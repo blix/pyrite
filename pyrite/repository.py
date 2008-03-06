@@ -435,7 +435,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
 
-    def export(self, first, last, outdir, force=False, numbered=False):
+    def export_patch(self, first, last, outdir, force=False, numbered=False):
         self.validate()
         args = ['git', 'format-patch']
         if outdir:
@@ -454,3 +454,18 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to export: %s') % proc.stderr.read())
 
+    def import_patch(self, filename, sign=False):
+        self.validate()
+        dt = os.path.join(self._repo_dir, 'dotest')
+        args = ['git', 'am']
+        if sign:
+            args.append('--signoff')
+        args.append(filename)
+        proc = self._popen(args, cwd=os.getcwd())        
+        if proc.wait():
+            try:
+                os.remove('.dotest')
+            except OSError:
+                pass
+            return False, proc.stderr.readlines()
+        return True, None

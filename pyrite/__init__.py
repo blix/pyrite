@@ -38,11 +38,6 @@ ui = UI.UI()
 # options with the last arg as 2 are required
 # options with the last arg as 3 are required and want an argument
 commands = {
-"apply|import": ['import', 0,
-            [('s', 'stat', _('Output a diffstat for the input.  Does not actually apply.'), 0),
-            ('c', 'check', _('Check to see if it would apply.  Does not actually apply.'), 0),
-            ('v', 'verbose', _('Report progress to stdout'), 0)],
-            _('Import a patch that has been exported by pyt')],
 "archive|bundle": ['archive', 0,
             [('f', 'format', _('specify zip or tar, default is tar'), 0),
             ('c', 'commit', _('commit (commitid, symbolic reference) to create an archive for'), 0)],
@@ -148,6 +143,13 @@ commands = {
 "help": ['help', 1,
             [('v', 'verbose', _('print full help and aliases'), 0)],
             _('view the general help or help for a command')],
+"import|apply": ['import', 0,
+            [('a', 'archive', _('Import an archive.'), 0),
+            ('i', 'interactive', _('Run interactively.'), 0),
+            ('s', 'signoff', _('Add Signed-off-by line to message.'), 0),
+            ('', 'skip', _('Skip the current patch.'), 0),
+            ('', 'resolved', _('Current patch conflict is resolved'), 0)],
+            _('Import a patch that has been exported by pyt')],
 "init": ['init', 1,
             [],
             _('Create an empty repository')],

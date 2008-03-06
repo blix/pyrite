@@ -92,6 +92,6 @@ def run(cmd, *args, **flags):
         
         fd.write(message)
 
-    pyrite.repo.export(firstcommit, lastcommit, outdir, force=force,
+    pyrite.repo.export_patch(firstcommit, lastcommit, outdir, force=force,
                         numbered=numbered)
 
