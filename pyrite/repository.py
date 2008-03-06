@@ -434,4 +434,22 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
 
+    def export(self, first, last, outdir, force=False, numbered=False):
+        self.validate()
+        args = ['git', 'format-patch']
+        if outdir:
+            if outdir == '-':
+                args.append('--stdout')
+            else:
+                args.append('-o')
+                args.append(outdir)
+        if force:
+            args.append('-f')
+        if numbered:
+            args.append('--numbered')
+        commits = self._convert_range(first, last)
+        args.append(commits)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to export: %s') % proc.stderr.read())
 
