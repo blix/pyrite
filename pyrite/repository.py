@@ -15,6 +15,7 @@
 
 import subprocess
 import os
+import gzip
 
 class RepoError(Exception):
     """Thrown when repo fails"""
@@ -536,3 +537,56 @@ class Repo(object):
             return False, proc.stderr.readlines()
         return True, None
 
+    def import_bundle(self, filename, refs):
+        self.validate()
+        args = ['git', 'pull', filename]
+        if refs:
+            args.extend(refs)
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to import %s: %s') % (filename,
+                            proc.stderr.read()))
+
+    def export_bundle(self, filename, first, last):
+        self.validate()
+        args = ['git', 'bundle', 'create', filename,
+                self._convert_range(first, last)]
+        proc = self._popen(args)
+        if proc.wait():
+            raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+
+    def verify_bundle(self, filename):
+        args = ['git', 'bundle', 'verify', filename]
+        proc = self._popen(args)
+        if proc.wait():
+            return False, proc.stderr.read().strip()
+        return True, None
+
+    def export_archive(self, filename, commit, paths=None, format='tgz'):
+        self.validate()
+        args = ['git', 'archive', ]
+        if format == 'tgz':
+            format = 'tar'
+        elif format == 'zip':
+            pass
+        else:
+            raise HelpError(_('Invalid format %s') % format)
+        args.append('--format=' + format)
+        args.append(commit)
+        args.extend(paths)
+        f = None
+        if format == 'tar':
+            f = gzip.GzipFile(filename, 'w')
+        else:
+            f = open(filename, 'w')
+        try:
+            proc = self._popen(args)
+            data = proc.stdout.read(4096)
+            while data:
+                f.write(data)
+                data = proc.stdout.read(4096)
+        finally:
+            f.close()
+        if proc.wait():
+            os.remove(filename)
+            raise RepoError(_('Failed to export: %s') % proc.stderr.read())

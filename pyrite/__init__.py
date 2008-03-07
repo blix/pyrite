@@ -38,10 +38,6 @@ ui = UI.UI()
 # options with the last arg as 2 are required
 # options with the last arg as 3 are required and want an argument
 commands = {
-"archive|bundle": ['archive', 0,
-            [('f', 'format', _('specify zip or tar, default is tar'), 0),
-            ('c', 'commit', _('commit (commitid, symbolic reference) to create an archive for'), 0)],
-            _('Create an archive of files from a commit')],
 "bisect": ['bisect', 0,
             [],
             _('Find the change that introduced a bug by binary search.')],
@@ -115,7 +111,11 @@ commands = {
             [('c', 'compose', _('launch an editor to write an introductory message'), 0),
             ('o', 'output-dir', _('file or directory to save to ("-" for stdout)'), 1),
             ('n', 'numbered', _('create patches with names prefixed [PATCH n/m]'), 0),
-            ('f', 'force', _('overwrite existing files'), 0)],
+            ('f', 'force', _('overwrite existing files'), 0),
+            ('b', 'bundle', _('create a min-repo that can be used to pull/fetch from'), 1),
+            ('v', 'verify', _('verify a bundle'), 1),
+            ('a', 'archive', _('create a archive of the workdir for commit'), 1),
+            ('', 'format', _('format for an archive, either .tgz (default) or .zip'), 1)],
             _('Export patches suitable to be emailed or imported')],
 "fetch": ['fetch', 0,
             [('f', 'force', _('force fetch even if the local branch does not decend from the remote one'), 0),
@@ -144,7 +144,7 @@ commands = {
             [('v', 'verbose', _('print full help and aliases'), 0)],
             _('view the general help or help for a command')],
 "import|apply": ['import', 0,
-            [('a', 'archive', _('Import an archive.'), 0),
+            [('b', 'bundle', _('Import a bundle.'), 1),
             ('i', 'interactive', _('Run interactively.'), 0),
             ('s', 'signoff', _('Add Signed-off-by line to message.'), 0),
             ('', 'skip', _('Skip the current patch.'), 0),
