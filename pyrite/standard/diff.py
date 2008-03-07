@@ -41,10 +41,11 @@ def run(cmd, *args, **flags):
     startcommit = endcommit = None
     if len(args) > 0:
         commits = args[0].split('..')
-        startcommit = commits[0]
-        if len(commits) == 2:
-            endcommit = commits[1]
-        args = args[1:]
+        if pyrite.repo.get_commit_sha(commits[0]):  
+            startcommit = commits[0]
+            if len(commits) == 2:
+                endcommit = commits[1]
+            args = args[1:]
 
     if style:
         pass
@@ -57,4 +58,4 @@ def run(cmd, *args, **flags):
                                 color=color, template=template, detect=detect,
                                 ignorewhite=ignorewhite)
 
-    pyrite.ui.info(line)
+    pyrite.ui.info(output)
