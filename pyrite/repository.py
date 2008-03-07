@@ -173,12 +173,11 @@ class Repo(object):
             self._read_remotes()
             return self._remotes
 
-    def get_head_sha(self):
+    def get_commit_sha(self, commit='HEAD'):
         self.validate()
-        proc = self._popen(('git', 'rev-list', '--max-count=1', 'HEAD'))
+        proc = self._popen(('git', 'rev-list', '--max-count=1', commit))
         if proc.wait():
-            raise RepoError(_('Count not find HEAD sham: %s') %
-                                proc.stderr.read())
+            return None
         return proc.stdout.readline().strip()
 
     def get_commit_info(self, commit):

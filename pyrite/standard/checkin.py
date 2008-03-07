@@ -79,7 +79,7 @@ def run(cmd, *args, **flags):
     if edit:
         if not use_message: use_message = '\n'
         f = os.path.join(pyrite.repo.get_repo_dir(),
-                     'pyt-edit-' + pyrite.repo.get_head_sha())
+                     'pyt-edit-' + pyrite.repo.get_commit_sha())
         new_msg = pyrite.ui.edit(use_message, extra, f)
         if new_msg == use_message:
             pyrite.ui.info(_('Message unchanged. Aborting checkin'))

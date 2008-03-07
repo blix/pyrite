@@ -56,7 +56,7 @@ def run(cmd, *args, **flags):
             count += 1
         endname = lastcommit
         if not endname:
-            endname = pyrite.repo.get_head_sha()
+            endname = pyrite.repo.get_commit_sha()
         message = pyrite.ui.edit(None, None,
                     'pyt-header-' + firstcommit + '-' + endname + '.txt')
         message = message.lstrip()
