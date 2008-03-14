@@ -120,7 +120,6 @@ commands = {
 "fetch": ['fetch', 0,
             [('f', 'force', _('force fetch even if the local branch does not decend from the remote one'), 0),
             ('n', 'no-tags', _('do not download any tags'), 0),
-            ('e', 'extra-tags', _('download tags thier related objects even if they would not be reachable otherwise'), 0),
             ('d', 'depth', _('maximum number of commits to fetch'), 0)],
             _('Get objects and refs from another repository')],
 "grep": ['grep', 0,

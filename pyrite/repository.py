@@ -590,3 +590,28 @@ class Repo(object):
         if proc.wait():
             os.remove(filename)
             raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+
+    def fetch(self, repo, branchspecs, force=False, depth=-1, notags=False):
+        self.validate()
+        args = ['git', 'fetch']
+        if force:
+            args.append('--force')
+        if depth > 0:
+            args.append('--depth=' + depth)
+        if notags:
+            args.append('--no-tags')
+        if repo:
+            args.append(repo)
+        else:
+            args.append('.')
+        for source, dest in branchspecs:
+            if not dest:
+                dest = self.branch()
+            args.append(source + ':' + dest)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            print 'testing'
+            raise RepoError(_('Failed to fetch: %s') % proc.stderr.read())
+        print 'arrrggh'
