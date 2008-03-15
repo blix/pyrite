@@ -612,6 +612,22 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            print 'testing'
             raise RepoError(_('Failed to fetch: %s') % proc.stderr.read())
-        print 'arrrggh'
+
+    def move(self, sources, dest, force=False, ignore=False, noop=False):
+        self.validate()
+        args = ['git', 'mv']
+        if force:
+            args.append('-f')
+        if ignore:
+            args.append('-k')
+        if noop:
+            args.append('-n')
+        args.extend(sources)
+        args.append(dest)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to move: %s') % proc.stderr.read())
+
