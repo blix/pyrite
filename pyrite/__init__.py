@@ -197,6 +197,7 @@ commands = {
 "remove|rm": ['remove', 0,
             [('f', 'force', _('override the up-to-date check'), 0),
             ('n', 'no-remove', _('do not actually remove the file(s)'), 0),
+            ('u', 'untrack', _('do not remove the file(s), just stop tracking them'), 0),
             ('r', 'recursive', _('remove recursively when leading directory is given'), 0)],
             _('Remove files from the working set and tell pyt about it')],
 "revert": ['revert', 0,

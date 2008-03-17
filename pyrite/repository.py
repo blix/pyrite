@@ -631,3 +631,22 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to move: %s') % proc.stderr.read())
 
+    def delete(self, paths, force=False, recursive=False, noop=False,
+                cached=False):
+        self.validate()
+        args = ['git', 'rm']
+        if force:
+            args.append('-f')
+        if recursive:
+            args.append('-r')
+        if noop:
+            args.append('-n')
+        if cached:
+            args.append('--cached')
+        args.extend(paths)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to remove: %s') % proc.stderr.read())
+
