@@ -404,13 +404,13 @@ class Repo(object):
     def diff(self, start, end, paths, stat=False, color=False, template=None,
                 detect=False, ignorewhite='none'):
         self.validate()
-        args = ['git', 'diff', '--stat']
+        args = ['git', 'diff', '--stat', '--summary']
         if not stat:
             args.append('-p')
         if color:
             args.append('--color')
         if detect:
-            args.extend(['-B', '-M', '-C'])
+            args.extend(['-M', '-C'])
         if ignorewhite == 'all':
             args.append('-w')
         elif ignorewhite == 'eol':

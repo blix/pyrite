@@ -33,6 +33,7 @@ def run(cmd, *args, **flags):
     if amend:
         commit = 'HEAD^'
 
-    output = pyrite.repo.diff(commit, None, args, stat=True, color=color)
+    output = pyrite.repo.diff(commit, None, args, detect=True, stat=True,
+                                color=color)
     
     pyrite.ui.info(output)
