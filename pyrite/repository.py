@@ -21,6 +21,12 @@ class RepoError(Exception):
     """Thrown when repo fails"""
 
 class Repo(object):
+    Status = {'?': 'untracked',
+                'H': 'uptodate',
+                'C': 'modified',
+                'M': 'modified',
+                'D': 'deleted',
+                'A': 'added'    }
     def __init__(self, location=None):
         if location:
             self._location = os.path.expanduser(location)
@@ -432,6 +438,23 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
 
+    def list(self):
+        self.validate()
+        args = ['git', 'ls-files', '-o', '-c', '-t']
+        proc = self._popen(args)
+        files = {}
+        for item in proc.stdout.readlines():
+            status = item[0]
+            f = item[2:].strip()
+            files[f] = Repo.Status[status]
+        proc.wait()
+        proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
+        for line in proc.stdout.readlines():
+            status, filename = line.split()
+            files[filename.strip()] = Repo.Status[status[0]]
+        proc.wait()
+        return files
+
     def _convert_range(self, first, last):
         if not first:
             first = 'HEAD^'
@@ -639,4 +662,3 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to remove: %s') % proc.stderr.read())
-
