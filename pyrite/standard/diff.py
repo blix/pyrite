@@ -55,7 +55,6 @@ def run(cmd, *args, **flags):
 
     pyrite.repo.update_index(None)
     output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
-                                color=color, template=template, detect=detect,
-                                ignorewhite=ignorewhite)
+                                detect=detect, ignorewhite=ignorewhite)
 
     pyrite.ui.info(output)

@@ -409,16 +409,18 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
         
-    def diff(self, start, end, paths, stat=False, color=False, template=None,
+    def diff(self, start, end, paths, stat=False, patch=True,
                 detect=False, ignorewhite='none'):
         self.validate()
-        args = ['git', 'diff', '--stat', '--summary']
-        if not stat:
+        args = ['git', 'diff']
+        if patch:
             args.append('-p')
-        if color:
-            args.append('--color')
+        if stat:
+            args.append('--stat')
+            args.append('--summary')
         if detect:
-            args.extend(['-M', '-C'])
+            args.append('-M')
+            args.append('-C')
         if ignorewhite == 'all':
             args.append('-w')
         elif ignorewhite == 'eol':
