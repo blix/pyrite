@@ -61,6 +61,14 @@ def run(cmd, *args, **flags):
 
     output = pyrite.repo.get_history(first, last, limit, show_patch=show_patch,
                                        follow=follow, paths=paths)
-    for line in output:
-        pyrite.ui.info(line)
-               
+    for commit_data in output:
+        pyrite.ui.info(_('Commit: %s') % commit_data[0])
+        pyrite.ui.info(_('Author: %s <%s>') % (commit_data[1], commit_data[2]))
+        pyrite.ui.info(_('Date: %s') % commit_data[3])
+        pyrite.ui.info(_('Subject: %s\n\n') % commit_data[4])
+        if commit_data[5]:
+            pyrite.ui.info(commit_data[5])
+            pyrite.ui.info('\n')
+            if show_patch:
+                print commit_data
+                pyrite.ui.info(commit_data[6])

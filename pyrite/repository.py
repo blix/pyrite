@@ -485,35 +485,54 @@ class Repo(object):
         return first
 
     def get_history(self, first, last, limit, show_patch=False, follow=False,
-                    paths=None):
+                    paths=None, skip=0):
         #TODO: In the future, this should return a list of commit objects
         # The commit objects can have some simple information in them and
         # fetch the rest when asked for it.  For now we will not show the
         # "body" information.
-
+        
         self.validate()
-        args = ['git', 'log', '--pretty=format:%H %P\t%an\t%ae\t%ad\t%s']
+        args = ['git', 'log',
+                '--pretty=format:%H%n%an%n%ae%n%ad%n%s%n%b', '-z']
+        if show_patch:
+            args.append('-p')
         if limit > -1:
             args.append('-' + str(limit))
-        #if show_patch: args.append('-p')
-        # Ignore patch parameter for now to simplfy the parse
         if follow:
             args.append('--follow')
-        if first:
-            args.append(self._convert_range(first, last))
+        if skip:
+            args.append('--skip=' + str(skip))
+        args.append(self._convert_range(first, last, False))
         if paths:
             args.append('--')
             args.extend(paths)
         proc = self._popen(args)
-        for line in proc.stdout.readlines():
-            idx = line.find(' ')
-            ID = line[:idx]
-            idx2 = line.find('\t')
-            parents = line[idx+1:idx2].split(' ')
-            name, email, date, subj = line[idx2+1:].split('\t')
-            yield ID, parents, name, email, date, subj
         if proc.wait():
             raise RepoError(_('Failed to get log: %s') % proc.stderr.read())
+        items = []
+        buffer = []
+        for line in proc.stdout.readlines():
+            length = len(items)
+            if length < 5:
+                items.append(line.strip())
+                continue
+            nul_pos = line.find('\0')
+            if nul_pos > -1:
+                buffer.append(line[:nul_pos])
+                items.append(''.join(buffer))
+                buffer = []
+                if (length + 1 == 6 and not show_patch) or length + 1 > 6:
+                    yield items
+                    items = []
+                    tail = line[nul_pos + 1:]
+                    if tail:
+                        items.append(tail.strip())
+            else:
+                buffer.append(line)
+        if items:
+            if buffer:
+                items.append(''.join(buffer))
+            yield items
 
     def merge(self, branch, show_summary=False, merge_strategy=None,
                 message=None):
