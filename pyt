@@ -17,7 +17,19 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import pyrite
+import os
 
-pyrite.run()
+if os.getenv('PYTPROF'):
+    import cProfile
+    import pstats
+    
+    cProfile.run('pyrite.run()', 'pyt-profile')
+    
+    p = pstats.Stats('pyt-profile')
+    p.sort_stats(os.getenv('PYTPROFSORT', default='cumulative'))
+    p.print_title()
+    p.print_stats()
+    p.print_callers()
+else:
+    pyrite.run()
