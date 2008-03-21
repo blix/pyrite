@@ -13,7 +13,8 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
+from sys import stdout, stderr, exit
+import os
 import pyrite
 import platform
 from subprocess import Popen, PIPE
@@ -25,25 +26,27 @@ class UI(object):
     def _write(self, stream, msg):
         if msg.__class__ == ''.__class__:
             if msg[-1] == '\n':
-                print msg,
+                stream.write(msg)
             else:
-                print msg
+                stream.write(msg)
+                stream.write('\n')
         else:
             for l in msg:
                 if l[-1] == '\n':
-                    print l,
+                    stream.write(l)
                 else:
-                    print l
+                    stream.write(l)
+                    stream.write('\n')
 
     def info(self, msg):
-        self._write(sys.stdout, msg)
+        self._write(stdout, msg)
 
     def error(self, msg):
-        self._write(sys.stderr, msg)
+        self._write(stderr, msg)
 
     def error_out(self, msg):
         self.error(_('Error: ') + str(msg) + '\n')
-        sys.exit(2)
+        exit(2)
         
     def debug(self, msg):
         pass
