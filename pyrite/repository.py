@@ -49,16 +49,33 @@ class Repo(object):
     def refresh(self):
         self._branches = None
         self._remotes = None
-        proc = self._popen(('git', 'rev-parse', '--git-dir', '--show-cdup'))
-        if proc.wait(): self._is_repo = False
-        else:
-            self._is_repo = True
-            self._repo_dir = proc.stdout.readline().strip()
-            topdir = proc.stdout.readline().strip()
-            if topdir:
-                self._location = os.path.join(self._location, topdir)
+        self._repo_dir = None
+        self._is_repo = not not self.get_repo_dir()
+
+    def _is_git_dir(self, d):
+        if os.path.isdir(d) and os.path.isdir(os.path.join(d, 'objects')) and \
+                os.path.isdir(os.path.join(d, 'refs')):
+            headref = os.path.join(d, 'HEAD')
+            return os.path.isfile(headref) or \
+                    (os.path.islink(headref) and
+                    os.readlink(headref).startswith('refs'))
 
     def get_repo_dir(self):
+        if not self._repo_dir:
+            self._repo_dir = os.getenv('GIT_DIR')
+            if self._repo_dir and self._is_git_dir(self._repo_dir):
+                return self._repo_dir
+            curpath = self._location
+            while curpath:
+                if self._is_git_dir(curpath):
+                    self._repo_dir = curpath
+                    break
+                elif self._is_git_dir(os.path.join(curpath, '.git')):
+                    self._repo_dir = os.path.join(curpath, '.git')
+                    break
+                curpath, dummy = os.path.split(curpath)
+                if not dummy:
+                    break
         return self._repo_dir
 
     def is_repo(self):
