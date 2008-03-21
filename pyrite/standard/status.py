@@ -27,8 +27,7 @@ like checkin, you can use paths to limit what is reported by status.
 def run(cmd, *args, **flags):
     amend = 'amend' in flags
     color = 'color' in flags
-    
-    pyrite.repo.update_index(None)
+
     commit = 'HEAD'
     if amend:
         commit = 'HEAD^'
