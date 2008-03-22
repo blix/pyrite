@@ -93,7 +93,7 @@ class Repo(object):
             raise RepoError(_('Failed to rename branch %s to %s: %s') %
                                 (oldname, newname, proc.stderr.read()))
 
-    def create_branch(self, name, force, track=True):
+    def create_branch(self, name, start='HEAD', force=False, track=True):
         self.validate()
         args = ['git', 'branch']
         if force:
@@ -103,6 +103,7 @@ class Repo(object):
         else:
             args.append('--no-track')
         args.append(name)
+        args.append(start)
         proc = self._popen(args)
         if proc.wait():
             if not force and name in self.branches():
@@ -129,7 +130,11 @@ class Repo(object):
             return
         proc = self._popen(('git', 'branch', '-r'))
         for b in proc.stdout.readlines():
-             self._remotes.append(b.strip())
+            status = b[0]
+            branch = b[2:].strip()
+            if status == '*':
+                self._current_branch = branch
+            self._remotes.append(branch)
         if proc.wait():
             raise RepoError('Could not get remotes list: %s' %
                             proc.stderr.read())
@@ -141,38 +146,35 @@ class Repo(object):
             return
         proc = self._popen(('git', 'branch'))
         for b in proc.stdout.readlines():
-            tokens = b.split()
-            if len(tokens) == 2:
-                self._current_branch = tokens[1].strip()
-                self._branches.append(self._current_branch)
-            else: self._branches.append(tokens[0].strip())
+            status = b[0]
+            branch = b[2:].strip()
+            if status == '*':
+                self._current_branch = branch
+            self._branches.append(branch)
         if proc.wait():
             raise RepoError(_('Could not get branch list: %s') %
                                 proc.stderr.read())
 
     def branches(self):
         self.validate()
-        if self._branches:
-            return self._branches
-        else:
+        if not self._branches:
             self._read_branches()
-            return self._branches
+            
+        for b in self._branches:
+            yield b
 
     def branch(self):
         self.validate()
-        if self._branches:
-            return self._current_branch
-        else:
+        if not self._branches:
             self._read_branches()
-            return self._current_branch
+        return self._current_branch
 
     def remotes(self):
         self.validate()
-        if self._remotes:
-            return self._remotes
-        else:
+        if not self._remotes:
             self._read_remotes()
-            return self._remotes
+        for r in self._remotes:
+            yield r
 
     def get_commit_sha(self, commit='HEAD'):
         self.validate()

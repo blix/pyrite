@@ -65,16 +65,22 @@ def run(cmd, *args, **flags):
             pyrite.repo.rename_branch(args[0], args[1], is_force)
         else:
             if len(args) < 1:
-                branches = []
-                if is_all or not is_remote:
-                    branches.extend(pyrite.repo.branches())
-                if is_all or is_remote: branches.extend(pyrite.repo.remotes())
                 current = pyrite.repo.branch()
-                for b in branches:
-                    if b == current:
-                        print '* ' + b
-                    else: print '  ' + b
+                if is_all or not is_remote:
+                    for b in pyrite.repo.branches():
+                        if b == current:
+                            pyrite.ui.info('* ' + b)
+                        else:
+                            pyrite.ui.info('  ' + b)
+                if is_all or is_remote:
+                    for r in pyrite.repo.remotes():
+                        if r == current:
+                            pyrite.ui.info('* ' + r)
+                        else:
+                            pyrite.ui.info('  ' + r)
             else:
-                pyrite.repo.create_branch(args[0], is_force, is_tracking)
+                pyrite.repo.create_branch(args[0], force=is_force,
+                                            track=is_tracking)
     except pyrite.repository.RepoError, inst:
         pyrite.ui.error_out(inst)
+
