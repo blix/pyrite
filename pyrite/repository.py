@@ -432,35 +432,20 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
 
-    def list(self):
-        self.validate()
-        args = ['git', 'ls-files', '-c', '-d', '-m', '-o', '-k', '-t', '-z']
-        proc = self._popen(args)
-        files = {}
-        for item in proc.stdout.read().split('\0'):
-            item = item.strip()
-            if len(item) < 3:
-                continue
-            status = item[0]
-            filename = item[2:]
-            files[filename] = Repo.Status[status]
-        proc.wait()
-        return files
-
     def _convert_range(self, first, last):
         first += '^'
         if not last:
             last = 'HEAD'
         first = first + '..' + last
         return first
-    
+
     def get_history(self, first, last, limit, show_patch=False, follow=False,
                     paths=None):
         #TODO: In the future, this should return a list of commit objects
         # The commit objects can have some simple information in them and
         # fetch the rest when asked for it.  For now we will not show the
         # "body" information.
-        
+
         self.validate()
         args = ['git', 'log', '--pretty=format:%H %P\t%an\t%ae\t%ad\t%s']
         if limit > -1:
