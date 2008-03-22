@@ -433,7 +433,10 @@ class Repo(object):
             raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
 
     def _convert_range(self, first, last):
-        first += '^'
+        if not first:
+            first = 'HEAD^'
+        else:
+            first += '^'
         if not last:
             last = 'HEAD'
         first = first + '..' + last
