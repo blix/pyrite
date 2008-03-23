@@ -205,7 +205,7 @@ commands = {
 "show": ['show', 0,
             [('s', 'style', _('use a predefined style'), 0),
             ('t', 'template', _('specify your own template to use'), 0)],
-            _('show files trees tags and commits')],
+            _('show files, tags and commits')],
 "status": ['status', 1,
             [('c', 'color', _('Show in color'), 0),
             ('', 'amend', _('Replace the current tip with the new commit'), 0)],

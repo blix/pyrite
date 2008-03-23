@@ -51,6 +51,7 @@ class Repo(object):
         self._remotes = None
         self._repo_dir = None
         self._is_repo = not not self.get_repo_dir()
+        self._tags = None
 
     def _is_git_dir(self, d):
         if os.path.isdir(d) and os.path.isdir(os.path.join(d, 'objects')) and \
@@ -311,17 +312,19 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Could not add files: %s') % proc.stderr.read())
             
-    def list_tags(self, pattern):
+    def list_tags(self, pattern=None):
+        if self._tags:
+            return self._tags
         self.validate()
         proc = None
         if pattern:
             proc = self._popen(('git', 'tag', '-l', pattern))
         else:
             proc = self._popen(('git', 'tag', '-l'))
-        for line in proc.stdout.readlines():
-            yield line
+        self._tags = [ line.strip() for line in proc.stdout.readlines()]
         if proc.wait():
             raise RepoError(_('Failed to list tags: %s') % proc.stderr.read())
+        return self._tags
 
     def verify_tag(self, tag):
         self.validate()
@@ -707,3 +710,22 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to remove: %s') % proc.stderr.read())
+
+    def show(self, files, commit='HEAD', tag=None):
+        self.validate()
+        args = ['git', 'show']
+        treeish = None
+        if tag:
+            treeish = tag
+        else:
+            treeish = commit
+        if files:
+            for f in files:
+                args.append(treeish + ':' + f)
+        else:
+            args.append(treeish)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to show: %s') % proc.stderr.read())
