@@ -135,11 +135,13 @@ class Repo(object):
                 raise RepoError(_('Could not create branch: %s') %
                                     proc.stderr.read())
 
-    def checkout(self, commit, is_merge, paths=None):
+    def checkout(self, commit, is_merge=False, force=False, paths=None):
         self.validate()
         args = ['git', 'checkout']
         if is_merge:
             args.append('-m')
+        elif force:
+            args.append('-f')
         args.append(commit)
         if paths: args.extend(paths)
         proc = self._popen(args)

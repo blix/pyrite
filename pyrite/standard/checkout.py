@@ -17,7 +17,6 @@ import pyrite
 from pyrite.standard.help import HelpError
 
 help_str = _("""
-pyt checkout [-f | --force] -b <newbranch> 
 pyt checkout [-f | --force] <commit> [path1] [path2] [path3]...
 
 Update the working directory or files specified by paths to the <commit>.
@@ -34,14 +33,8 @@ def run(cmd, *args, **flags):
         is_force = True
     if flags.has_key('merge'):
         is_merge = True
-        
-    if flags.has_key('branch'):
-        if len(args): raise HelpError({'command': cmd, 'message':
-                                        'Cannot create branch with paths'})
-        pyrite.repo.create_branch(flags['branch'], is_force)
-        pyrite.repo.checkout(flags['branch'], is_merge)
-    else:
-        if len(args) < 1: raise HelpError({'command': cmd, 'message':
-                                            'Need a commit'})
-        pyrite.repo.checkout(args[0], is_merge, paths=args[1:])
+
+    if len(args) < 1: raise HelpError({'command': cmd, 'message':
+                                        'Need a commit'})
+    pyrite.repo.checkout(args[0], is_merge, paths=args[1:])
 
