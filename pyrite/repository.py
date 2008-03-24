@@ -729,3 +729,19 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to show: %s') % proc.stderr.read())
+
+    def move_head_to(self, commit, workdir=False):
+        self.validate()
+        args = ['git', 'reset']
+        if not commit:
+            commit='HEAD'
+        if workdir:
+            args.append('--hard')
+        else:
+            args.append('--mixed')
+        args.append(commit)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to move head: %s') % proc.stderr.read())

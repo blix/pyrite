@@ -58,8 +58,6 @@ def run(cmd, *args, **flags):
                          _('Cannot specify commit and message')})
     elif use_commit:
         use_message, use_author = pyrite.repo.get_commit_info(use_commit)
-    elif amend:
-        use_message, use_author = pyrite.repo.get_commit_info('HEAD')
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -69,6 +67,11 @@ def run(cmd, *args, **flags):
             _('Changed Files...'),
             _('  ')]
 
+    if amend:
+        use_message, use_author = pyrite.repo.get_commit_info('HEAD')
+        output = pyrite.repo.move_head_to('HEAD^')
+        for line in output:
+            pass # ignore output
     pyrite.repo.update_index(args)
     for x in pyrite.repo.changed_files():
         extra.append('  ' + ' '.join(x))
