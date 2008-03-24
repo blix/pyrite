@@ -504,7 +504,12 @@ class Repo(object):
             args.append('--follow')
         if skip:
             args.append('--skip=' + str(skip))
-        args.append(self._convert_range(first, last, False))
+        if not first:
+            first = 'HEAD'
+        if last:
+            args.append(first + '..' + last)
+        else:
+            args.append(first)
         if paths:
             args.append('--')
             args.extend(paths)

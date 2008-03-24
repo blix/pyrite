@@ -52,11 +52,12 @@ def run(cmd, *args, **flags):
         idx = args[0].find('..')
         if idx < 0:
             first = args[0]
+            if not pyrite.repo.get_commit_sha(first):
+                raise HelpError({'command': cmd, 'message':
+                    _('Cannot resolve %s to a commit') % first})
         else:
             first = args[0][:idx]
             last = args[0][idx + 2:]
-            
-    if len(args) > 1:
         paths = args[1:]
 
     output = pyrite.repo.get_history(first, last, limit, show_patch=show_patch,
@@ -70,5 +71,4 @@ def run(cmd, *args, **flags):
             pyrite.ui.info(commit_data[5])
             pyrite.ui.info('\n')
             if show_patch:
-                print commit_data
                 pyrite.ui.info(commit_data[6])
