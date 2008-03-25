@@ -25,14 +25,14 @@ class UI(object):
 
     def _write(self, stream, msg):
         if msg.__class__ == ''.__class__:
-            if msg[-1] == '\n':
+            if msg and msg[-1] == '\n':
                 stream.write(msg)
             else:
                 stream.write(msg)
                 stream.write('\n')
         else:
             for l in msg:
-                if l[-1] == '\n':
+                if l and l[-1] == '\n':
                     stream.write(l)
                 else:
                     stream.write(l)
