@@ -15,6 +15,7 @@
 
 import pyrite
 from pyrite.standard.help import HelpError
+from pyrite.repository import Repo
 import os
 
 help_str="""
@@ -53,11 +54,15 @@ def run(cmd, *args, **flags):
     verify = not flags.has_key('no-verify')
     verbose = flags.has_key('verbose')
 
+    data = Repo.SUBJECT | Repo.AUTHOR | Repo.AUTHOR_EMAIL | \
+           Repo.BODY | Repo.ID
+    commitdata = {}
+
     if use_commit and use_message:
         raise HelpError({'command': cmd, 'message':
                          _('Cannot specify commit and message')})
     elif use_commit:
-        use_message, use_author = pyrite.repo.get_commit_info(use_commit)
+        commitdata = pyrite.repo.get_commit_info(use_commit, data)
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -68,30 +73,48 @@ def run(cmd, *args, **flags):
             _('  ')]
 
     if amend:
-        use_message, use_author = pyrite.repo.get_commit_info('HEAD')
-        output = pyrite.repo.move_head_to('HEAD^')
-        for line in output:
-            pass # ignore output
+        commitdata = pyrite.repo.get_commit_info('HEAD', data)
+        if not use_message:
+            use_message = commitdata[Repo.SUBJECT] + '\n' + \
+                            commitdata[Repo.BODY]
+        amend = commitdata[Repo.ID]
+        del commitdata[Repo.ID]
+        pyrite.repo.move_head_to('HEAD^')
     pyrite.repo.update_index(args)
-    for x in pyrite.repo.changed_files():
-        extra.append('  ' + ' '.join(x))
 
     if sign:
         if not use_message: use_message = ''
-        use_message+= _('\n\nSigned-off-by: %s\n\n') % pyrite.config.get_user()
+        use_message += _('\n\nSigned-off-by: %s\n\n') % \
+                                pyrite.config.get_user()
+
     if edit:
-        if not use_message: use_message = '\n'
+        for x in pyrite.repo.changed_files():
+            extra.append('  ' + ' '.join(x))
+        
+        if not use_message:
+            use_message = '\n'
+
         f = os.path.join(pyrite.repo.get_repo_dir(),
-                     'pyt-edit-' + pyrite.repo.get_commit_sha())
+                     'pyt-edit-' + pyrite.repo.get_commit_info()[Repo.ID])
         new_msg = pyrite.ui.edit(use_message, extra, f)
+
         if new_msg == use_message:
-            pyrite.ui.info(_('Message unchanged. Aborting checkin'))
-            return
+            if amend:
+                pyrite.repo.move_head_to(amend)
+            pyrite.ui.error_out(_('Message unchanged. Aborting checkin'))
         use_message = new_msg
 
-    if not use_message: raise HelpError({'command': cmd, 'message': 
-                                            _('No commit message')})
+    if not use_message:
+        if amend:
+            pyrite.repo.move_head_to(amend)
+        pyrite.ui.error_out(_('No commit message'))
 
-    pyrite.repo.commit(use_message, use_author, verify=verify,
-                        commit=use_commit, paths=args)
-
+    commitdata[Repo.SUBJECT] = use_message
+    if Repo.BODY in commitdata:
+        del commitdata[Repo.BODY]
+    try:
+        pyrite.repo.commit(commit=commitdata, verify=verify, paths=args)
+    except:
+        if amend:
+            pyrite.repo.move_head_to(amend)
+        raise

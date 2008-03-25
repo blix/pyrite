@@ -75,9 +75,10 @@ def _run_patch_export(compose, outdir, numbered, force, args):
             count += 1
         endname = lastcommit
         if not endname:
-            endname = pyrite.repo.get_commit_sha()
+            endname = pyrite.repo.get_commit_info()
         message = pyrite.ui.edit(None, None,
-                    'pyt-header-' + firstcommit + '-' + endname + '.txt')
+                    'pyt-header-' + firstcommit + '-' + endname[Repo.ID] +
+                    '.txt')
         message = message.lstrip()
         idx = message.find(os.linesep)
         title = ''

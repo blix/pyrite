@@ -62,7 +62,7 @@ def run(cmd, *args, **flags):
             if len(args) > 1:
                 raise HelpError({'command': cmd, 'message':
                                     _('Cannot create branch with paths')})
-            elif args and pyrite.repo.get_commit_sha(args[0]):
+            elif args and pyrite.repo.get_commit_info(args[0]):
                 start = args[0]
             pyrite.repo.create_branch(switch, start=start, force=is_force)
             pyrite.repo.checkout(switch, force=is_force, is_merge=True)
