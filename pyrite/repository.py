@@ -182,8 +182,12 @@ class Repo(object):
         elif force:
             args.append('-f')
         args.append(commit)
-        if paths: args.extend(paths)
+        if paths:
+            args.append('--')
+            args.extend(paths)
         proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
         if proc.wait():
              raise RepoError(_('Failed to switch to %s: %s') % (commit,
                                 proc.stderr.read()))
@@ -815,3 +819,17 @@ class Repo(object):
                             proc.stderr.read())
         return proc.stdout.read().strip()
 
+    def revert(self, commit, dryrun=False, mainline=None):
+        self.validate()
+        args = ['git', 'revert', '--no-edit']
+        if dryrun:
+            args.append('--no-commit')
+        if mainline:
+            args.append('--mainline')
+            args.append(str(mainline))
+        args.append(commit)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to revert: %s') % proc.stderr.read())
