@@ -38,6 +38,9 @@ class UI(object):
                     stream.write(l)
                     stream.write('\n')
 
+    def raw_write(self, msg):
+        stdout.write(msg)
+
     def info(self, msg):
         self._write(stdout, msg)
 

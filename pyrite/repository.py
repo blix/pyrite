@@ -50,10 +50,10 @@ class Repo(object):
     _flagopts = {
         AUTHOR: '%an',
         AUTHOR_EMAIL: '%ae',
-        AUTHOR_DATE: '%ad',
+        AUTHOR_DATE: '%at',
         COMMITER: '%cn',
         COMMITER_EMAIL: '%ce',
-        COMMIT_DATE: '%cd',
+        COMMIT_DATE: '%ct',
         SUBJECT: '%s',
         ID: '%H',
         PARENTS: '%P',

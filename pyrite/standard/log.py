@@ -16,6 +16,7 @@
 import pyrite
 from pyrite.standard.help import HelpError
 from pyrite.repository import Repo
+from pyrite.template import FileTemplate, Template
 
 help_str=_("""
 pyt log [options] [firstcommit[..[lastcommit]]] [paths]...
@@ -32,7 +33,7 @@ You can also limit the history searched to a one or more paths.
 
 def run(cmd, *args, **flags):
     style = flags.get('style', None)
-    template = flags.get('template', None)
+    template = flags.get('template', 'normal_log')
     limit = flags.get('limit', 10)
     show_patch = flags.has_key('patch')
     follow = flags.has_key('follow-renames')
@@ -61,20 +62,19 @@ def run(cmd, *args, **flags):
             last = args[0][idx + 2:]
         paths = args[1:]
 
-    data = Repo.AUTHOR | Repo.AUTHOR_EMAIL | Repo.AUTHOR_DATE | \
-           Repo.SUBJECT | Repo.BODY | Repo.ID
-    if show_patch:
-        data = data | Repo.PATCH
+    formatter = None
+    if style:
+        formatter = Template(style)
+    else:
+        formatter = FileTemplate(template)
+
+    data = formatter.compile()
+    if not show_patch:
+        data &= ~Repo.PATCH
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=paths)
 
     for commit_data in output:
-        pyrite.ui.info(_('Commit: %s') % commit_data[Repo.ID])
-        pyrite.ui.info(_('Author: %s <%s>') % (commit_data[Repo.AUTHOR],
-                                               commit_data[Repo.AUTHOR_EMAIL]))
-        pyrite.ui.info(_('Date: %s') % commit_data[Repo.AUTHOR_DATE])
-        pyrite.ui.info(_('Subject: %s\n\n') % commit_data[Repo.SUBJECT])
-        if Repo.BODY in commit_data:
-            pyrite.ui.info(commit_data[Repo.BODY])
-        if show_patch:
-            pyrite.ui.info(commit_data[Repo.PATCH])
+        formatter.generate(commit_data, pyrite.repo)
+
+    pyrite.ui.raw_write('\n')
