@@ -16,6 +16,7 @@
 import pyrite
 from pyrite.repository import Repo
 from datetime import datetime
+import time
 import os.path
 
 class Template(object):
@@ -62,14 +63,16 @@ class Template(object):
         buffer.append((self._style[end_pos + 1:],))
         return sorted(repo_props)
 
-    def short(self, input, length=6):
+    def short(self, input, length=6, foo=None):
+        length = int(length)
         if len(input) > length:
             return input[:length]
         return input
 
     def humandate(self, timestamp):
-        d = datetime.utcfromtimestamp(int(timestamp))
-        return d.strftime('%a, %d %b %Y %H:%M:%S %z')
+        t = int(timestamp)
+        utc = datetime.utcfromtimestamp(t)
+        return utc.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
     def timestamp(self, timestamp):
         return timestamp
@@ -103,6 +106,10 @@ class Template(object):
         d = datetime.utcfromtimestamp(int(timestamp))
         return d.isoformat()
 
+    def ctimedate(self, timestamp):
+        d = datetime.utcfromtimestamp(int(timestamp))
+        return d.ctime()
+
     def _get_fn(self, fn_name):
         fn = getattr(self, fn_name, None)
         if fn and callable(fn):
@@ -114,8 +121,17 @@ class Template(object):
             return ''
         return item
 
+    def getparent(self, parents, index=0):
+        return parents.split()[index]
+
     def _get_repo_prop(self, what):
         return getattr(Repo, what, 0)
+
+    def static_prop_nl(self):
+        return '\n'
+
+    def static_prop_curdate(self):
+        return time.mktime(datetime.utcnow().timetuple())
 
     def _get_data(self, data, repo, what):
         if what in data:
@@ -133,33 +149,38 @@ class Template(object):
             ret = repo.branches().copy()
             ret.extend(repo.remotes())
             return ret
+        static_item = getattr(self, 'static_prop_' + what, None)
+        if static_item:
+            return static_item()
         return None
 
     def generate(self, data, repo=None):
-        local_buffer = []
         for t in self._compiled_buffer:
             if len(t) == 1:
-                local_buffer.append(t[0])
+                pyrite.ui.raw_write(t[0])
             else:
                 prop = self._get_data(data, repo, t[0])
                 for formatter, args in t[1]:
                     prop = formatter(prop, **args)
                 if prop == None: #dont want empty string to trigger fail
                     pyrite.ui.error_out(_('Could not display %s with %s') % t)
-                local_buffer.append(prop)
-
-        pyrite.ui.raw_write(''.join(local_buffer))
+                pyrite.ui.raw_write(prop)
 
 class FileTemplate(Template):
     def __init__(self, filename):
-        if os.path.isabs(filename):
-            f = file(filename)
-            style = f.read()
-            Template.__init__(self, style)
-        else:
+        f = None
+        if not filename.endswith('.tmpl'):
             filedir = os.path.dirname(__file__)
-            if not filename.endswith('.tmpl'):
-                filename = filename + '.tmpl'
-            f = file(os.path.join(filedir, '..', 'templates', filename))
-            style = f.read()
-            Template.__init__(self, style)
+            realname = filename + '.tmpl'
+            try:
+                f = file(os.path.join(filedir, '..', 'templates', realname))
+            except IOError:
+                pyrite.ui.error_out(_('%s is not a standard '
+                                      'template') % filename)
+        else:
+            try:
+                f = file(filename)
+            except IOError:
+                pyrite.ui.error_out(_('Cannot open %s') % filename)
+        style = f.read()
+        Template.__init__(self, style)
