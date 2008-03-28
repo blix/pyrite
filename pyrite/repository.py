@@ -348,7 +348,7 @@ class Repo(object):
                             commit[Repo.AUTHOR_EMAIL] + '>')
             if Repo.ID in commit:
                 args.append('-C')
-                args.append(commit)
+                args.append(commit[Repo.ID])
             elif Repo.SUBJECT in commit:
                 args.append('-m')
                 if Repo.BODY in commit:

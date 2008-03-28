@@ -48,7 +48,7 @@ def run(cmd, *args, **flags):
     use_message = flags.get('message', None)
     #need to decide if ament or use_commit mean that editor should not
     #be invoked by default
-    edit = not use_message or flags.has_key('edit')
+    edit = (not use_message or flags.has_key('edit')) and not use_commit
     amend = flags.has_key('amend')
     sign = flags.has_key('signoff')
     verify = not flags.has_key('no-verify')
@@ -62,6 +62,8 @@ def run(cmd, *args, **flags):
                          _('Cannot specify commit and message')})
     elif use_commit:
         commitdata = pyrite.repo.get_commit_info(use_commit, data)
+        use_message = commitdata[Repo.SUBJECT] + '\n\n' + \
+                            commitdata[Repo.BODY]
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -74,7 +76,7 @@ def run(cmd, *args, **flags):
     if amend:
         commitdata = pyrite.repo.get_commit_info('HEAD', data)
         if not use_message:
-            use_message = commitdata[Repo.SUBJECT] + '\n' + \
+            use_message = commitdata[Repo.SUBJECT] + '\n\n' + \
                             commitdata[Repo.BODY]
         amend = commitdata[Repo.ID]
         del commitdata[Repo.ID]
