@@ -28,7 +28,8 @@ class Template(object):
         start_pos = self._style.find('{')
         end_pos = -1
         buffer = self._compiled_buffer
-        repo_props = 0
+        repo_props = set()
+        empty_dict = {}
         while start_pos > -1:
             if start_pos > end_pos + 1:
                 buffer.append((self._style[end_pos + 1:start_pos],))
@@ -41,21 +42,29 @@ class Template(object):
                     buffer.append(self._style[start_pos:],)
                 else:
                     cmd = self._style[start_pos + 1:end_pos]
-                    sep_idx = cmd.find('|')
-                    if sep_idx > -1:
-                        prop = cmd[:sep_idx]
-                        repo_props |= self._get_repo_prop(prop)
-                        buffer.append((prop, cmd[sep_idx + 1:]))
-                    else:
-                        repo_props |= self._get_repo_prop(cmd)
-                        buffer.append((cmd, None))
+                    parts = cmd.split('|')
+                    formatters = []
+                    for p in parts[1:]:
+                        arg_start = p.find(':')
+                        if arg_start > -1:
+                            args = {}
+                            for arg in p[arg_start + 1:].split(','):
+                                name, value = arg.split('=')
+                                args[name] = value
+                            fn = self._get_fn(p[:arg_start])
+                            formatters.append((fn, args))
+                        else:
+                            fn = self._get_fn(p)
+                            formatters.append((fn, empty_dict))
+                    repo_props.add(self._get_repo_prop(parts[0]))
+                    buffer.append((parts[0], formatters))
                     start_pos = self._style.find('{', end_pos + 1)
         buffer.append((self._style[end_pos + 1:],))
-        return repo_props
+        return sorted(repo_props)
 
     def short(self, input, length=6):
         if len(input) > length:
-            return input[:lenthg]
+            return input[:length]
         return input
 
     def humandate(self, timestamp):
@@ -133,11 +142,11 @@ class Template(object):
                 local_buffer.append(t[0])
             else:
                 prop = self._get_data(data, repo, t[0])
-                if t[1]:
-                    fmt_fn = self._get_fn(t[1])
-                    local_buffer.append(fmt_fn(prop))
-                else:
-                    local_buffer.append(prop)
+                for formatter, args in t[1]:
+                    prop = formatter(prop, **args)
+                if prop == None: #dont want empty string to trigger fail
+                    pyrite.ui.error_out(_('Could not display %s with %s') % t)
+                local_buffer.append(prop)
 
         pyrite.ui.raw_write(''.join(local_buffer))
 

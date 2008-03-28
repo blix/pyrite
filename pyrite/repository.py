@@ -30,24 +30,23 @@ class Repo(object):
         'A': 'added'
     }
 
-    AUTHOR = 1 << 0
-    AUTHOR_EMAIL = 1 << 1
-    AUTHOR_DATE = 1 << 2
-    COMMITER = 1 << 3
-    COMMITER_EMAIL = 1 << 4
-    COMMIT_DATE = 1 << 5
-    SUBJECT = 1 << 6
-    ID = 1 << 7
-    PARENTS = 1 << 8
-    BODY = 1 << 9
-    DIFFSTAT = 1 << 10
-    PATCH = 1 << 11
-    FILES = 1 << 12
+    AUTHOR = 0
+    AUTHOR_EMAIL = 1
+    AUTHOR_DATE = 2
+    COMMITER = 3
+    COMMITER_EMAIL = 4
+    COMMIT_DATE = 5
+    SUBJECT = 6
+    ID = 7
+    PARENTS = 8
+    BODY = 9
+    DIFFSTAT = 10
+    PATCH = 11
+    FILES = 12
 
-    _last_single_line_format = PARENTS
-    _last_format = FILES
+    _last_property = FILES
 
-    _flagopts = {
+    _properties = {
         AUTHOR: '%an',
         AUTHOR_EMAIL: '%ae',
         AUTHOR_DATE: '%at',
@@ -239,71 +238,59 @@ class Repo(object):
             yield r
 
     def _get_format_args(self, data):
-        if not data:
-            raise RepoError(_('Bad argument to _get_format_tags: %s') %
-                            str(data))
         options = ['-z']
         format = '--pretty=format:'
-        for k in Repo._flagopts.keys():
-            if data & k:
-                opt = Repo._flagopts[k]
-                if opt[0] == '%':
-                    format += opt + '%x00'
+        first = True
+        for prop in data:
+            opt = Repo._properties[prop]
+            if opt[0] == '%':
+                if first:
+                    format += '%x00' + opt + '%x00'
+                    first = False
                 else:
-                    options.append(opt)
+                    format += opt + '%x00'
+            else:
+                options.append(opt)
         options.insert(0, format)
-        if not Repo.PATCH & data:
+        if not Repo.PATCH in data:
             options.append('-s')
         return options
 
-    def _parse_git_data_list(self, data, stream):
-        retval = [c for c in self._parse_git_data(data, stream)]
-
-    def _parse_git_data(self, data, stream):
-        commitdata = {}
-        line_buffer = []
-
-        def advance(data, start):
-            last_format_option = start
-            while not data & last_format_option:
-                last_format_option = last_format_option << 1
-                if last_format_option > Repo._last_format:
-                    return advance(data, 1)
-            return last_format_option
-
-        last_format_option = advance(data, 1)
-        chunk = stream.read(1024)
-        while chunk:
-            segments = chunk.split('\0')
-            if len(segments) == 1:
-                line_buffer.append(segments[0])
-                chunk = stream.read(1024)
+    def _parse_git_data(self, prop_types, stream):
+        cur_buf = stream.read(1024 * 10)
+        idx = 0
+        num_props = len(prop_types)
+        separator = '\0'
+        properties = {}
+        while cur_buf:
+            field, x, cur_buf = cur_buf.partition('\0')
+            if not idx and not field:
                 continue
-            for segment in segments[:-1]:
-                if not segment:
-                    if last_format_option <= Repo._last_single_line_format:
-                        continue
-                    commitdata[last_format_option] = ''
-                elif last_format_option > Repo._last_single_line_format:
-                    line_buffer.append(segment)
-                    commitdata[last_format_option] = ''.join(line_buffer)
-                    line_buffer = []
-                else:
-                    commitdata[last_format_option] = segment
-                prev = last_format_option
-                last_format_option = advance(data, last_format_option << 1)
-                if last_format_option <= prev:
-                    yield commitdata
-                    commitdata = {}
-            chunk = segments[-1] + stream.read(1024)
+            if not cur_buf:
+                new_buf = stream.read(1024 * 10)
+                if new_buf:
+                    if not x:
+                        cur_buf = field + new_buf
+                    else:
+                        cur_buf = new_buf
+                    continue
+            properties[prop_types[idx]] = field
+            idx = (idx + 1) % num_props
+            if not idx:
+                yield properties
+                properties = {}
+        if properties:
+            yield properties
 
-    def get_commit_info(self, commit='HEAD', data=ID):
+    def get_commit_info(self, commit='HEAD', data=None):
         self.validate()
         args = ['git', 'show']
+        if not data:
+            data = [Repo.ID]
         args.extend(self._get_format_args(data))
         args.append(commit)
         proc = self._popen(args)
-        retval = self._parse_git_data_list(data, proc.stdout)
+        retval = self._parse_git_data(data, proc.stdout).next()
         if proc.wait():
             return None
         if retval:

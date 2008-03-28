@@ -69,8 +69,8 @@ def run(cmd, *args, **flags):
         formatter = FileTemplate(template)
 
     data = formatter.compile()
-    if not show_patch:
-        data &= ~Repo.PATCH
+    if not show_patch and Repo.PATCH in data:
+        data.remove(Repo.PATCH)
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=paths)
 
