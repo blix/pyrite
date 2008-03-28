@@ -174,4 +174,5 @@ cscope*
 *.kpf
 pyt-profile
 build/
+lib/
 pyrite/__version__.py

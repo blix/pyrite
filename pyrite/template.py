@@ -178,19 +178,23 @@ class Template(object):
 
 class FileTemplate(Template):
     def __init__(self, filename):
-        f = None
-        if not filename.endswith('.tmpl'):
-            filedir = os.path.dirname(__file__)
-            realname = filename + '.tmpl'
-            try:
-                f = file(os.path.join(filedir, '..', 'templates', realname))
-            except IOError:
-                pyrite.ui.error_out(_('%s is not a standard '
-                                      'template') % filename)
-        else:
-            try:
-                f = file(filename)
-            except IOError:
-                pyrite.ui.error_out(_('Cannot open %s') % filename)
-        style = f.read()
-        Template.__init__(self, style)
+        try:
+            f = None
+            if not filename.endswith('.tmpl'):
+                filedir = os.path.dirname(__file__)
+                realname = filename + '.tmpl'
+                try:
+                    f = file(os.path.join(filedir, 'templates', realname))
+                except IOError:
+                    pyrite.ui.error_out(_('%s is not a standard '
+                                          'template') % filename)
+            else:
+                try:
+                    f = file(filename)
+                except IOError:
+                    pyrite.ui.error_out(_('Cannot open %s') % filename)
+            style = f.read()
+            Template.__init__(self, style)
+        finally:
+            if f:
+                f.close()

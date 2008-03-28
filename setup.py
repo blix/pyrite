@@ -21,6 +21,7 @@ import os
 #module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
 
 repo = Repo()
+
 version=''
 try:
     tag, ncommits, abbrev = repo.most_recent_tag().split('-')
@@ -32,16 +33,9 @@ except:
 f = open('pyrite/__version__.py', 'w+')
 f.write('version = ' + version + '\n')
 
-def get_template_files():
-    template_files = []
-    for root, dirs, files, in os.walk('templates'):
-        for f in files:
-            template_files.append(os.path.join(root, f))
-    return template_files
-
 setup(name='pyrite', version='0', description='Pyrite git porcelain',
       license='GNU GPL', scripts=['pyt'],
       packages=['pyrite', 'pyrite.standard'], #ext_modules=[module1],
-      data_files=[(os.path.join('pyrite', 'templates'), get_template_files())]
+      package_data={'pyrite' : [os.path.join('templates', '*.tmpl')]}
     )
 
