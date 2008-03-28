@@ -54,8 +54,7 @@ def run(cmd, *args, **flags):
     verify = not flags.has_key('no-verify')
     verbose = flags.has_key('verbose')
 
-    data = Repo.SUBJECT | Repo.AUTHOR | Repo.AUTHOR_EMAIL | \
-           Repo.BODY | Repo.ID
+    data = [Repo.SUBJECT, Repo.AUTHOR, Repo.AUTHOR_EMAIL, Repo.BODY, Repo.ID]
     commitdata = {}
 
     if use_commit and use_message:
@@ -94,20 +93,14 @@ def run(cmd, *args, **flags):
         if not use_message:
             use_message = '\n'
 
-        f = os.path.join(pyrite.repo.get_repo_dir(),
-                     'pyt-edit-' + pyrite.repo.get_commit_info()[Repo.ID])
-        new_msg = pyrite.ui.edit(use_message, extra, f)
-
-        if new_msg == use_message:
-            if amend:
-                pyrite.repo.move_head_to(amend)
-            pyrite.ui.error_out(_('Message unchanged. Aborting checkin'))
+        new_msg = pyrite.ui.edit(use_message, extra,
+                                 pyrite.repo.get_commit_info()[Repo.ID])
         use_message = new_msg
 
-    if not use_message:
+    if not use_message.strip():
         if amend:
             pyrite.repo.move_head_to(amend)
-        pyrite.ui.error_out(_('No commit message'))
+        pyrite.ui.error_out(_('No commit message, aborting'))
 
     commitdata[Repo.SUBJECT] = use_message
     if Repo.BODY in commitdata:

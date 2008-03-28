@@ -59,28 +59,41 @@ class UI(object):
         else: return ['/usr/bin/env', 'vi']
 
     def edit(self, message, extra, tmpfile, strip_prefix='#'):
-        msg = '\n'
-        if message: msg = message + '\n'
+        msg = ['\n']
+        if message:
+            if message.__class__ == ''.__class__:
+                msg = [message, '\n']
+            else:
+                msg = message
         if extra:
             for line in extra:
-                msg += strip_prefix + ' ' + line + '\n'
+                msg.append(strip_prefix)
+                msg.append(' ')
+                msg.append(line)
+                msg.append('\n')
+
         editor = pyrite.config.get_option('ui.editor')
         if not editor:
             editor = self.get_platform_editor()
-        f = open(tmpfile, 'w+')
-        try: f.write(msg)
-        finally: f.close()
-        tmpfile = os.path.abspath(tmpfile)
-        editor.append(tmpfile)
-        proc = Popen(editor)
-        if proc.wait(): return message
-        msg = None
-        f = open(tmpfile, 'r')
-        try: msg = f.readlines()
+
+        path = os.path.join(pyrite.repo.get_repo_dir(), 'pyt-edit-' + tmpfile)
+        f = open(path, 'w+')
+        try:
+            f.write(''.join(msg))
         finally:
             f.close()
-            os.remove(tmpfile)
-        if not msg: return message
+        path = os.path.abspath(path)
+        editor.append(path)
+        proc = Popen(editor)
+        if proc.wait():
+            return message
+        msg = None
+        f = open(path, 'r')
+        try:
+            msg = f.readlines()
+        finally:
+            f.close()
+            os.remove(path)
         msg = [ line for line in msg if not line.startswith(strip_prefix)]
         return ''.join(msg)
         
