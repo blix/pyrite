@@ -20,10 +20,11 @@ def noop(message):return message #Don't know if I really want to localize the
                               #cmd line. For now continue to add localzable
                               #strings with the _() but make it a noop
 import __builtin__
-__builtin__.__dict__['_'] = noop                              
+__builtin__.__dict__['_'] = noop
 
 import extensions, options, UI, repository
-from standard.help import HelpError
+import pyrite.standard.config as pytconfig
+import pyrite.standard.help as pythelp
 import sys, imp
 
 config = None
@@ -263,22 +264,20 @@ def dyn_import(module, is_extension=False, path=None):
     return m
 
 def run():
-    help = dyn_import('help')
-    configuration = dyn_import('config')
     show_trace = False
     try:
         global repo
         repo = repository.Repo()
         global config
-        config = configuration.Config()
+        config = pytconfig.Config()
         extensions.load(commands, modules) #TODO:implement extension loading
         options.expand_aliases(commands, aliases_map)
         
         if len(sys.argv) < 2:
-            raise help.HelpError, {'basic': 1}
+            raise pythelp.HelpError, {'basic': 1}
         cmd = sys.argv[1]
         if not commands.has_key(cmd):
-            raise help.HelpError({'unknown': 1, 'command': cmd})
+            raise pythelp.HelpError({'unknown': 1, 'command': cmd})
             
         module_name = commands[cmd][0]
         opts = []
@@ -288,10 +287,10 @@ def run():
         show_trace = flags.get('debug-show-trace', False)
         m = dyn_import(module_name)
         modules[module_name].run(cmd, *args, **flags)
-        
-    except help.HelpError, inst:
+
+    except pythelp.HelpError, inst:
         if show_trace: raise
-        help.run(None, None, **inst.args[0])
+        pythelp.run(None, None, **inst.args[0])
     except options.ParseError, inst:
         if show_trace: raise
         ui.error_out(inst)
