@@ -810,3 +810,15 @@ class Repo(object):
         proc = self._popen(args)
         if proc.wait():
             raise RepoError(_('Failed to move head: %s') % proc.stderr.read())
+
+    def most_recent_tag(self, branch=None):
+        self.validate()
+        if not branch:
+            branch = self._current_branch
+        proc = self._popen(('git', 'describe', '--abbrev=10',
+                            '--tags', branch))
+        if self.wait():
+            raise RepoError(_('Unable to get most recent tag %s') %
+                            proc.stderr.read())
+        return proc.stdout.read().strip()
+

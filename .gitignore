@@ -157,7 +157,7 @@ common-cmds.h
 git.spec
 *.exe
 *.[aos]
-*.py[co]
+*.py[cod]
 config.mak
 autom4te.cache
 config.cache
@@ -173,3 +173,5 @@ cscope*
 *.bak
 *.kpf
 pyt-profile
+build/
+pyrite/__version__.py
