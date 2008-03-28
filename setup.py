@@ -15,27 +15,29 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from distutils.core import setup, Extension
-from pyrite.repository import Repo, RepoError
-import os
+import os, sys
 
 #module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
 
-repo = Repo()
+if sys.argv[1] == 'version':
+    from pyrite.repository import Repo, RepoError
+    repo = Repo()
+    
+    version=''
+    try:
+        tag, ncommits, abbrev = repo.most_recent_tag().split('-')
+        version = tag + '-' + abbrev[1:]
+    except:
+        c = repo.get_commit_info()
+        version = c[Repo.ID][:10]
 
-version=''
-try:
-    tag, ncommits, abbrev = repo.most_recent_tag().split('-')
-    version = tag + '-' + abbrev[1:]
-except:
-    c = repo.get_commit_info()
-    version = c[Repo.ID][:10]
+    f = open('pyrite/__version__.py', 'w+')
+    f.write('version = \'' + version + '\'\n')
 
-f = open('pyrite/__version__.py', 'w+')
-f.write('version = ' + version + '\n')
-
-setup(name='pyrite', version='0', description='Pyrite git porcelain',
-      license='GNU GPL', scripts=['pyt'],
-      packages=['pyrite', 'pyrite.standard'], #ext_modules=[module1],
-      package_data={'pyrite' : [os.path.join('templates', '*.tmpl')]}
-    )
+else:
+    setup(name='pyrite', version='0', description='Pyrite git porcelain',
+          license='GNU GPL', scripts=['pyt'],
+          packages=['pyrite', 'pyrite.standard'], #ext_modules=[module1],
+          package_data={'pyrite' : [os.path.join('templates', '*.tmpl')]}
+        )
 
