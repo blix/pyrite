@@ -833,3 +833,26 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to revert: %s') % proc.stderr.read())
+
+    def cherry(self, downstream, limit=None):
+        self.validate()
+        args = ['git', 'cherry', 'HEAD', downstream]
+        if limit:
+            args.append(limit)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to get cherry info %s') %
+                            proc.stderr.read())
+
+    def cherry_pick(self, commit, dryrun=False):
+        self.validate()
+        args = ['git', 'cherry-pick']
+        if dryrun:
+            args.append('--no-commit')
+        args.append(commit)
+        proc = None
+        proc = self._popen(args, stdout=None)
+        if proc.wait():
+            raise RepoError(proc.stderr.read())
