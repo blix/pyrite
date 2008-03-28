@@ -33,7 +33,7 @@ You can also limit the history searched to a one or more paths.
 
 def run(cmd, *args, **flags):
     style = flags.get('style', None)
-    template = flags.get('template', 'normal_log')
+    template = flags.get('template', 'medium')
     limit = flags.get('limit', 10)
     show_patch = flags.has_key('patch')
     follow = flags.has_key('follow-renames')

@@ -121,6 +121,11 @@ class Template(object):
             return ''
         return item
 
+    def add_if_present(self, item, to_append='\n'):
+        if item:
+            return item + to_append
+        return item
+
     def getparent(self, parents, index=0):
         return parents.split()[index]
 
@@ -153,6 +158,11 @@ class Template(object):
         if static_item:
             return static_item()
         return None
+
+    def indent(self, s):
+        s = s.replace('\n', '\n   ')
+        s = '   ' + s
+        return s
 
     def generate(self, data, repo=None):
         for t in self._compiled_buffer:
