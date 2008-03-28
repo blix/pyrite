@@ -69,7 +69,9 @@ class Repo(object):
             self._location = os.getcwd()
         self.refresh()
 
-    def _popen(self, args, cwd=None, stdin=False):
+    def _popen(self, args, cwd=None, stdin=False,
+               stdout=subprocess.PIPE,
+               stderr=subprocess.PIPE):
         if not cwd:
             cwd = self._location
         if stdin:
@@ -77,8 +79,8 @@ class Repo(object):
         else:
             stdin = None
         return subprocess.Popen(args, cwd=cwd,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
+                                    stdout=stdout,
+                                    stderr=stderr,
                                     stdin=stdin)
 
     def refresh(self):
