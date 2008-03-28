@@ -18,7 +18,7 @@ from distutils.core import setup, Extension
 from pyrite.repository import Repo, RepoError
 import os
 
-module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
+#module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
 
 repo = Repo()
 version=''
@@ -41,7 +41,7 @@ def get_template_files():
 
 setup(name='pyrite', version='0', description='Pyrite git porcelain',
       license='GNU GPL', scripts=['pyt'],
-      packages=['pyrite', 'pyrite.standard'], ext_modules=[module1],
+      packages=['pyrite', 'pyrite.standard'], #ext_modules=[module1],
       data_files=[(os.path.join('pyrite', 'templates'), get_template_files())]
     )
 
