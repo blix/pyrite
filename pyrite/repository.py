@@ -399,8 +399,9 @@ class Repo(object):
             raise RepoError(_('Failed to get changed files: %s') %
                                 proc.stderr.read())
 
-    def commit(self, commit=None, verify=True, paths=None):
+    def commit(self, commit=None, verify=True):
         self.validate()
+        have_msg = Repo.SUBJECT in commit
         args = ['git', 'commit']
         if not verify:
             args.append('--no-verify')
@@ -412,17 +413,16 @@ class Repo(object):
             if Repo.ID in commit:
                 args.append('-C')
                 args.append(commit[Repo.ID])
-            elif Repo.SUBJECT in commit:
-                args.append('-m')
-                if Repo.BODY in commit:
-                    args.append(commit[Repo.SUBJECT] + '\n' +
-                                ''.join(commit[Repo.BODY]))
-                else:
-                    args.append(commit[Repo.SUBJECT])
-        if paths:
-            args.append('--')
-            args.extend(paths)
-        proc = self._popen(args)
+                have_msg = False
+            elif have_msg:
+                args.append('-F')
+                args.append('-')
+        proc = self._popen(args, stdin=have_msg)
+        if have_msg:
+            proc.stdin.writelines(commit[Repo.SUBJECT])
+            if Repo.BODY in commit:
+                proc.stdin.writelines(commit[Repo.BODY])
+            proc.stdin.close()
         if proc.wait():
             raise RepoError(_('Failed to commit change: %s') %
                             proc.stdout.read() + proc.stderr.read())
@@ -980,6 +980,21 @@ class Repo(object):
             err_str = proc.stderr.read()
             if err_str:
                 raise RepoError(_('Failed to grep: %s') % err_str)
+
+    def apply(self, diff, toindex=False, getstat=False):
+        self.validate()
+        args = ['git', 'apply', '--binary']
+        if toindex:
+            args.append('--cached')
+        if getstat:
+            args.extend(['--stat', '--summary', '--apply'])
+        args.append('-')
+        proc = self._popen(args, stdin=True)
+        proc.stdin.writelines(diff)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to apply %s') % proc.stderr.read())
 
     def _parse_blame(self, stream):
         commits = {}
