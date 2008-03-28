@@ -45,7 +45,7 @@ def run(cmd, *args, **flags):
         tag = args[0]
         if len(args) > 1:
             files = args[1:]
-    elif pyrite.repo.get_commit_sha(args[0]):
+    elif pyrite.repo.get_commit_info(args[0]):
         commit = args[0]
         if len(args) > 1:
             files = args[1:]
