@@ -596,7 +596,7 @@ class Repo(object):
             raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
         
     def diff(self, start, end, paths, stat=False, patch=True,
-                detect=False, ignorewhite='none'):
+                detect=False, ignorewhite='none', binary=False):
         self.validate()
         args = ['git', 'diff']
         if patch:
@@ -611,6 +611,8 @@ class Repo(object):
             args.append('-w')
         elif ignorewhite == 'eol':
             args.append('--ignore-space-at-eol')
+        if binary:
+            args.append('--binary')
         spec = start
         if not start:
             spec = 'HEAD'
@@ -966,3 +968,62 @@ class Repo(object):
             err_str = proc.stderr.read()
             if err_str:
                 raise RepoError(_('Failed to grep: %s') % err_str)
+
+    def _parse_blame(self, stream):
+        commits = {}
+        line = stream.readline()
+        while line:
+            line = line.strip()
+            if not line:
+                continue
+            id, orig_lineno, rest = line.split(None, 2)
+            cur_lineno = rest.split()[0]
+            c = None
+            if not id in commits:
+                c = {Repo.ID: id}
+                commits[id] = c
+            else:
+                c = commits[id]
+            while True:
+                if line.startswith('\t'):
+                    line_contents = line[1:]
+                    yield cur_lineno, commits[id], \
+                            line_contents, orig_lineno
+                    line = stream.readline()
+                    break
+                key, value = line.split(None, 1)
+                if key == 'author':
+                    c[Repo.AUTHOR] = value.strip()
+                elif key == 'author-email':
+                    c[Repo.AUTHOR_EMAIL] = value.strip()
+                elif key == 'author-time':
+                    c[Repo.AUTHOR_DATE] = value.strip()
+                elif key == 'commiter':
+                    c[Repo.COMMITER] = value.strip()
+                elif key == 'commiter-mail':
+                    c[Repo.COMMITER_EMAIL] = value.strip()
+                elif key == 'commiter-time':
+                    c[Repo.COMMIT_DATE] = value.strip()
+                elif key == 'summary':
+                    c[Repo.SUBJECT] = value.strip()
+                line = stream.readline()
+
+    def blame(self, file, commit=None, startline=None, endline=None):
+        self.validate()
+        args = ['git', 'blame', '-p']
+        if startline != None:
+            args.append('-L')
+            limits = str(startline)
+            if endline != None:
+                limits += ',' + str(endline)
+            args.append(limits)
+        if commit:
+            args.append(commit)
+        args.append('--')
+        args.append(file)
+        proc = self._popen(args)
+        for data in self._parse_blame(proc.stdout):
+            yield data
+        if proc.wait():
+            raise RepoError(_('Failed to get blame info: %s') %
+                            proc.stderr.read())
