@@ -63,7 +63,7 @@ class Template(object):
         buffer.append((self._style[end_pos + 1:],))
         return sorted(repo_props)
 
-    def short(self, input, length=6, foo=None):
+    def short(self, input, length=6):
         length = int(length)
         if len(input) > length:
             return input[:length]
@@ -141,19 +141,20 @@ class Template(object):
     def _get_data(self, data, repo, what):
         if what in data:
             return data[what]
-        repo_item = getattr(repo, what, None)
+        repo_item = getattr(Repo, what, None)
         if repo_item in data:
             return data[repo_item]
-        if what == 'branch':
-            return repo.branch()
-        if what == 'branches':
-            return repo.branches()
-        if what == 'remotes':
-            return repo.remotes()
-        if what == 'all_branches':
-            ret = repo.branches().copy()
-            ret.extend(repo.remotes())
-            return ret
+        if repo:
+            if what == 'branch':
+                return repo.branch()
+            if what == 'branches':
+                return repo.branches()
+            if what == 'remotes':
+                return repo.remotes()
+            if what == 'all_branches':
+                ret = repo.branches().copy()
+                ret.extend(repo.remotes())
+                return ret
         static_item = getattr(self, 'static_prop_' + what, None)
         if static_item:
             return static_item()
@@ -164,17 +165,27 @@ class Template(object):
         s = '   ' + s
         return s
 
-    def generate(self, data, repo=None):
+    def write_to_stream(self, data, stream, repo=None):
+        for chunk in self._generate(data, repo):
+            stream.write(chunk)
+
+    def get_complete(self, data, repo=None):
+        all_data = []
+        for chunk in self._generate(data, repo):
+            all_data.append(chunk)
+        return ''.join(all_data)
+
+    def _generate(self, data, repo=None):
         for t in self._compiled_buffer:
             if len(t) == 1:
-                pyrite.ui.raw_write(t[0])
+                yield t[0]
             else:
                 prop = self._get_data(data, repo, t[0])
                 for formatter, args in t[1]:
                     prop = formatter(prop, **args)
                 if prop == None: #dont want empty string to trigger fail
                     pyrite.ui.error_out(_('Could not display %s with %s') % t)
-                pyrite.ui.raw_write(prop)
+                yield(prop)
 
 class FileTemplate(Template):
     def __init__(self, filename):

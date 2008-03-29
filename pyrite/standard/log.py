@@ -75,6 +75,7 @@ def run(cmd, *args, **flags):
                                        follow=follow, paths=paths)
 
     for commit_data in output:
-        formatter.generate(commit_data, pyrite.repo)
+        formatter.write_to_stream(commit_data, pyrite.ui.info_stream(),
+                                  pyrite.repo)
 
-    pyrite.ui.raw_write('\n')
+    pyrite.ui.info('\n')
