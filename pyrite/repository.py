@@ -389,7 +389,10 @@ class Repo(object):
             args.extend(files)
         else:
             args.append('.')
-        proc = self._popen(args, cwd=os.getcwd())
+        wd = os.getcwd()
+        if not wd.startswith(self._location):
+            wd = self._location
+        proc = self._popen(args, cwd=wd)
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
