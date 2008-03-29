@@ -34,11 +34,6 @@ class CommitTest(PyriteTestCase):
         self.repo = Repo(TESTDIR)
         self.repo.init()
 
-    def createAndAdd(self, filename):
-        self.touch(filename)
-        self.consume_output(self.repo.add_files(False, False,
-                                                [filename]))
-
     def doSimpleCommit(self, filename):
         self.createAndAdd(filename)
         c = {Repo.SUBJECT: filename}
@@ -74,3 +69,37 @@ class CommitTest(PyriteTestCase):
         self.assertEqual(auth_date, c2[Repo.AUTHOR_DATE])
         self.assertEqual(subj, c2[Repo.SUBJECT])
         self.assertNotEqual(c[Repo.ID], c2[Repo.ID])
+
+class AddTest(PyriteTestCase):
+    def setUp(self):
+        self.reset_test_dir()
+        self.repo = Repo(TESTDIR)
+        self.repo.init()
+
+    def testSimpleAdd(self):
+        fn_name = self.whoami()
+
+        self.createAndAdd(fn_name)
+
+    def testAddFromToplevel(self):
+        fn_name = self.whoami()
+
+        origwd = os.getcwd()
+        os.chdir(TESTDIR)
+        try:
+            os.mkdir(os.path.join(TESTDIR, fn_name))
+            self.createAndAdd(os.path.join(fn_name, fn_name))
+        finally:
+            os.chdir(origwd)
+
+    def testAddFromSubdir(self):
+        fn_name = self.whoami()
+
+        origwd = os.getcwd()
+        try:
+            os.mkdir(os.path.join(TESTDIR, fn_name))
+            os.chdir(os.path.join(TESTDIR, fn_name))
+            self.touch(os.path.join(fn_name, fn_name))
+            self.consume_output(self.repo.add_files(False, False, [fn_name]))
+        finally:
+            os.chdir(origwd)

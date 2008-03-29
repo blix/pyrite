@@ -35,6 +35,11 @@ class PyriteTestCase(unittest.TestCase):
         for line in generator:
             pass
 
+    def createAndAdd(self, filename):
+        self.touch(filename)
+        self.consume_output(self.repo.add_files(False, False,
+                                                [filename]))
+
     def reset_test_dir(self):
         for curdir, dirs, files in os.walk(PyriteTestCase.TESTDIR,
                                            topdown=False):
