@@ -125,6 +125,7 @@ class Repo(object):
         proc = self._popen(('git', 'init'), cwd=self._location)
         if proc.wait():
             raise RepoError(_('Failed to init repo: %s') % proc.stderr.read())
+        self.refresh()
 
     def del_branch(self, names, force):
     #TODO: need to give better error when branch exists
