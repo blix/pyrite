@@ -361,7 +361,8 @@ class Repo(object):
             args.extend(paths)
         proc = self._popen(args)
         if proc.wait():
-            raise RepoError(_('Failed to commit change') + proc.stderr.read())
+            raise RepoError(_('Failed to commit change: %s') %
+                            proc.stdout.read() + proc.stderr.read())
 
     def gc(self, prune, aggressive):
         self.validate()
