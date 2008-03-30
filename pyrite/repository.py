@@ -859,3 +859,40 @@ class Repo(object):
         proc = self._popen(args, stdout=None)
         if proc.wait():
             raise RepoError(proc.stderr.read())
+
+    def grep(self, pattern, files, commit=None, ignore=False, whole=False,
+                ignore_binary=False, invert=False, path=False,
+                not_regex=False, count=False):
+        self.validate()
+        args = ['git', 'grep', '-e', pattern]
+        if ignore:
+            args.append('--ignore-case')
+        if whole:
+            args.append('--word-regexp')
+        if ignore_binary:
+            args.append('-I')
+        if invert:
+            args.append('--invert-match')
+        if path:
+            args.append('--full-name')
+        elif path == None:
+            args.append('-h')
+        if not_regex:
+            args.append('--fixed-strings')
+        if count:
+            args.append('--count')
+        if commit:
+            args.append(commit)
+        else:
+            args.append('.')
+        if files:
+            args.append('--')
+            args.extend(files)
+
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            err_str = proc.stderr.read()
+            if err_str:
+                raise RepoError(_('Failed to grep: %s') % err_str)
