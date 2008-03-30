@@ -582,10 +582,12 @@ class Repo(object):
         first = first + '..' + last
         return first
 
-    def get_history(self, first, last, limit, data=ID, follow=False,
+    def get_history(self, first, last, limit, data=None, follow=False,
                     paths=None, skip=0):
         self.validate()
         args = ['git', 'log']
+        if not data:
+            data = [Repo.ID]
         args.extend(self._get_format_args(data))
         if limit > -1:
             args.append('-' + str(limit))
