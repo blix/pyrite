@@ -103,3 +103,19 @@ class AddTest(PyriteTestCase):
             self.consume_output(self.repo.add_files(False, False, [fn_name]))
         finally:
             os.chdir(origwd)
+
+class LogTest(PyriteTestCase):
+    def setUp(self):
+        self.reset_test_dir()
+        self.repo = Repo(TESTDIR)
+        self.repo.init()
+
+    def testLog(self):
+        fn_name = self.whoami()
+
+        self.createAndAdd(fn_name)
+        self.repo.commit({Repo.SUBJECT: 'test'})
+        count = 0
+        for commit in self.repo.get_history(None, None, -1):
+            count += 1
+        self.assertEqual(count, 1)
