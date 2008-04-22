@@ -58,8 +58,8 @@ def run_all_tests():
         for f in files:
             if f.startswith('__') or not f.endswith('.py'):
                 continue
-            modstr += '.' + f[:-3]
-            module = __import__(modstr)
+            curmodstr = modstr + '.' + f[:-3]
+            module = __import__(curmodstr)
             for c in dir(module):
                 if c[0] == '_':
                     continue
