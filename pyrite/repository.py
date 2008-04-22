@@ -372,6 +372,7 @@ class Repo(object):
             retval = self._parse_git_data(data, proc.stdout).next()
         except StopIteration:
             retval = None
+
         if proc.wait():
             return None
         if retval:

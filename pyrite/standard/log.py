@@ -53,14 +53,15 @@ def run(cmd, *args, **flags):
     if len(args) > 0:
         idx = args[0].find('..')
         if idx < 0:
-            first = args[0]
-            if not pyrite.repo.get_commit_info(first):
-                raise HelpError({'command': cmd, 'message':
-                    _('Cannot resolve %s to a commit') % first})
+            if pyrite.repo.get_commit_info(args[0]):
+                first = args[0]
         else:
             first = args[0][:idx]
             last = args[0][idx + 2:]
+    if first:
         paths = args[1:]
+    else:
+        paths = args
 
     formatter = None
     if style:
