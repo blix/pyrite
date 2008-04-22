@@ -1,6 +1,6 @@
 From: {PARENTS|getparent} {AUTHOR_DATE|isodate}
 From: {AUTHOR} <{AUTHOR_EMAIL}>
-Date: {curdate|humandate}
+Date: {curdate|humandate} {AUTHOR_DATE_OFFSET}
 Subject: [PATCH{SEQNO|absent_ok}] {SUBJECT}
 
 {BODY|absent_ok|add_if_present}{DIFFSTAT|absent_ok|add_if_present}{PATCH|absent_ok}

@@ -72,7 +72,7 @@ class Template(object):
     def humandate(self, timestamp):
         t = int(timestamp)
         utc = datetime.utcfromtimestamp(t)
-        return utc.strftime('%a, %d %b %Y %H:%M:%S +0000')
+        return utc.strftime('%a, %d %b %Y %H:%M:%S')
 
     def timestamp(self, timestamp):
         return timestamp
@@ -143,6 +143,8 @@ class Template(object):
             return data[what]
         repo_item = getattr(Repo, what, None)
         if repo_item in data:
+            if repo_item == Repo.PARENTS:
+                return ' '.join(data[repo_item])
             return data[repo_item]
         if repo:
             if what == 'branch':

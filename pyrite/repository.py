@@ -20,6 +20,42 @@ import gzip
 class RepoError(Exception):
     """Thrown when repo fails"""
 
+class SmartStream(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.buffer = None
+        self.lastidx = 0
+        self.done = False
+
+    def readline(self):
+        if not self.buffer:
+            self.buffer = self.stream.read(1024 * 20)
+        nextidx = self.buffer.find('\n', self.lastidx) + 1
+        if self.lastidx > -1:
+            if nextidx > 0:
+                s = self.buffer[self.lastidx:nextidx]
+                self.lastidx = nextidx
+                #print '**' + s + '--'
+                return s
+            arrbuf = [self.buffer[self.lastidx:]]
+            while True:
+                buf2 = self.stream.read(1024 * 20)
+                if not buf2:
+                    self.buffer = buf2
+                    s = ''.join(arrbuf)
+                    #print '--' + s + '--'
+                    return s
+                nextidx = buf2.find('\n') + 1
+                if nextidx > 0:
+                    arrbuf.append(buf2[:nextidx])
+                    self.lastidx = nextidx
+                    self.buffer = buf2
+                    s = ''.join(arrbuf)
+                    #print '--' + s + '--'
+                    return s
+                else:
+                    arrbuf.append(buf2)
+
 class Repo(object):
     _status = {
         '?': 'untracked',
@@ -43,24 +79,12 @@ class Repo(object):
     DIFFSTAT = 10
     PATCH = 11
     FILES = 12
+    TAGS = 13
+    HEADS = 14
+    AUTHOR_DATE_OFFSET = 15
+    COMMITER_DATE_OFFSET = 16
 
-    _last_property = FILES
-
-    _properties = {
-        AUTHOR: '%an',
-        AUTHOR_EMAIL: '%ae',
-        AUTHOR_DATE: '%at',
-        COMMITER: '%cn',
-        COMMITER_EMAIL: '%ce',
-        COMMIT_DATE: '%ct',
-        SUBJECT: '%s',
-        ID: '%H',
-        PARENTS: '%P',
-        BODY: '%b',
-        DIFFSTAT: '--stat',
-        PATCH: '-p',
-        FILES: '--name-status'
-    }
+#    _last_property = FILES
 
     def __init__(self, location=None):
         if location:
@@ -245,49 +269,92 @@ class Repo(object):
             yield r
 
     def _get_format_args(self, data):
-        options = ['-z']
-        format = '--pretty=format:'
-        first = True
-        for prop in data:
-            opt = Repo._properties[prop]
-            if opt[0] == '%':
-                if first:
-                    format += '%x00' + opt + '%x00'
-                    first = False
-                else:
-                    format += opt + '%x00'
-            else:
-                options.append(opt)
-        options.insert(0, format)
-        if not Repo.PATCH in data:
-            options.append('-s')
+        options = ['--pretty=raw']
+        if Repo.PATCH in data:
+            options.append('-p')
+        if Repo.DIFFSTAT in data:
+            options.append('--stat')
+        if Repo.TAGS in data or Repo.HEADS in data:
+            options.append('--decorate')
         return options
 
+    def _parse_git_log(self, commit, firstline, stream):
+        commit[Repo.SUBJECT] = stream.readline().strip()
+        stream.readline()
+        buf = []
+        while True:
+            line = stream.readline()
+            if not line.startswith(' ') or not line:
+                commit[Repo.BODY] = ''.join(buf)
+                return line
+            buf.append(line.lstrip())
+
+    def _parse_git_stat(self, commit, firstline, stream):
+        if firstline.startswith('commit'):
+            return firstline
+        buf = [firstline]
+        while True:
+            line = stream.readline()
+            if not line.startswith(' ') or not line:
+                commit[Repo.DIFFSTAT] = ''.join(buf)
+                return line
+            buf.append(line)
+
+    def _parse_git_patch(self, commit, firstline, stream):
+        if firstline.startswith('commit'):
+            return firstline
+        buf = [firstline]
+        while True:
+            line = stream.readline()
+            if not line or line.startswith('commit'):
+                commit[Repo.PATCH] = ''.join(buf)
+                return line
+            buf.append(line)
+
+    def _parse_raw_header(Self, commit, firstline, stream):
+        commit[Repo.ID] = firstline.split()[1]
+        stream.readline()
+        parents = []
+        while True:
+            line = stream.readline()
+            parts = line.split()
+            if parts[0] != 'parent':
+                break
+            parents.append(parts[1])
+        commit[Repo.PARENTS] = parents
+        idx = line.find('<')
+        commit[Repo.AUTHOR] = line[len('author '):idx - 1]
+        idx2 = line.rfind('>') + 1
+        commit[Repo.AUTHOR_EMAIL] = line[idx + 1:idx2 - 1]
+        commit[Repo.AUTHOR_DATE] = line[idx2 + 1:-6]
+        commit[Repo.AUTHOR_DATE_OFFSET] = line[-6:-1]
+
+        line = stream.readline()
+        idx = line.find('<')
+        commit[Repo.COMMITER] = line[len('committer '):idx - 1]
+        idx2 = line.rfind('>') + 1
+        commit[Repo.COMMITER_EMAIL] = line[idx + 1:idx2 - 1]
+        commit[Repo.COMMIT_DATE] = line[idx2 + 1:-6]
+        commit[Repo.COMMITER_DATE_OFFSET] = line[-6:-1]
+        return stream.readline()
+
     def _parse_git_data(self, prop_types, stream):
-        cur_buf = stream.read(1024 * 10)
-        idx = 0
-        num_props = len(prop_types)
-        separator = '\0'
-        properties = {}
-        while cur_buf:
-            field, x, cur_buf = cur_buf.partition('\0')
-            if not idx and not field:
-                continue
-            if not cur_buf:
-                new_buf = stream.read(1024 * 10)
-                if new_buf:
-                    if not x:
-                        cur_buf = field + new_buf
-                    else:
-                        cur_buf = new_buf
-                    continue
-            properties[prop_types[idx]] = field
-            idx = (idx + 1) % num_props
-            if not idx:
-                yield properties
-                properties = {}
-        if properties:
-            yield properties
+        commit = {}
+
+        sstream = SmartStream(stream)
+        line = sstream.readline()
+        while line:
+            line = self._parse_raw_header(commit, line, sstream)
+            line = self._parse_git_log(commit, line, sstream)
+            if Repo.DIFFSTAT in prop_types:
+                line = self._parse_git_stat(commit, line, sstream)
+            if Repo.PATCH in prop_types:
+                line = self._parse_git_patch(commit, line, sstream)
+            while line == '\n':
+                line = sstream.readline()
+            yield commit
+            commit = {}
+            
 
     def get_commit_info(self, commit='HEAD', data=None):
         self.validate()
@@ -297,7 +364,10 @@ class Repo(object):
         args.extend(self._get_format_args(data))
         args.append(commit)
         proc = self._popen(args)
-        retval = self._parse_git_data(data, proc.stdout).next()
+        try:
+            retval = self._parse_git_data(data, proc.stdout).next()
+        except StopIteration:
+            retval = None
         if proc.wait():
             return None
         if retval:
