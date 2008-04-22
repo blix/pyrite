@@ -36,5 +36,6 @@ def run(cmd, *args, **flags):
 
     if len(args) < 1: raise HelpError({'command': cmd, 'message':
                                         'Need a commit'})
-    pyrite.repo.checkout(args[0], is_merge, paths=args[1:])
+    for line in pyrite.repo.checkout(args[0], is_merge, paths=args[1:]):
+        pyrite.ui.info(line)
 
