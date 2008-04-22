@@ -94,7 +94,7 @@ class Config(object):
         elif self.user_config.has_option(category, name):
             return self.user_config.get(category, name)
         else:
-            return None
+            return ''
 
     def update_ignore(self, item, remove):
         if not pyrite.repo.is_repo():
