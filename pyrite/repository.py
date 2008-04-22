@@ -86,6 +86,8 @@ class Repo(object):
 
 #    _last_property = FILES
 
+    DEBUGCOMMANDS = os.getenv('PYTDBGC')
+
     def __init__(self, location=None):
         if location:
             self._location = os.path.expanduser(location)
@@ -102,6 +104,8 @@ class Repo(object):
             stdin = subprocess.PIPE
         else:
             stdin = None
+        if Repo.DEBUGCOMMANDS:
+            print args
         return subprocess.Popen(args, cwd=cwd,
                                     stdout=stdout,
                                     stderr=stderr,
