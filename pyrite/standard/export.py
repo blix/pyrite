@@ -51,7 +51,7 @@ contians tracked files.
 
 def _parse_range(args):
     if not args:
-        raise HelpError({'command': cmd, 'message': _('Need to specify a '
+        raise HelpError({'command': 'export', 'message': _('Need to specify a '
                          'commit or commit range')})
     first = last = None
     spec = args[0]
