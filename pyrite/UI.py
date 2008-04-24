@@ -24,7 +24,9 @@ class UI(object):
         pass
 
     def _write(self, stream, msg):
+        did_write = False
         if msg.__class__ == ''.__class__:
+            did_write = True
             if msg and msg[-1] == '\n':
                 stream.write(msg)
             else:
@@ -32,20 +34,22 @@ class UI(object):
                 stream.write('\n')
         else:
             for l in msg:
+                did_write = True
                 if l and l[-1] == '\n':
                     stream.write(l)
                 else:
                     stream.write(l)
                     stream.write('\n')
+        return did_write
 
     def info_stream(self):
         return stdout
 
     def info(self, msg):
-        self._write(stdout, msg)
+        return self._write(stdout, msg)
 
     def error(self, msg):
-        self._write(stderr, msg)
+        return self._write(stderr, msg)
 
     def error_out(self, msg):
         self.error(_('Error: ') + str(msg) + '\n')

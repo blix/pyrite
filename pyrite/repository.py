@@ -1032,3 +1032,13 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to get blame info: %s') %
                             proc.stderr.read())
+
+    def get_untracked(self):
+        self.validate()
+        proc = self._popen(('git', 'ls-files', '-o',
+                            '--exclude-standard'))
+        for line in proc.stdout.readlines():
+            yield line.strip()
+        if proc.wait():
+            raise RepoError(_('Failed to get untracked files: %s') %
+                            proc.stderr.read())
