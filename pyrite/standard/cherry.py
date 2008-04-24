@@ -22,7 +22,8 @@ options = [
 ('l', 'limit-commit', _('stop looking for candidates after this commit'), 1),
 ('n', 'no-commit', _('limit number of candidates to find'), 0),
 ('r', 'record-origin', _('note on the commit where the change came from'), 0),
-('i', 'identify', _('find candidates to cherry pick from a branch'), 1)
+('i', 'identify', _('find candidates to cherry pick from a branch'), 1),
+('v', 'verbose', _('show full sha1 id'), 0)
 ]
 
 help_str =_("""
@@ -85,6 +86,7 @@ def run(cmd, *args, **flags):
     record = 'record-origin' in flags
     limit = flags.get('limit-commit', None)
     downstream = flags.get('identify', None)
+    verbose = 'verbose' in flags
 
     if (edit or record or dryrun) and (limit or downstream):
         raise HelpError({'command': cmd, 'message':
@@ -97,7 +99,15 @@ def run(cmd, *args, **flags):
     output = None
     if downstream:
         output = pyrite.repo.cherry(downstream, limit=limit)
-        pyrite.ui.info(output)
+        for line in output:
+            if line[0] == '-':
+                continue
+            c = pyrite.repo.get_commit_info(line[2:-1],
+                                            [Repo.ID, Repo.SUBJECT])
+            id = c[Repo.ID]
+            if not verbose:
+                id = id[:8]
+            pyrite.ui.info(id + ' ' + c[Repo.SUBJECT])
     else:
         for commit in args:
             succ, err, id = _run_cherry_pick(commit, edit, record, dryrun)
