@@ -16,6 +16,16 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('f', 'force', _('allows local branch to be overwritten'), 0),
+('n', 'no-tags', _('do not download any tags'), 0),
+('e', 'extra-tags', _('download all tags even those not tracked'), 0),
+('d', 'depth', _('maximum number of commits to fetch'), 1),
+('', 'no-commit', _('merge the working set without commiting'), 0),
+('s', 'summary', _('show a diffstat at the end of the merge'), 0),
+('r', 'rebase', _('local changes are moved on top of pulled changes'), 0)
+]
+
 help_str =_("""
 pyt pull [options] <sourcerepo> [sourcebranch[:targetbranch]]
 

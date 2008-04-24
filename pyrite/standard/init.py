@@ -15,6 +15,8 @@
 
 import pyrite
 
+options = []
+
 help_str = """
 pyt init
 

@@ -18,6 +18,16 @@ import ConfigParser, os
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('r', 'repo-only', _('option only applies to current repo'), 0),
+('d', 'delete', _('delete option'), 0),
+('a', 'all', _('show all configured options'), 0),
+('s', 'set', _('set a option'), 0),
+('i', 'ignore', _('ignore a pattern of files'), 0),
+('u', 'unignore', _('stop ignoring a pattern of files'), 0),
+('', 'add', _('add variable with the name even if it exists'), 0)
+]
+
 help_str = _("""
 pyt config -i | --ignore <glob>
 pyt config -u | --unignore <glob>

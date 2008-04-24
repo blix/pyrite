@@ -15,6 +15,12 @@
 
 import pyrite
 from pyrite.standard.help import HelpError
+
+options = [
+('c', 'color', _('Show in color'), 0),
+('', 'amend', _('Show what would an ammended commit would do'), 0)
+]
+
 help_str =_("""
 pyt status [options] [paths]...
 

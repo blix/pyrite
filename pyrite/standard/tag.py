@@ -17,6 +17,16 @@ import pyrite
 import os
 from pyrite.standard.help import HelpError
 
+options = [
+('d', 'delete', _('delete the given tag'), 0),
+('s', 'sign', _('make a signed tag'), 0),
+('a', 'annotated', _('make an annotaged tag'), 0),
+('k', 'key', _('use as the signing key'), 1),
+('v', 'verify', _('verify the signature of the tag'), 0),
+('m', 'message', _('specify the message to use for the tag'), 0),
+('l', 'list', _('list tags with an optional matching pattern'), 0)
+]
+
 help_str = """
 pyt tag -d | --delete <tagname>
 pyt tag -l | --list [pattern]

@@ -16,6 +16,12 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('a', 'all', _('push all heads'), 0),
+('t', 'all-tags', _('push all tags'), 0),
+('f', 'force', _('allows remote brach to be overwritten'), 0),
+('v', 'verbose', _('show extra output'), 0)
+]
 help_str =_("""
 pyt push [-a] [-t] [-f] [-v] [targetrepo] [localsource[:targetbranch]]
 

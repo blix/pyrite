@@ -16,6 +16,12 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('f', 'force', _('force rename even if target exists'), 0),
+('i', 'ignore-errors', _('skip operations that result in errors'), 0),
+('n', 'no-move', _('do not actually move the file(s)'), 0)
+]
+
 help_str =_("""
 pyt move [options] <source> <destination>
 pyt move [options] <sources>... <destination dir>

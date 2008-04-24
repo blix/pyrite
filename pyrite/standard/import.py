@@ -17,6 +17,14 @@ import pyrite
 from pyrite.standard.help import HelpError
 import os
 
+options = [
+('b', 'bundle', _('Import a bundle.'), 1),
+('i', 'interactive', _('Run interactively.'), 0),
+('s', 'signoff', _('Add Signed-off-by line to message.'), 0),
+('', 'skip', _('Skip the current patch.'), 0),
+('', 'resolved', _('Current patch conflict is resolved'), 0)
+]
+
 help_str =_("""
 pyt import [options] <exportfile>|<exportfiledir>
 pyt import -b <file>

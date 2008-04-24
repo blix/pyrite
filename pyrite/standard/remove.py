@@ -16,6 +16,13 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('f', 'force', _('remove even if modified'), 0),
+('n', 'no-remove', _('do not actually remove the file(s)'), 0),
+('u', 'untrack', _('do not remove the file(s), just stop tracking them'), 0),
+('r', 'recursive', _('remove recursively'), 0)
+]
+
 help_str =_("""
 pyt rm [options] <source> <destination>
 

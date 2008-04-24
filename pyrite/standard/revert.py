@@ -17,6 +17,14 @@ import pyrite
 from pyrite.repository import Repo
 from pyrite.standard.help import HelpError
 
+options = [
+('f', 'files', _('Revert files in the working directory'), 0),
+('u', 'undo', _('Undo a commit by applying a reverse patch'), 1),
+('m', 'mainline', _('Undo a commit by applying a reverse patch'), 1),
+('e', 'edit', _('Edit the commit message before commiting'), 0),
+('n', 'no-commit', _('Prepare the working set but do not commit'), 0)
+]
+
 help_str =_("""
 pyt revert -f [files]
 pyt revert [undo commit options] -u <commit>

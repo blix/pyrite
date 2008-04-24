@@ -18,6 +18,13 @@ from pyrite.repository import Repo
 from pyrite.template import Template
 from pyrite.standard.help import HelpError
 
+options = [
+('l', 'long', _('show long rev'), 0),
+('c', 'commit', _('show the file from its state in this commit'), 1),
+('s', 'start-line', _('start showing at this line number'), 1),
+('e', 'end-line', _('don\'t show after this line number'), 1)
+]
+
 help_str =_("""
 pyt blame [options] file
 

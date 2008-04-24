@@ -16,6 +16,11 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('s', 'style', _('use a predefined style'), 0),
+('t', 'template', _('specify your own template to use'), 0)
+]
+
 help_str =_("""
 pyt show [options] [commit | tag] <path>...
 pyt show [options] <commit>

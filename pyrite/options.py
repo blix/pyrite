@@ -13,8 +13,6 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-from copy import copy
 import pyrite
 
 class ParseError(Exception):
@@ -81,18 +79,4 @@ def parse(options, arguments, command):
         parser.add_option(s, l, f)
     parser.parse(arguments)
     return parser.get_switches(), parser.get_args()
-    
-def expand_aliases(commands, aliases_map):
-    items = commands.copy()
-    for c, options in items.iteritems():
-        aliases = c.split('|')
-        if len(aliases) > 1:
-            aliases_map[aliases[0]] = []
-            for a in aliases:
-                o = copy(options)
-                o[1] = 2
-                commands[a] = o
-            commands[aliases[0]][1] = options[1]
-            aliases_map[aliases[0]].append(a)
-            del commands[c]
 

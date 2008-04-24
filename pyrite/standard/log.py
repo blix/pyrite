@@ -18,6 +18,15 @@ from pyrite.standard.help import HelpError
 from pyrite.repository import Repo
 from pyrite.template import FileTemplate, Template
 
+options = [
+('s', 'style', _('specify a predefined style'), 1),
+('t', 'template', _('specify a template for the output'), 1),
+('l', 'limit', _('specify the maximum number or commits to show (defualt 10)'), 1),
+('p', 'patch', _('show the patch for the commit'), 0),
+('f', 'follow-renames', _('show history of files beyond renames'), 0),
+('a', 'all', _('do not limit the number of commits to show'), 0)
+]
+
 help_str=_("""
 pyt log [options] [firstcommit[..[lastcommit]]] [paths]...
 

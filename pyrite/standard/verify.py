@@ -15,6 +15,8 @@
 
 import pyrite
 
+options = [('v', 'verbose', _('output extra information'), 0)]
+
 help_str =_("""
 pyt verify [-v | --verbose]
 

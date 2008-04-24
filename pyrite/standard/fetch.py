@@ -17,6 +17,13 @@ import pyrite
 from pyrite.standard.help import HelpError
 import os
 from time import gmtime, strftime
+
+options = [
+('f', 'force', _('allows local branch to be overwritten'), 0),
+('n', 'no-tags', _('do not download any tags'), 0),
+('d', 'depth', _('maximum number of commits to fetch'), 0)
+]
+
 help_str =_("""
 pyt fetch [options] <branch>
 pyt fetch [options] <localrepo> | <remoterepo> <sourcebranch1>[:destbranch1]...

@@ -17,6 +17,18 @@ import pyrite
 from pyrite.standard.help import HelpError
 import os
 from time import gmtime, strftime
+
+options = [
+('c', 'compose', _('launch an editor to write an introductory message'), 0),
+('o', 'output-dir', _('file or directory to save to ("-" for stdout)'), 1),
+('n', 'numbered', _('create patches with names prefixed [PATCH n/m]'), 0),
+('f', 'force', _('overwrite existing files'), 0),
+('b', 'bundle', _('create a min-repo that can be used to pull/fetch from'), 1),
+('v', 'verify', _('verify a bundle'), 1),
+('a', 'archive', _('create a archive of the workdir for commit'), 1),
+('', 'format', _('format for an archive, either .tgz (default) or .zip'), 1)
+]
+
 help_str =_("""
 pyt export [OPTIONS] [firstcommit[..lastcommit]]
 pyt export -b <file> | --bundle <file> [firstcommit[..lastcommit]

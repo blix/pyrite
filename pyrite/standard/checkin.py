@@ -18,6 +18,17 @@ from pyrite.standard.help import HelpError
 from pyrite.repository import Repo
 import os
 
+options = [
+('c', 'commit', _('Reuse commit message, author and timestamp'), 1),
+('a', 'author', _('Use as author of the commit'), 1),
+('m', 'message', _('Use as the commit message'), 1),
+('s', 'signoff', _('Add a Signed-off-by line to the message'), 0),
+('n', 'no-verify', _('bypass precommit hooks'), 0),
+('', 'amend', _('Replace the current tip with the new commit'), 0),
+('e', 'edit', _('Force invoking the editor for the commit message'), 0),
+('v', 'verbose', _('show diff at the bottom of the commit message'), 0)
+]
+
 help_str="""
 pyt checkin [-m | --message <message>]
             [-a | --author <author>] [-s | --signoff] [-s | --signoff]

@@ -19,6 +19,8 @@ from pyrite.standard.help import HelpError
 # this should probably be done such that you can give the patches rather than
 # a two step process to gen the patch files and then send them
 
+options = []
+
 help_str =_("""
 pyt email <files>...
 

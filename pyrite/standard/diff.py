@@ -16,6 +16,16 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('s', 'stat', _('show a diffstat'), 0),
+('c', 'color', _('show colored diff'), 0),
+('t', 'template', _('use a formatted template'), 1),
+('', 'style', _('use a predefined style'), 1),
+('d', 'detect', _('detect renames and copies'), 0),
+('e', 'ignore-eol', _('ignore end of line whitespace differences'), 0),
+('w', 'ignore-whitespace', _('ignore all whitespace'), 0)
+]
+
 help_str =_("""
 pyt diff [options] [startcommit[..endcommit]] [-- paths]
 

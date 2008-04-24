@@ -17,6 +17,18 @@ import pyrite
 from pyrite.standard.help import HelpError
 import sys
 
+options = [
+('i', 'ignore-case', _('ignore case differences'), 0),
+('w', 'whole-word', _('match whole word'), 0),
+('n', 'no-binary', _('do not match against binary files'), 0),
+('v', 'invert', _('invert match'), 0),
+('f', 'full-path', _('print the full path to the file'), 0),
+('', 'no-name', _('do not print the path/name of the file'), 0),
+('b', 'basic-string', _('match string is not a regex'), 0),
+('c', 'count', _('print the number of matches per file'), 0),
+('r', 'revision', _('match against the supplied revision'), 1)
+]
+
 help_str =_("""
 pyt grep [options] <pattern> <paths>...
 

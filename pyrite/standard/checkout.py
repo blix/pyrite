@@ -16,6 +16,11 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('f', 'force', _('Force operation'), 0),
+('m', 'merge', _('Merge files if working set is not clean'), 0)
+]
+
 help_str = _("""
 pyt checkout [-f | --force] <commit> [path1] [path2] [path3]...
 

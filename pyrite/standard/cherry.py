@@ -17,6 +17,14 @@ import pyrite
 from pyrite.repository import Repo, RepoError
 from pyrite.standard.help import HelpError
 
+options = [
+('e', 'edit', _('edit the commit message before commiting'), 0),
+('l', 'limit-commit', _('stop looking for candidates after this commit'), 1),
+('n', 'no-commit', _('limit number of candidates to find'), 0),
+('r', 'record-origin', _('note on the commit where the change came from'), 0),
+('i', 'identify', _('find candidates to cherry pick from a branch'), 1)
+]
+
 help_str =_("""
 pyt cherry  [--record-origin] [--no-commit ] [--edit] <commit>
 pyt cherry [--limit <limit commit>] --identify <search from commit>

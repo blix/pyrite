@@ -16,6 +16,12 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('n', 'no-checkout', _('no checkout of HEAD is done after clone is complete'), 0),
+('b', 'bare', _('clone target dir is the git dir'), 0),
+('d', 'depth', _('create a shallow clone up to depth'), 0)
+]
+
 help_str =_("""
 pyt clone [--bare] [--depth] [--no-checkout] <source> [targetdir]
 

@@ -16,6 +16,16 @@
 import pyrite
 from pyrite.standard.help import HelpError
 
+options = [
+('d', 'delete', _('delete the named branch'), 0),
+('f', 'force', _('force creation or deletion'), 0),
+('m', 'move', _('rename the branch'), 0),
+('r', 'remote', _('list or delete remote-tracking branches'), 0),
+('v', 'verbose', _('show detailed information'), 0),
+('a', 'all', _('show all branches'), 0),
+('s', 'switch', _('Create a branch and switch to it'), 1)
+]
+
 help_str=_("""
 pyt branch [option] -d | --delete <branch>
 pyt branch [option] -m | --move <oldname> <newname>

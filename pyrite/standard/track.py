@@ -15,6 +15,11 @@
 
 import pyrite
 
+options = [
+('f', 'force', _('Add file even if it is ignored'), 0),
+('v', 'verbose', _('show added files'), 0)
+]
+
 help_str = _("""
 pyt track [-f | --force] [-v | --verbose] [files...]
 
