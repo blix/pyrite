@@ -36,10 +36,8 @@ def _get_message(message, name):
     extra = [_('This is a tag message.'),
             _('Lines beginning with "#" will be removed'),
             _('To abort tagging, do not save this file')]
-            
-    f = os.path.join(pyrite.repo.get_repo_dir(),
-             'pyt-edit-' + name)
-    message = pyrite.ui.edit('', extra, f)
+
+    message = pyrite.ui.edit('', extra, 'pyt-edit-' + name)
     if not message:
         raise HelpError({'command': cmd, 'message': 
                         _('No commit message')})
