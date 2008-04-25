@@ -17,13 +17,13 @@ import pyrite
 from pyrite.standard.help import HelpError
 
 options = [
-('n', 'no-checkout', _('no checkout of HEAD is done after clone is complete'), 0),
+('n', 'no-checkout', _('no checkout of HEAD is done after clone'), 0),
 ('b', 'bare', _('clone target dir is the git dir'), 0),
 ('d', 'depth', _('create a shallow clone up to depth'), 0)
 ]
 
 help_str =_("""
-pyt clone [--bare] [--depth] [--no-checkout] <source> [targetdir]
+pyt clone [OPTIONS] <source> [targetdir]
 
 The clone command creates a new copy of the source repository.  You can use
 --bare to create a repository suitable for pushing to and --depth to limit

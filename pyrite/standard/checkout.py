@@ -22,7 +22,7 @@ options = [
 ]
 
 help_str = _("""
-pyt checkout [-f | --force] <commit> [path1] [path2] [path3]...
+pyt checkout [-f | --force] <commit> [ [--] <paths>...]
 
 Update the working directory or files specified by paths to the <commit>.
 <commit> can be any commit, tag or branch.
