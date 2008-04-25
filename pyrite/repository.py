@@ -289,7 +289,10 @@ class Repo(object):
             if not line.startswith(' ') or not line:
                 commit[Repo.BODY] = ''.join(buf)
                 return line
-            buf.append(line.lstrip())
+            if line == '    \n':
+                buf.append(line)
+            else:
+                buf.append(line.lstrip())
 
     def _parse_git_stat(self, commit, firstline, stream):
         if firstline.startswith('commit'):
