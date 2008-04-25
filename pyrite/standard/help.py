@@ -16,6 +16,7 @@
 
 import pyrite
 from pyrite import options as pytoptions
+from pyrite.__version__ import version
 
 options = [('v', 'verbose', _('print full help and aliases'), 0)]
 
@@ -34,6 +35,7 @@ class HelpError(Exception):
         self.verbose = verbose
 
 def show_help(prefix, template, threshold, suffix):
+    pyrite.ui.info(pyrite.help_str + _(' version ') + version)
     pyrite.ui.info(prefix)
     commands = {}
     for c in pyrite.commands.keys():
@@ -45,9 +47,7 @@ def show_help(prefix, template, threshold, suffix):
     pyrite.ui.info(suffix)
 
 def show_full_help():
-    show_help(pyrite.help_str + _('\nAll commands...\n'),
-                _(' %s %s'),
-                0,
+    show_help(_('All commands...\n'), _(' %s %s'), 0,
                 '\n' + _('For more aliases type "%s"') % 'pyt help -v')
 
 def show_command_help(cmd, message):
@@ -75,7 +75,8 @@ def show_command_help(cmd, message):
 def on_help_error(err):
     if not err.cmd:
         if err.verbose:
-            pyrite.ui.info(pyrite.help_str + '\n')
+            pyrite.ui.info(pyrite.help_str + _(' version ') + version
+                           + '\n')
             messages = {}
             for c, info in pyrite.commands.iteritems():
                 cmd = c[0]
@@ -83,16 +84,13 @@ def on_help_error(err):
             for m in sorted(messages.keys()):
                 pyrite.ui.info(messages[m])
         else:
-            show_help(pyrite.help_str + _('\n\nBasic commands...\n'),
-                      _(' %s %s'),
-                      1,
+            show_help(_('\nBasic commands...\n'), _(' %s %s'), 1,
                       _('\n' + _('For more options type "pyt help"')))
         return
 
     info = pytoptions.get_command_info(err.cmd)
     if not info:
-        show_help(pyrite.help_str +
-                  _('\n\nUnknown command %s\nBasic commands...\n') % err.cmd,
+        show_help(_('\nUnknown command %s\nBasic commands...\n') % err.cmd,
                     _(' %s %s'), 1, '\n' +
                     _('For more options type "pyt help"'))
     elif err.cmd == 'help':

@@ -891,10 +891,10 @@ class Repo(object):
     def most_recent_tag(self, branch=None):
         self.validate()
         if not branch:
-            branch = self._current_branch
+            branch = self.branch()
         proc = self._popen(('git', 'describe', '--abbrev=10',
                             '--tags', branch))
-        if self.wait():
+        if proc.wait():
             raise RepoError(_('Unable to get most recent tag %s') %
                             proc.stderr.read())
         return proc.stdout.read().strip()

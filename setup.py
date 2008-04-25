@@ -25,8 +25,7 @@ if sys.argv[1] == 'version':
     
     version=''
     try:
-        tag, ncommits, abbrev = repo.most_recent_tag().split('-')
-        version = tag + '-' + abbrev[1:]
+        version = repo.most_recent_tag()
     except:
         c = repo.get_commit_info()
         version = c[Repo.ID][:10]
