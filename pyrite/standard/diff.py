@@ -20,6 +20,7 @@ options = [
 ('r', 'revision-start', _('revision to use as base for comparison'), 1),
 ('R', 'revision-end', _('revision to diff against revision-start'), 1),
 ('s', 'stat', _('show a diffstat'), 0),
+('p', 'patch-stat', _('show both the diff and a diffstat'), 0),
 ('c', 'color', _('show colored diff'), 0),
 ('d', 'detect', _('detect renames and copies'), 0),
 ('e', 'ignore-eol', _('ignore end of line whitespace differences'), 0),
@@ -37,20 +38,27 @@ to narrow down the result of the patch.
 """)
 
 def run(cmd, *args, **flags):
-    stat = flags.has_key('stat')
-    color = flags.has_key('color')
-    detect = flags.get('detect')
+    stat = 'stat' in flags
+    patch_stat = 'patch-stat' in flags
+    color = 'color' in flags
+    detect = 'detect' in flags
     startcommit = flags.get('revision-start', 'HEAD')
     endcommit = flags.get('revision-end', None)
     ignorewhite = 'none'
 
-    if flags.has_key('ignore-eol'):
+    if 'ignore-eol' in flags:
         ignorewhite = 'eol'
-    if flags.has_key('ignore_whitespace'):
+    if 'ignore_whitespace' in flags:
         ignorewhite = 'all'
 
+    show_patch = True
+    if stat and not patch_stat:
+        show_patch = False
+    if patch_stat:
+        stat = True
     output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
-                                detect=detect, ignorewhite=ignorewhite)
+                                detect=detect, ignorewhite=ignorewhite,
+                                patch=show_patch)
 
     if color:
         from pyrite.template import color_diff
