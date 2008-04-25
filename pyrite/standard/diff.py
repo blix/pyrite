@@ -17,53 +17,38 @@ import pyrite
 from pyrite.standard.help import HelpError
 
 options = [
+('r', 'revision-start', _('revision to use as base for comparison'), 1),
+('R', 'revision-end', _('revision to diff against revision-start'), 1),
 ('s', 'stat', _('show a diffstat'), 0),
 ('c', 'color', _('show colored diff'), 0),
-('t', 'template', _('use a formatted template'), 1),
-('', 'style', _('use a predefined style'), 1),
 ('d', 'detect', _('detect renames and copies'), 0),
 ('e', 'ignore-eol', _('ignore end of line whitespace differences'), 0),
 ('w', 'ignore-whitespace', _('ignore all whitespace'), 0)
 ]
 
 help_str =_("""
-pyt diff [options] [startcommit[..endcommit]] [-- paths]
+pyt diff [OPTIONS] [-- paths]
 
 The diff command shows a diff shows differences between 2 commit points.  If
-no commit is given, the diff will be between the working set and HEAD.
-If one commit is given, the diff will be between the working set and the
-commit.  You can specify a set of paths to narrow down the result of the patch.
+no --revision-start commit is given, the diff will be between the working set
+and HEAD.  Giving --revision-start or --revision-end but not both will diff
+be between the working set and the commit.  You can specify a set of paths
+to narrow down the result of the patch.
 """)
 
 def run(cmd, *args, **flags):
     stat = flags.has_key('stat')
     color = flags.has_key('color')
-    template = flags.get('template', None)
-    style = flags.get('style', None)
     detect = flags.get('detect')
+    startcommit = flags.get('revision-start', 'HEAD')
+    endcommit = flags.get('revision-end', None)
     ignorewhite = 'none'
-    
+
     if flags.has_key('ignore-eol'):
         ignorewhite = 'eol'
     if flags.has_key('ignore_whitespace'):
         ignorewhite = 'all'
-    
-    startcommit = endcommit = None
-    if len(args) > 0:
-        commits = args[0].split('..')
-        if pyrite.repo.get_commit_info(commits[0]):  
-            startcommit = commits[0]
-            if len(commits) == 2:
-                endcommit = commits[1]
-            args = args[1:]
 
-    if style:
-        pass
-        #here we look up the style in the pyrite/styles directory
-        #if it is a full path then we look at the path
-        #we then read the file into the template variable
-
-    pyrite.repo.update_index(None)
     output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
                                 detect=detect, ignorewhite=ignorewhite)
 
