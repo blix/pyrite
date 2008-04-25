@@ -55,8 +55,8 @@ def run(cmd, *args, **flags):
     files = []
     
     if bundle and (is_interactive or sign or skip or resolved):
-        raise HelpError({'command': cmd, 'message': _('Bundle cannot be used'
-                        ' with any other arguments')})
+        raise HelpError(cmd, _('Bundle cannot be used with any other '
+                               'arguments'))
 
     if bundle:
         pyrite.repo.import_bundle(bundle, args)
@@ -64,8 +64,7 @@ def run(cmd, *args, **flags):
         return
 
     if len(args) < 1 and not skip and not resolved:
-        raise HelpError({'command': cmd,
-                        'message': _('Missing file(s) or directory')})
+        raise HelpError(cmd, _('Missing file(s) or directory'))
     if len(args) == 1:
         if os.path.exists(args[0]) and os.path.isdir(args[0]):
             directory = args[0]

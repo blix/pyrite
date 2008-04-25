@@ -49,8 +49,7 @@ def run(cmd, *args, **flags):
     commit = flags.get('revision', None)
 
     if full_path and no_name:
-        raise HelpError({'command': cmd, 'message':
-            _('Cannot use both --full-path and --no-name')})
+        raise HelpError(cmd, _('Cannot use both --full-path and --no-name'))
 
     path = False
     if full_path:
@@ -59,8 +58,7 @@ def run(cmd, *args, **flags):
         path = None
 
     if not args:
-        raise HelpError({'command': cmd, 'message':
-            _('Need a pattern to search for')})
+        raise HelpError(cmd, _('Need a pattern to search for'))
 
     pattern = args[0]
     args = args[1:]

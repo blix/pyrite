@@ -43,10 +43,10 @@ def run(cmd, *args, **flags):
     end = flags.get('end-line', None)
 
     if not args:
-        raise HelpError({'command': cmd, 'message': _('Need a file to view')})
+        raise HelpError(cmd, _('Need a file to view'))
 
     if end and not start:
-        raise HelpError({'command': cmd, 'message': _('Need a file to view')})
+        raise HelpError(cmd, _('Need a file to view'))
 
     style = None
     if use_long:

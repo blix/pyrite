@@ -44,19 +44,21 @@ def run(cmd, *args, **flags):
     source = target = None
     
     if (not tags) and extra_tags:
-        raise HelpError({'command': cmd,'message':
-                _('no-tags and extra-tags are conflicing arguments')})
-    elif tags: tags = 'normal'
-    elif extra_tags: tags = 'extra'
-    else: tags = 'none'
+        raise HelpError(cmd, _('no-tags and extra-tags are conflicing '
+                               'arguments'))
+    elif tags:
+        tags = 'normal'
+    elif extra_tags:
+        tags = 'extra'
+    else:
+        tags = 'none'
 
     if len(args) > 0:
         repo = args[0]
     if len(args) > 1:
         refspec = args[1].split(':')
         if len(refspec) > 2:
-            raise HelpError({'command':cmd, 'message':
-                            _('Invalid ref spec')})
+            raise HelpError(cmd, _('Invalid ref spec'))
         source = target = refspec[0]
         if len(refspec) > 1:
             target = refspec[1]

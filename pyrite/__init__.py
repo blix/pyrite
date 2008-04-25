@@ -123,15 +123,11 @@ def run():
         extensions.load(commands, modules) #TODO:implement extension loading
 
         if len(sys.argv) < 2:
-            raise pythelp.HelpError, {'basic': 1}
+            raise pythelp.HelpError()
         cmd = sys.argv[1]
-        cmd_info = None
-        for aliases, info in commands.iteritems():
-            if cmd in aliases:
-                cmd_info = info
-                break
+        cmd_info = options.get_command_info(cmd)
         if not cmd_info:
-            raise pythelp.HelpError({'unknown': 1, 'command': cmd})
+            raise pythelp.HelpError(cmd)
 
         m = dyn_import(cmd_info[0])
         flags,args = options.parse(m.options, sys.argv[2:], cmd)
@@ -139,7 +135,7 @@ def run():
         modules[cmd_info[0]].run(cmd, *args, **flags)
 
     except pythelp.HelpError, inst:
-        pythelp.run(None, None, **inst.args[0])
+        pythelp.on_help_error(inst)
     except options.ParseError, inst:
         ui.error_out(inst)
     except repository.RepoError, inst:

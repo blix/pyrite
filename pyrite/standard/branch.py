@@ -64,14 +64,12 @@ def run(cmd, *args, **flags):
             pyrite.repo.del_branch(args, is_force)
         elif is_move:
             if len(args) != 2:
-                raise HelpError({'command': cmd, 'message':
-                                    _('Need oldbranch and newbranch')})
+                raise HelpError(cmd, _('Need oldbranch and newbranch'))
             pyrite.repo.rename_branch(args[0], args[1], force=is_force)
         elif switch:
             start = 'HEAD'
             if len(args) > 1:
-                raise HelpError({'command': cmd, 'message':
-                                    _('Cannot create branch with paths')})
+                raise HelpError(cmd, _('Cannot create branch with paths'))
             elif args and pyrite.repo.get_commit_info(args[0]):
                 start = args[0]
             pyrite.repo.create_branch(switch, start=start, force=is_force)

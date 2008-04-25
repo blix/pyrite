@@ -15,6 +15,7 @@
 
 
 import pyrite
+from pyrite import options as pytoptions
 
 options = [('v', 'verbose', _('print full help and aliases'), 0)]
 
@@ -26,6 +27,11 @@ Shows list of commands or help for a command.
 
 class HelpError(Exception):
     """Raised to show help"""
+
+    def __init__(self, cmd=None, message=None, verbose=False):
+        self.cmd = cmd
+        self.message = message
+        self.verbose = verbose
 
 def show_help(prefix, template, threshold, suffix):
     pyrite.ui.info(prefix)
@@ -45,13 +51,9 @@ def show_full_help():
                 '\n' + _('For more aliases type "%s"') % 'pyt help -v')
 
 def show_command_help(cmd, message):
-    cmd_info = None
-    for c, info in pyrite.commands.iteritems():
-        if cmd in c:
-            cmd_info = info
-            break
-    else:
-        raise HelpError
+    cmd_info = pytoptions.get_command_info(cmd)
+    if not cmd_info:
+        raise HelpError(cmd)
 
     pyrite.dyn_import(cmd_info[0])
     mod = pyrite.modules[cmd_info[0]]
@@ -70,37 +72,37 @@ def show_command_help(cmd, message):
         pyrite.ui.info(message)
     pyrite.ui.info('\n')
 
-def run(cmd, *args, **flags):
-    if flags.has_key('basic'):
-        show_help(pyrite.help_str + _('\n\nBasic commands...\n'),
-                    _(' %s %s'),
-                    1,
-                    _('\n' + _('For more options type "pyt help"')))
-    elif flags.has_key('unknown'):
-        show_help(pyrite.help_str + _('\n\nUnknown command %s\nBasic '
-                                      'commands...\n') % cmd,
-                    _(' %s %s'),
-                    1,
-                    _('\n' + _('For more options type "pyt help"')))
-    elif flags.has_key('command'):
-        cmd = flags['command']
-        if cmd == 'help':
+def on_help_error(err):
+    if not err.cmd:
+        if err.verbose:
+            pyrite.ui.info(pyrite.help_str + '\n')
+            messages = {}
+            for c, info in pyrite.commands.iteritems():
+                cmd = c[0]
+                messages[cmd] = ', '.join(c) + ':\n\t' + info[2] + '\n\n'
+            for m in sorted(messages.keys()):
+                pyrite.ui.info(messages[m])
+        else:
+            show_help(pyrite.help_str + _('\n\nBasic commands...\n'),
+                      _(' %s %s'),
+                      1,
+                      _('\n' + _('For more options type "pyt help"')))
+        return
+
+    info = pytoptions.get_command_info(err.cmd)
+    if not info:
+        show_help(pyrite.help_str +
+                  _('\n\nUnknown command %s\nBasic commands...\n') % err.cmd,
+                    _(' %s %s'), 1, '\n' +
+                    _('For more options type "pyt help"'))
+    elif err.cmd == 'help':
             show_full_help()
-            return
-        show_command_help(flags['command'], flags.get('message', None))
-    elif flags.has_key('verbose'):
-        pyrite.ui.info(pyrite.help_str + '\n')
-        messages = {}
-        for c, info in pyrite.commands.iteritems():
-            cmd = c[0]
-            messages[cmd] = ', '.join(c) + ':\n\t' + info[2] + '\n\n'
-        for m in sorted(messages.keys()):
-            pyrite.ui.info(messages[m])
-    elif len(args) == 1:
-        try:
-            show_command_help(args[0], None)
-        except HelpError:
-            show_full_help()    
     else:
-        show_full_help()
-        
+        show_command_help(err.cmd, err.message)
+
+def run(cmd, *args, **flags):
+    if 'verbose' in flags:
+        raise HelpError(verbose=True)
+    if args:
+        raise HelpError(args[0])
+    raise HelpError(cmd)

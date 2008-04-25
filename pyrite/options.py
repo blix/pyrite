@@ -18,6 +18,11 @@ import pyrite
 class ParseError(Exception):
     """Could Not Parse Argument"""
 
+def get_command_info(cmd):
+    for c, info in pyrite.commands.iteritems():
+        if cmd in c:
+            return info
+
 class OptionParser(object):
     def __init__(self, command):
         self._options = {}
@@ -51,8 +56,7 @@ class OptionParser(object):
                     self._options[longopt] = True
                     if has_opts: last = longopt
                 else:
-                    raise pyrite.standard.help.HelpError, {
-                            'command': self._command}
+                    raise pyrite.standard.help.HelpError(self._command)
             elif a[0] == '-':
                 if len(a) < 2: raise ParseError(_('Malformed argument %s') % a)
                 a = a[1]
@@ -64,8 +68,7 @@ class OptionParser(object):
                         if has_opts: last = longopt
                         break
                 else:
-                    raise pyrite.standard.help.HelpError, {
-                            'command': self._command}
+                    raise pyrite.standard.help.HelpError(self._command)
             elif last != None:
                 self._options[last] = a
                 last = None

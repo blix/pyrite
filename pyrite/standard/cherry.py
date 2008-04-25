@@ -89,12 +89,10 @@ def run(cmd, *args, **flags):
     verbose = 'verbose' in flags
 
     if (edit or record or dryrun) and (limit or downstream):
-        raise HelpError({'command': cmd, 'message':
-            _('Incompatable arguments passed')})
+        raise HelpError(cmd, _('Incompatable arguments passed'))
 
     if not args and not downstream:
-        raise HelpError({'command': cmd, 'message':
-            _('Need commmit(s) to cherry pick or -i')})
+        raise HelpError(cmd, _('Need commmit(s) to cherry pick or -i'))
 
     output = None
     if downstream:

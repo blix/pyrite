@@ -38,8 +38,7 @@ def run(cmd, *args, **flags):
     untrack = 'untrack' in flags
     
     if not args:
-        raise HelpError({'command': cmd, 'message': _('Need at least a source'
-                            ' and a destination')})
+        raise HelpError(cmd, _('Need at least a source and a destination'))
 
     output = pyrite.repo.delete(args, force=force, recursive=recurse,
                                 noop=noop, cached=untrack)

@@ -128,10 +128,12 @@ class Config(object):
         parts = option.split('.')
         l = len(parts)
         if 2 > l or l > 3:
-            raise HelpError({'command': 'config',
-                             'message': _('Malformed option string: %s') % option})
-        if l == 2: return parts[0], parts[1]
-        else: return parts[0] + ' "' + parts[1] + '"', parts[2]
+            raise HelpError('config', _('Malformed option string: %s') %
+                            option)
+        if l == 2:
+            return parts[0], parts[1]
+        else:
+            return parts[0] + ' "' + parts[1] + '"', parts[2]
         
     def _del_option(self, config, file_obj, item, is_all):
         category, name = self._split_option(item)

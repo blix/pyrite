@@ -49,8 +49,7 @@ def _get_message(message, name):
 
     message = pyrite.ui.edit('', extra, 'pyt-edit-' + name)
     if not message:
-        raise HelpError({'command': cmd, 'message': 
-                        _('No commit message')})
+        raise HelpError(cmd, _('No commit message'))
     return message
 
 def run(cmd, *args, **flags):
@@ -65,8 +64,7 @@ def run(cmd, *args, **flags):
         return
     
     if len(args) < 1:
-            raise HelpError({'command': cmd, 'message':
-                            _('No tag name specified')})
+            raise HelpError(cmd, _('No tag name specified'))
   
     if flags.has_key('verify'):
         pyrite.ui.info(pyrite.repo.verify_tag(args[0]))

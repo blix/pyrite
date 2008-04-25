@@ -50,12 +50,10 @@ def run(cmd, *args, **flags):
         limit = -1
     
     if flags.has_key('style') and flags.has_key('template'):
-        raise HelpError({'command': cmd, 'message':
-                        _('"style" and "template" are redundant.')})
+        raise HelpError(cmd, _('"style" and "template" are redundant.'))
                         
     if flags.has_key('limit') and flags.has_key('all'):
-        raise HelpError({'command': cmd, 'message':
-                        _('"limit" and "all" conflict.')})
+        raise HelpError(cmd, _('"limit" and "all" conflict.'))
 
     first = last = None
     paths = None

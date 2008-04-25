@@ -69,8 +69,7 @@ def run(cmd, *args, **flags):
     commitdata = {}
 
     if use_commit and use_message:
-        raise HelpError({'command': cmd, 'message':
-                         _('Cannot specify commit and message')})
+        raise HelpError(cmd, _('Cannot specify commit and message'))
     elif use_commit:
         commitdata = pyrite.repo.get_commit_info(use_commit, data)
         use_message = commitdata[Repo.SUBJECT] + '\n\n' + \

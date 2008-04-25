@@ -41,8 +41,7 @@ def run(cmd, *args, **flags):
     checkout = not flags.has_key('no-checkout')
     
     if len(args) < 1:
-        raise HelpError({'command': cmd, 'message':
-                        _('Missing source repo')})
+        raise HelpError(cmd, _('Missing source repo'))
     source = args[0]
     
     if len(args) > 1:

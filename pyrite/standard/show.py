@@ -40,12 +40,11 @@ def run(cmd, *args, **flags):
     files = []
     
     if style and template:
-        raise HelpError({'command':cmd, 'message': _('"style" and "template"'
-                            ' are conflicting arguments.')})
+        raise HelpError(cmd, _('"style" and "template" are conflicting '
+                               'arguments.'))
     
     if not args:
-        raise HelpError({'command':cmd, 'message':
-                        _('Need something to show')})
+        raise HelpError(cmd, _('Need something to show'))
     if args[0] in pyrite.repo.list_tags():
         tag = args[0]
         if len(args) > 1:

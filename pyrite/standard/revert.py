@@ -47,19 +47,18 @@ def run(cmd, *args, **flags):
     mainline = flags.get('mainline', None)
 
     if files and (commit or edit or dryrun or mainline):
-        raise HelpError({'command': cmd, 'message': _('-f/--files cannot'
-                        'be used with any other argument')})
+        raise HelpError(cmd, _('-f/--files cannotbe used with any other '
+                               'argument'))
     if (dryrun or edit or mainline) and not commit:
-        raise HelpError({'command': cmd, 'message':
-                        _('missing -u/--undo <commit>')})
+        raise HelpError(cmd, _('missing -u/--undo <commit>'))
 
     if files:
         output = pyrite.repo.checkout('HEAD', paths=args)
         pyrite.ui.info(output)
     else:
         if not commit:
-            raise HelpError({'command': cmd, 'message': _('No action chosen! '
-                            'You must use either -f or -c')})
+            raise HelpError(cmd, _('No action chosen! You must use either '
+                                   '-f or -c'))
         c = pyrite.repo.get_commit_info(commit, [Repo.ID, Repo.SUBJECT])
         message = [
             _('Revert: '), c[Repo.SUBJECT],

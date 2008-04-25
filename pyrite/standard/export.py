@@ -63,8 +63,8 @@ contians tracked files.
 
 def _parse_range(args):
     if not args:
-        raise HelpError({'command': 'export', 'message': _('Need to specify a '
-                         'commit or commit range')})
+        raise HelpError('export', _('Need to specify a commit or commit '
+                                    'range'))
     first = last = None
     spec = args[0]
     idx = spec.find('..')
@@ -139,14 +139,13 @@ def run(cmd, *args, **flags):
 
     if bundle and (verify or compose or outdir or numbered or
                     force or archive):
-        raise HelpError({'command': cmd, 'message': _('bundle used with '
-                        'incompatable option')})
+        raise HelpError(cmd, _('bundle used with incompatable option'))
+
     if archive and verify or compose or outdir or numbered or force:
-        raise HelpError({'command': cmd, 'message': _('archive used with '
-                        'incompatable option')})
+        raise HelpError(cmd, _('archive used with incompatable option'))
+
     if 'format' in flags and not archive:
-        raise HelpError({'command': cmd, 'message': _('format used without '
-                        'archive')})
+        raise HelpError(cmd, _('format used without archive'))
 
     if bundle:
         first, last, args = _parse_range(args)

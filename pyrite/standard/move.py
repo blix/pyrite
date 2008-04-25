@@ -36,8 +36,7 @@ def run(cmd, *args, **flags):
     noop = 'no-move' in flags
     
     if len(args) < 2:
-        raise HelpError({'command': cmd, 'message': _('Need at least a source'
-                            ' and a destination')})
+        raise HelpError(cmd, _('Need at least a source and a destination'))
 
     sources = args[:-1]
     dest = args[-1]
