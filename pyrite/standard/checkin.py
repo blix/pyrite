@@ -26,18 +26,10 @@ options = [
 ('n', 'no-verify', _('bypass precommit hooks'), 0),
 ('', 'amend', _('Replace the current tip with the new commit'), 0),
 ('e', 'edit', _('Force invoking the editor for the commit message'), 0),
-('v', 'verbose', _('show diff at the bottom of the commit message'), 0)
 ]
 
 help_str="""
-pyt checkin [-m | --message <message>]
-            [-a | --author <author>] [-s | --signoff] [-s | --signoff]
-            [-v | --verbose] [-n | --no-verify] [--no-edit]
-            
-            [-c | --commit <commit>] [ [--] paths]..
-            
-pyt checkin [-s | --signoff] [-v | --verbose] [-n | --no-verify]
-            [-a | --author] --amend [ [--] paths]..
+pyt checkin [OPTIONS] [ [--] <paths>...]
 
 Check-in your changes to the repository so they become part of the history.
 Options allow you to specify a message, author such as
@@ -50,7 +42,6 @@ trivial updates to changes that have not been published.
 
 The commit option allows you to re-use the commit message, author and timestamp
 of a previous commit as the default messages for the current commit.
-
 """
 
 def run(cmd, *args, **flags):
@@ -63,7 +54,6 @@ def run(cmd, *args, **flags):
     amend = flags.has_key('amend')
     sign = flags.has_key('signoff')
     verify = not flags.has_key('no-verify')
-    verbose = flags.has_key('verbose')
 
     data = [Repo.SUBJECT, Repo.AUTHOR, Repo.AUTHOR_EMAIL, Repo.BODY, Repo.ID]
     commitdata = {}
