@@ -82,8 +82,6 @@ def run(cmd, *args, **flags):
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=paths)
 
+    stream = pyrite.ui.info_stream()
     for commit_data in output:
-        formatter.write_to_stream(commit_data, pyrite.ui.info_stream(),
-                                  pyrite.repo)
-
-    pyrite.ui.info('\n')
+        formatter.write_to_stream(commit_data, stream, pyrite.repo)

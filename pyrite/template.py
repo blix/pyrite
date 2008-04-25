@@ -126,11 +126,14 @@ class Template(object):
             return item + to_append
         return item
 
-    def getparent(self, parents, index=0):
-        return parents.split()[index]
+    def get(self, item, index=0):
+        return item[int(index)]
 
     def _get_repo_prop(self, what):
         return getattr(Repo, what, 0)
+
+    def join(self, item, joinstr=' '):
+        return joinstr.join(item)
 
     def static_prop_nl(self):
         return '\n'
@@ -143,8 +146,6 @@ class Template(object):
             return data[what]
         repo_item = getattr(Repo, what, None)
         if repo_item in data:
-            if repo_item == Repo.PARENTS:
-                return ' '.join(data[repo_item])
             return data[repo_item]
         if repo:
             if what == 'branch':

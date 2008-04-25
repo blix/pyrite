@@ -79,10 +79,9 @@ class Repo(object):
     DIFFSTAT = 10
     PATCH = 11
     FILES = 12
-    TAGS = 13
-    HEADS = 14
-    AUTHOR_DATE_OFFSET = 15
-    COMMITER_DATE_OFFSET = 16
+    REFS = 13
+    AUTHOR_DATE_OFFSET = 14
+    COMMITER_DATE_OFFSET = 15
 
     def __init__(self, location=None):
         if location:
@@ -276,7 +275,7 @@ class Repo(object):
             options.append('-p')
         if Repo.DIFFSTAT in data:
             options.append('--stat')
-        if Repo.TAGS in data or Repo.HEADS in data:
+        if Repo.REFS in data:
             options.append('--decorate')
         return options
 
@@ -289,15 +288,12 @@ class Repo(object):
             if not line.startswith(' ') or not line:
                 commit[Repo.BODY] = ''.join(buf)
                 return line
-            if line == '    \n':
-                buf.append(line)
-            else:
-                buf.append(line.lstrip())
+            buf.append(line[4:])
 
     def _parse_git_stat(self, commit, firstline, stream):
         if firstline.startswith('commit'):
             return firstline
-        buf = [firstline]
+        buf = []
         while True:
             line = stream.readline()
             if not line.startswith(' ') or not line:
@@ -317,16 +313,22 @@ class Repo(object):
             buf.append(line)
 
     def _parse_raw_header(Self, commit, firstline, stream):
-        commit[Repo.ID] = firstline.split()[1]
+        parts = firstline.split()
+        commit[Repo.ID] = parts[1]
+        refs = commit[Repo.REFS] = []
+        for part in parts[2:]:
+            part = part.strip('()')
+            if not part.startswith('refs'):
+                continue
+            refs.append(part)
         stream.readline()
-        parents = []
+        parents = commit[Repo.PARENTS] = []
         while True:
             line = stream.readline()
             parts = line.split()
             if parts[0] != 'parent':
                 break
             parents.append(parts[1])
-        commit[Repo.PARENTS] = parents
         idx = line.find('<')
         commit[Repo.AUTHOR] = line[len('author '):idx - 1]
         idx2 = line.rfind('>') + 1
