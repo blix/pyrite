@@ -84,16 +84,13 @@ class Repo(object):
     AUTHOR_DATE_OFFSET = 15
     COMMITER_DATE_OFFSET = 16
 
-#    _last_property = FILES
-
-    DEBUGCOMMANDS = os.getenv('PYTDBGC')
-
     def __init__(self, location=None):
         if location:
             self._location = os.path.expanduser(location)
         else:
             self._location = os.getcwd()
         self.refresh()
+        self._debug_commands = False
 
     def _popen(self, args, cwd=None, stdin=False,
                stdout=subprocess.PIPE,
@@ -104,8 +101,9 @@ class Repo(object):
             stdin = subprocess.PIPE
         else:
             stdin = None
-        if Repo.DEBUGCOMMANDS:
-            print args
+        if self._debug_commands:
+            import pyrite
+            pyrite.ui.error(str(args))
         return subprocess.Popen(args, cwd=cwd,
                                     stdout=stdout,
                                     stderr=stderr,
@@ -869,6 +867,7 @@ class Repo(object):
         else:
             args.append(treeish)
         proc = self._popen(args)
+        
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():

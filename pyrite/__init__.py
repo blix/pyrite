@@ -101,6 +101,16 @@ help_str = _("Pyrite Distributed SCM")
 
 modules = {}
 
+global_options = [
+('h', 'help', _(''), 0),
+('', 'debug-subcommands', _(''), 0),
+('', 'debug-suppress-output', _(''), 0),
+('', 'debug-profile', _(''), 0),
+('', 'debug-profile-extra', _(''), 0),
+('', 'debug-profile-sort', _(''), 0),
+('', 'debug-exceptions', _(''), 0)
+]
+
 def dyn_import(module, is_extension=False, path=None):
     if module in modules: return
     package = None
@@ -115,6 +125,7 @@ def dyn_import(module, is_extension=False, path=None):
 
 def run():
     show_trace = False
+    dummy_out = None
     try:
         global repo
         repo = repository.Repo()
@@ -131,12 +142,41 @@ def run():
 
         m = dyn_import(cmd_info[0])
         flags,args = options.parse(m.options, sys.argv[2:], cmd)
-
-        modules[cmd_info[0]].run(cmd, *args, **flags)
+        if 'help' in flags:
+            raise pythelp.HelpError(cmd)
+        if 'debug-subcommands' in flags:
+            repo._debug_commands = True
+        if 'debug-exceptions' in flags:
+            show_trace = True
+        if 'debug-suppress-output' in flags:
+            dummy_out = open('/dev/null', 'w')
+            ui.stdout = dummy_out
+        if 'debug-profile' in flags:
+            import cProfile
+            import pstats
+            cProfile.runctx('modules[cmd_info[0]].run(cmd, *args, **flags)',
+                            globals(), locals(), 'pyt-profile')
+            p = pstats.Stats('pyt-profile')
+            p.sort_stats(flags.get('debug-profile-sort', 'cumulative'))
+            p.print_title()
+            p.print_stats()
+            if 'debug-profile-extra' in flags:
+                p.print_callers()
+        else:
+            modules[cmd_info[0]].run(cmd, *args, **flags)
 
     except pythelp.HelpError, inst:
         pythelp.on_help_error(inst)
+        if show_trace:
+            raise
     except options.ParseError, inst:
+        if show_trace:
+            raise
         ui.error_out(inst)
     except repository.RepoError, inst:
+        if show_trace:
+            raise
         ui.error_out(inst)
+    finally:
+        if dummy_out:
+            dummy_out.close()

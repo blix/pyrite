@@ -80,6 +80,9 @@ def parse(options, arguments, command):
     parser = OptionParser(command)
     for s,l,m, f in options:
         parser.add_option(s, l, f)
+    for s, l, m, f in pyrite.global_options:
+        parser.add_option(s, l, f)
+
     parser.parse(arguments)
     return parser.get_switches(), parser.get_args()
 

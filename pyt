@@ -20,16 +20,4 @@
 import pyrite
 import os
 
-if os.getenv('PYTPROF'):
-    import cProfile
-    import pstats
-    
-    cProfile.run('pyrite.run()', 'pyt-profile')
-    
-    p = pstats.Stats('pyt-profile')
-    p.sort_stats(os.getenv('PYTPROFSORT', default='cumulative'))
-    p.print_title()
-    p.print_stats()
-    p.print_callers()
-else:
-    pyrite.run()
+pyrite.run()
