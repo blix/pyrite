@@ -168,8 +168,16 @@ class Template(object):
         return s
 
     def write_to_stream(self, data, stream, repo=None):
-        for chunk in self._generate(data, repo):
-            stream.write(chunk)
+        try:
+            for l in self._generate(data, repo):
+                stream.write(l)
+        except IOError:
+            pass
+        finally:
+            try:
+                stream.flush()
+            except IOError:
+                pass
 
     def get_complete(self, data, repo=None):
         all_data = []

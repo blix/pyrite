@@ -42,15 +42,15 @@ def run(cmd, *args, **flags):
                                 patch=False)
 
     did_print = pyrite.ui.info(output)
+    if did_print:
+        pyrite.ui.info('\n')
 
     first = True
     for f in pyrite.repo.get_untracked():
         if first:
-            if did_print:
-                pyrite.ui.info('\n')
             pyrite.ui.info(_('## The following files are neither tracked '
                              'nor ignored\n'))
             first = False
         pyrite.ui.info(f)
-    if not first or (first and did_print):
+    if not first:
         pyrite.ui.info('\n')

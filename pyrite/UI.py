@@ -21,43 +21,52 @@ from subprocess import Popen, PIPE
 
 class UI(object):
     def __init__(self):
-        pass
+        self.stdout = stdout
+        self.stderr = stderr
 
     def _write(self, stream, msg):
         did_write = False
-        if msg.__class__ == ''.__class__:
-            did_write = True
-            if msg and msg[-1] == '\n':
-                stream.write(msg)
-            else:
-                stream.write(msg)
-                stream.write('\n')
-        else:
-            for l in msg:
+        try:
+            if msg.__class__ == ''.__class__:
                 did_write = True
-                if l and l[-1] == '\n':
-                    stream.write(l)
+                if msg[-1] == '\n':
+                    stream.write(msg)
                 else:
-                    stream.write(l)
+                    stream.write(msg)
                     stream.write('\n')
+            else:
+                for l in msg:
+                    did_write = True
+                    if l[-1] == '\n':
+                        stream.write(l)
+                    else:
+                        stream.write(l)
+                        stream.write('\n')
+        except IOError:
+            pass
+        finally:
+            try:
+                stream.flush()
+            except IOError:
+                pass
         return did_write
 
     def info_stream(self):
-        return stdout
+        return self.stdout
 
     def info(self, msg):
-        return self._write(stdout, msg)
+        return self._write(self.stdout, msg)
 
     def error(self, msg):
-        return self._write(stderr, msg)
+        return self._write(self.stderr, msg)
 
     def error_out(self, msg):
         self.error(_('Error: ') + str(msg) + '\n')
         exit(2)
-        
+
     def debug(self, msg):
         pass
-        
+
     def get_platform_editor(self):
         if platform.system() == 'Windows': return ['write.exe']
         else: return ['/usr/bin/env', 'vi']
@@ -100,4 +109,3 @@ class UI(object):
             os.remove(path)
         msg = [ line for line in msg if not line.startswith(strip_prefix)]
         return ''.join(msg)
-        
