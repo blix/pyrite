@@ -30,42 +30,49 @@ class OptionParser(object):
         self._switches = {}
         self._command = command
         
-    def get_args(self): return self._args
-    
-    def get_switches(self): return self._options
-        
+    def get_args(self):
+        return self._args
+
+    def get_switches(self):
+        return self._options
+
     def add_option(self, short, longopt, flags):
         required = False
         has_opt = False
-        if flags == 1 or flags == 3: has_opt = True
-        if flags == 2 or flags == 3: required = True
+        if flags == 1:
+            has_opt = True
         self._switches[longopt] = (short, required, has_opt)
-        
+
     def parse(self, arguments):
         stop = False
         last = None
         for a in arguments:
             l = len(a)
-            if stop: self._args.append(a) 
-            elif a == '--': stop = True
+            if stop: self._args.append(a)
+            elif a == '--':
+                stop = True
             elif a.startswith('--'):
-                if l < 4: raise ParseError(_('Malformed argument %s') % a)
+                if l < 4:
+                    raise ParseError(_('Malformed argument %s') % a)
                 longopt = a[2:]
                 if longopt in self._switches:
                     short, required, has_opts = self._switches[longopt]
                     self._options[longopt] = True
-                    if has_opts: last = longopt
+                    if has_opts:
+                        last = longopt
                 else:
                     raise pyrite.standard.help.HelpError(self._command)
             elif a[0] == '-':
-                if len(a) < 2: raise ParseError(_('Malformed argument %s') % a)
+                if len(a) < 2:
+                    raise ParseError(_('Malformed argument %s') % a)
                 a = a[1]
                 if l != 2: raise ParseError(_('Malformed argument %s') % a)
                 for longopt, values in self._switches.iteritems():
                     short, required, has_opts = values
                     if short == a:
                         self._options[longopt] = True
-                        if has_opts: last = longopt
+                        if has_opts:
+                            last = longopt
                         break
                 else:
                     raise pyrite.standard.help.HelpError(self._command)
