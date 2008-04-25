@@ -286,7 +286,7 @@ class Repo(object):
         while True:
             line = stream.readline()
             if not line.startswith(' ') or not line:
-                commit[Repo.BODY] = ''.join(buf)
+                commit[Repo.BODY] = buf
                 return line
             buf.append(line[4:])
 
@@ -297,7 +297,7 @@ class Repo(object):
         while True:
             line = stream.readline()
             if not line.startswith(' ') or not line:
-                commit[Repo.DIFFSTAT] = ''.join(buf)
+                commit[Repo.DIFFSTAT] = buf
                 return line
             buf.append(line)
 
@@ -308,7 +308,7 @@ class Repo(object):
         while True:
             line = stream.readline()
             if not line or line.startswith('commit'):
-                commit[Repo.PATCH] = ''.join(buf)
+                commit[Repo.PATCH] = buf
                 return line
             buf.append(line)
 
@@ -431,7 +431,7 @@ class Repo(object):
                 args.append('-m')
                 if Repo.BODY in commit:
                     args.append(commit[Repo.SUBJECT] + '\n' +
-                                commit[Repo.BODY])
+                                ''.join(commit[Repo.BODY]))
                 else:
                     args.append(commit[Repo.SUBJECT])
         if paths:

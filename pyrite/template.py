@@ -19,10 +19,47 @@ from datetime import datetime
 import time
 import os.path
 
+reset_color = '\033[m'
+
+def get_diff_color(line):
+    if line[0] == '@':
+        return '\033[36m'
+    if line[0] == '+':
+        return '\033[32m'
+    if line[0] == '-':
+        return '\033[31m'
+    if line[0] != ' ':
+        return '\033[1m'
+    return reset_color
+
+def color_diff(lines, stream=None):
+    if stream:
+        try:
+            for line in lines:
+                stream.write(get_diff_color(line))
+                stream.write(line)
+                stream.write(reset_color)
+        except IOError:
+            pass
+        finally:
+            try:
+                stream.flush()
+            except IOError:
+                pass
+    else:
+        buf = []
+        for line in lines:
+            buf.append(get_diff_color(line))
+            buf.append(line)
+            buf.append(reset_color)
+        return buf
+
+
 class Template(object):
-    def __init__(self, style):
+    def __init__(self, style, color):
         self._style = style
         self._compiled_buffer = []
+        self.color = color
 
     def compile(self):
         parts_len = len(self._style)
@@ -141,6 +178,11 @@ class Template(object):
     def static_prop_curdate(self):
         return time.mktime(datetime.utcnow().timetuple())
 
+    def color_diff(self, item):
+        if not self.color:
+            return item
+        return color_diff(item)
+
     def _get_data(self, data, repo, what):
         if what in data:
             return data[what]
@@ -163,15 +205,26 @@ class Template(object):
             return static_item()
         return None
 
-    def indent(self, s):
-        s = s.replace('\n', '\n   ')
-        s = '   ' + s
-        return s
+    def indent(self, item):
+        if item.__class__ == ''.__class__:
+            item = item.replace('\n', '\n   ')
+            item = '   ' + item
+            return item
+        else:
+            buf = []
+            for line in item:
+                buf.append('   ')
+                buf.append(line)
+            return buf
 
     def write_to_stream(self, data, stream, repo=None):
         try:
-            for l in self._generate(data, repo):
-                stream.write(l)
+            for chunk in self._generate(data, repo):
+                if chunk.__class__ == ''.__class__:
+                    stream.write(chunk)
+                else:
+                    for l in chunk:
+                        stream.write(l)
         except IOError:
             pass
         finally:
@@ -199,7 +252,7 @@ class Template(object):
                 yield(prop)
 
 class FileTemplate(Template):
-    def __init__(self, filename):
+    def __init__(self, filename, color):
         try:
             f = None
             if not filename.endswith('.tmpl'):
@@ -216,7 +269,7 @@ class FileTemplate(Template):
                 except IOError:
                     pyrite.ui.error_out(_('Cannot open %s') % filename)
             style = f.read()
-            Template.__init__(self, style)
+            Template.__init__(self, style, color)
         finally:
             if f:
                 f.close()

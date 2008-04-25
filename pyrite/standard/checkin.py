@@ -63,7 +63,7 @@ def run(cmd, *args, **flags):
     elif use_commit:
         commitdata = pyrite.repo.get_commit_info(use_commit, data)
         use_message = commitdata[Repo.SUBJECT] + '\n\n' + \
-                            commitdata[Repo.BODY]
+                            ''.join(commitdata[Repo.BODY])
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -77,7 +77,7 @@ def run(cmd, *args, **flags):
         commitdata = pyrite.repo.get_commit_info('HEAD', data)
         if not use_message:
             use_message = commitdata[Repo.SUBJECT] + '\n\n' + \
-                            commitdata[Repo.BODY]
+                            ''.join(commitdata[Repo.BODY])
         amend = commitdata[Repo.ID]
         del commitdata[Repo.ID]
         pyrite.repo.move_head_to('HEAD^')

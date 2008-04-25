@@ -52,4 +52,8 @@ def run(cmd, *args, **flags):
     output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
                                 detect=detect, ignorewhite=ignorewhite)
 
-    pyrite.ui.info(output)
+    if color:
+        from pyrite.template import color_diff
+        color_diff(output, pyrite.ui.info_stream())
+    else:
+        pyrite.ui.info(output)

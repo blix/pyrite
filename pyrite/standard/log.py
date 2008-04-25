@@ -24,7 +24,8 @@ options = [
 ('l', 'limit', _('specify the maximum number or commits to show (defualt 10)'), 1),
 ('p', 'patch', _('show the patch for the commit'), 0),
 ('f', 'follow-renames', _('show history of files beyond renames'), 0),
-('a', 'all', _('do not limit the number of commits to show'), 0)
+('a', 'all', _('do not limit the number of commits to show'), 0),
+('c', 'color', _('show log in living color'), 0)
 ]
 
 help_str=_("""
@@ -72,9 +73,9 @@ def run(cmd, *args, **flags):
 
     formatter = None
     if style:
-        formatter = Template(style)
+        formatter = Template(style, 'color' in flags)
     else:
-        formatter = FileTemplate(template)
+        formatter = FileTemplate(template, 'color' in flags)
 
     data = formatter.compile()
     if not show_patch and Repo.PATCH in data:

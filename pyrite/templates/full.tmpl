@@ -1,5 +1,5 @@
 Commit: {ID}
-Parents: {PARENTS|join}
+Parents: {PARENTS}
 Author: {AUTHOR} <{AUTHOR_EMAIL}>
 Authored Date: {AUTHOR_DATE|humandate} {AUTHOR_DATE_OFFSET}
 Commiter: {COMMITER} <{COMMITER_EMAIL}>
@@ -7,4 +7,4 @@ Commited: {COMMIT_DATE|humandate}
 Refs: {REFS|join}
 Subject: {SUBJECT}
 
-{BODY|absent_ok|indent}{PATCH|absent_ok}
+{BODY|absent_ok|indent}{PATCH|absent_ok|color_diff}{DIFFSTAT|absent_ok}
