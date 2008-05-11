@@ -285,7 +285,7 @@ class Repo(object):
         buf = []
         while True:
             line = stream.readline()
-            if not line.startswith(' ') or not line:
+            if not line or line[0] != ' ':
                 commit[Repo.BODY] = buf
                 return line
             buf.append(line[4:])
@@ -296,7 +296,7 @@ class Repo(object):
         buf = []
         while True:
             line = stream.readline()
-            if not line.startswith(' ') or not line:
+            if not line or line[0] != ' ':
                 commit[Repo.DIFFSTAT] = buf
                 return line
             buf.append(line)
