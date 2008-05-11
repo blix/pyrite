@@ -517,7 +517,7 @@ class Repo(object):
             raise RepoError(_('Failed to delete tag(s): %s') %
                             proc.stderr.read())
 
-    def create_tag(self, name, message, key=None, sign=False):
+    def create_tag(self, name, message, commit='HEAD', key=None, sign=False):
         self.validate()
         args = ['git', 'tag']
         if message:
@@ -528,6 +528,7 @@ class Repo(object):
             args.append(key)
         elif sign: args.append('-s')
         args.append(name)
+        args.append(commit)
         proc = self._popen(args)
         for line in proc.stdout.readlines():
             yield line

@@ -24,14 +24,15 @@ options = [
 ('k', 'key', _('use as the signing key'), 1),
 ('v', 'verify', _('verify the signature of the tag'), 0),
 ('m', 'message', _('specify the message to use for the tag'), 0),
-('l', 'list', _('list tags with an optional matching pattern'), 0)
+('l', 'list', _('list tags with an optional matching pattern'), 0),
+('r', 'revision', _('revision to tag (defaults to current HEAD'), 1)
 ]
 
 help_str = """
 pyt tag -d | --delete <tagname>
 pyt tag -l | --list [pattern]
 pyt tag -v | --verify <tagname>
-pyt tag [-s | -a | -k <key-id>] [-m <message>] <tagname>
+pyt tag [-s | -a | -k <key-id>] [-m <message>] <tagname> [commit]
 
 The tag command is used to create, list or delete tags.  The --verify
 option will verify the gpg signature.  The --sign, -annotate and --key options
@@ -74,16 +75,21 @@ def run(cmd, *args, **flags):
         
         message = flags.get('message', None)
         key = flags.get('key', None)
+        commit = flags.get('revision', 'HEAD')
 
         if key:
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message, key=key))
+            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+                                                  commit=commit, key=key))
         elif flags.has_key('sign'):
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message, sign=True))
+            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+                                                  commit=commit, sign=True))
         elif flags.has_key('annotated'):
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message))
+            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+                                                  commit=commit))
         else:
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], None))
+            pyrite.ui.info(pyrite.repo.create_tag(args[0], None,
+                                                  commit=commit))
 
