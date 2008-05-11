@@ -16,7 +16,6 @@
 
 import pyrite
 from pyrite import options as pytoptions
-from pyrite.__version__ import version
 
 options = [('v', 'verbose', _('print full help and aliases'), 0)]
 
@@ -35,6 +34,7 @@ class HelpError(Exception):
         self.verbose = verbose
 
 def show_help(prefix, template, threshold, suffix):
+    from pyrite.__version__ import version
     pyrite.ui.info(pyrite.help_str + _(' version ') + version)
     pyrite.ui.info(prefix)
     commands = {}
@@ -77,6 +77,7 @@ def show_command_help(cmd, message):
 def on_help_error(err):
     if not err.cmd:
         if err.verbose:
+            from pyrite.__version__ import version
             pyrite.ui.info(pyrite.help_str + _(' version ') + version
                            + '\n')
             messages = {}
