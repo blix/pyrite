@@ -100,7 +100,7 @@ class Template(object):
         buffer.append((self._style[end_pos + 1:],))
         return sorted(repo_props)
 
-    def short(self, input, length=6):
+    def short(self, input, length=7):
         length = int(length)
         if len(input) > length:
             return input[:length]
