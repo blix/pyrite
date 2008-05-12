@@ -19,20 +19,31 @@ import os
 from time import gmtime, strftime
 
 options = [
-('c', 'compose', _('launch an editor to write an introductory message'), 0),
-('o', 'output-dir', _('file or directory to save to ("-" for stdout)'), 1),
-('n', 'numbered', _('create patches with names prefixed [PATCH n/m]'), 0),
+('', '', _('common options'), 0),
+('r', 'revision-start', _('first commit'), 1),
+('R', 'revision-end', _('last commit'), 1),
 ('f', 'force', _('overwrite existing files'), 0),
-('b', 'bundle', _('create a min-repo that can be used to pull/fetch from'), 1),
+('', '', _('export to patch options'), 0),
+('c', 'compose', _('launch an editor to write an introductory message'), 0),
+('n', 'numbered', _('create patches with names prefixed [PATCH n/m]'), 0),
+('o', 'output-dir', _('file or directory to save to ("-" for stdout)'), 1),
+('', '', _('export to bundle options'), 0),
+('b', 'bundle', _('create a mini-repo that you can pull/fetch from'), 1),
 ('v', 'verify', _('verify a bundle'), 1),
+('', '', _('export to archive options'), 0),
 ('a', 'archive', _('create a archive of the workdir for commit'), 1),
 ('', 'format', _('format for an archive, either .tgz (default) or .zip'), 1)
 ]
 
 help_str =_("""
-pyt export [OPTIONS] [firstcommit[..lastcommit]]
-pyt export -b <file> | --bundle <file> [firstcommit[..lastcommit]
+(to export patches suitable for mailing)
+pyt export [OPTIONS] [--revision-start <commit1> [--revision-end <commit2>]]
+
+(to export a bundle)
+pyt export -b <file> | --bundle <file> -r <commit1> [-R <commit2>]
 pyt export -v <file> | --verify <file>
+
+(to export an archive)
 pyt export -a | --archive <commit> [--format tgz | zip] [paths]...
 
 The export command has 3 modes.
@@ -61,25 +72,14 @@ allows you to export to a zip archive instead of a tarball.  An archive only
 contians tracked files.
 """)
 
-def _parse_range(args):
-    if not args:
-        raise HelpError('export', _('Need to specify a commit or commit '
-                                    'range'))
-    first = last = None
-    spec = args[0]
-    idx = spec.find('..')
-    if idx < 0:
-        first = spec
-    else:
-        first = spec[:idx]
-        last = spec[idx + 2:]
-    return first, last, args[1:]
+def _run_patch_export(args, flags):
+    compose = 'compose' in flags
+    outdir = flags.get('output-dir', None)
+    numbered = 'numbered' in flags
+    force = 'force' in flags
+    firstcommit = flags.get('revision-start', 'HEAD')
+    lastcommit = flags.get('revision-end', None)
 
-def _run_patch_export(compose, outdir, numbered, force, args):
-    firstcommit = lastcommit = None
-    
-    firstcommit, lastcommit, args = _parse_range(args)
-    
     if compose:
         hist = pyrite.repo.get_history(firstcommit, lastcommit, -1)
         count = 0
@@ -87,10 +87,9 @@ def _run_patch_export(compose, outdir, numbered, force, args):
             count += 1
         endname = lastcommit
         if not endname:
-            endname = pyrite.repo.get_commit_info()
+            endname = pyrite.repo.get_commit_info()[Repo.ID]
         message = pyrite.ui.edit(None, None,
-                    'pyt-header-' + firstcommit + '-' + endname[Repo.ID] +
-                    '.txt')
+                    'pyt-header-' + firstcommit + '-' + endname + '.txt')
         message = message.lstrip()
         idx = message.find(os.linesep)
         title = ''
@@ -124,32 +123,28 @@ def _run_patch_export(compose, outdir, numbered, force, args):
         
         fd.write(message)
 
-    pyrite.repo.export_patch(firstcommit, lastcommit, outdir, force=force,
-                        numbered=numbered)
+    pyrite.ui.info(pyrite.repo.export_patch(firstcommit, lastcommit, outdir,
+                                            force=force, numbered=numbered))
 
 def run(cmd, *args, **flags):
-    compose = 'compose' in flags
-    outdir = flags.get('output-dir', None)
-    numbered = 'numbered' in flags
-    force = 'force' in flags
     bundle = flags.get('bundle', None)
     verify = flags.get('verify', None)
     archive = flags.get('archive', None)
     format = flags.get('format', 'tgz')
 
-    if bundle and (verify or compose or outdir or numbered or
-                    force or archive):
+    if bundle and (archive or 'format' in flags):
         raise HelpError(cmd, _('bundle used with incompatable option'))
 
-    if archive and verify or compose or outdir or numbered or force:
+    if archive and verify:
         raise HelpError(cmd, _('archive used with incompatable option'))
 
     if 'format' in flags and not archive:
         raise HelpError(cmd, _('format used without archive'))
 
     if bundle:
-        first, last, args = _parse_range(args)
-        pyrite.repo.export_bundle(bundle, first, last)
+        last = flags.get('revision-end', 'HEAD')
+        first = flags.get('revision-start', last + '^') + '^'
+        pyrite.ui.info(pyrite.repo.export_bundle(bundle, first, last))
     elif verify:
         success, reason = pyrite.repo.verify_bundle(verify)
         if success:
@@ -165,5 +160,4 @@ def run(cmd, *args, **flags):
             args = args[1:]
         pyrite.repo.export_archive(archive, commit, paths=args, format=format)
     else:
-        _run_patch_export(compose, outdir, numbered, force, args)
-    
+        _run_patch_export(args, flags)

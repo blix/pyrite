@@ -15,7 +15,6 @@
 
 import subprocess
 import os
-import gzip
 
 class RepoError(Exception):
     """Thrown when repo fails"""
@@ -727,6 +726,8 @@ class Repo(object):
         commits = self._convert_range(first, last)
         args.append(commits)
         proc = self._popen(args)
+        for l in proc.stdout.readlines():
+            yield l
         if proc.wait():
             raise RepoError(_('Failed to export: %s') % proc.stderr.read())
 
@@ -757,12 +758,30 @@ class Repo(object):
                             proc.stderr.read()))
 
     def export_bundle(self, filename, first, last):
+        import time
         self.validate()
+        dummy_tagname = None
+        if (last != 'HEAD' and not os.path.exists(os.path.join(
+            self.get_repo_dir(), 'refs', 'tags', last)) and
+            not os.path.exists(os.path.join(self.get_repo_dir(), 'refs',
+                                            'heads', last)) and
+            not os.path.exists(os.path.join(self.get_repo_dir(), 'refs',
+                                            'remotes', last))):
+
+            dummy_tagname = 'pyrite-temp-tag-' + str(time.time())
+            for l in self.create_tag(dummy_tagname, None, last):
+                pass
+            last = dummy_tagname
         args = ['git', 'bundle', 'create', filename,
                 self._convert_range(first, last)]
         proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            yield line
         if proc.wait():
             raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+        if dummy_tagname:
+            for l in self.delete_tags([dummy_tagname]):
+                pass
 
     def verify_bundle(self, filename):
         args = ['git', 'bundle', 'verify', filename]
@@ -772,6 +791,7 @@ class Repo(object):
         return True, None
 
     def export_archive(self, filename, commit, paths=None, format='tgz'):
+        import gzip
         self.validate()
         args = ['git', 'archive', ]
         if format == 'tgz':
