@@ -390,7 +390,7 @@ class Repo(object):
             proc = self._popen(('git', 'diff', '--name-status', commit,
                                 commit + '^'))
         else:
-            proc = self._popen(('git', 'diff-index', '--cached',
+            proc = self._popen(('git', 'diff-index',
                                 '--name-status', 'HEAD'))
         for line in proc.stdout.readlines():
             parts = line.split()
