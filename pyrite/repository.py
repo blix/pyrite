@@ -885,15 +885,11 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to show: %s') % proc.stderr.read())
 
-    def move_head_to(self, commit, workdir=False):
+    def move_head_to(self, commit='HEAD', workdir=False):
         self.validate()
-        args = ['git', 'reset']
-        if not commit:
-            commit='HEAD'
+        args = ['git', 'reset', '-q']
         if workdir:
             args.append('--hard')
-        else:
-            args.append('--mixed')
         args.append(commit)
         proc = self._popen(args)
         if proc.wait():
