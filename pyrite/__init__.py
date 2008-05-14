@@ -83,6 +83,8 @@ commands = {
             _('Update remote refs and their associated objects')),
 ('remove', 'rm'): ('remove', 0,
             _('Remove files from the working set and tell pyt about it')),
+('resolve', 'res'): ('resolve', 1,
+            _('Resolve a merge conflict')),
 ('revert',): ('revert', 0,
             _('Revert a change in the history by applying a new commit')),
 ('show',): ('show', 0,

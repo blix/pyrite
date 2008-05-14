@@ -122,6 +122,9 @@ class Repo(object):
                     (os.path.islink(headref) and
                     os.readlink(headref).startswith('refs'))
 
+    def get_work_dir(self):
+        return self._location
+
     def get_repo_dir(self):
         if not self._repo_dir:
             self._repo_dir = os.getenv('GIT_DIR')
@@ -622,20 +625,29 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
 
-    def list(self):
+    def list(self, unresolved=False):
         self.validate()
-        args = ['git', 'ls-files', '-o', '-c', '-t']
+        if unresolved:
+            args = ['git', 'ls-files', '--unmerged']
+        else:
+            args = ['git', 'ls-files', '-o', '-c', '-t']
         proc = self._popen(args)
         files = {}
-        for item in proc.stdout.readlines():
-            status = item[0]
-            f = item[2:].strip()
-            files[f] = Repo._status[status]
-        proc.wait()
-        proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
-        for line in proc.stdout.readlines():
-            status, filename = line.split()
-            files[filename.strip()] = Repo._status[status[0]]
+        if unresolved:
+            for item in proc.stdout.readlines():
+                parts = item.split()
+                files[parts[3]] = 'M'
+        else:
+            for item in proc.stdout.readlines():
+                status = item[0]
+                f = item[2:].strip()
+                files[f] = Repo._status[status]
+            proc.wait()
+            proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
+            for line in proc.stdout.readlines():
+                status, filename = line.split()
+                files[filename.strip()] = Repo._status[status[0]]
+
         proc.wait()
         return files
 
@@ -939,7 +951,6 @@ class Repo(object):
         if dryrun:
             args.append('--no-commit')
         args.append(commit)
-        proc = None
         proc = self._popen(args, stdout=None)
         if proc.wait():
             raise RepoError(proc.stderr.read())
@@ -1064,3 +1075,78 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to get untracked files: %s') %
                             proc.stderr.read())
+
+    def continue_rebase(self):
+        self.validate()
+        proc = self._popen(('git', 'rebase', '--continue'))
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to continue rebase: %s') %
+                            proc.stderr.read())
+
+    def abort_rebase(self):
+        self.validate()
+        proc = self._popen(('git', 'rebase', '--abort'))
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to abort rebase: %s') %
+                            proc.stderr.read())
+
+    def skip_rebase_commit(self):
+        self.validate()
+        proc = self._popen(('git', 'rebase', '--continue'))
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to skip rebase commit: %s') %
+                            proc.stderr.read())
+
+    def alter_current_hist(self, start):
+        self.validate()
+        proc = self._popen(('git', 'rebase', '--interactive', start))
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to skip rebase commit: %s') %
+                            proc.stderr.read())
+
+    def cat_file(self, filename, cat_to=None, commit='HEAD'):
+        self.validate()
+        try:
+            if cat_to.__class__ == ''.__class__:
+                stream = open(cat_to, 'w')
+            else:
+                stream = cat_to
+            stream.writelines(self.show([filename], commit))
+        except RepoError:
+            return False
+        finally:
+            if cat_to.__class__ == ''.__class__:
+                stream.close()
+        return True
+
+    def rebase(self, base, branch, onto, interactive, merge=False,
+               preserve=False):
+        self.validate()
+
+        args = ['git', 'rebase']
+        if interactive:
+            args.append('--interactive')
+        if merge:
+            args.append('--merge')
+        if preserve:
+            args.append('-p')
+        if onto:
+            args.append('--onto')
+            args.append(onto)
+        args.append(base)
+        if branch:
+            args.append(branch)
+
+        proc = self._popen(args, stderr=subprocess.STDOUT)
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise RepoError(_('Failed to rebase'))

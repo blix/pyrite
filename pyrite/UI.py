@@ -13,7 +13,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from sys import stdout, stderr, exit
+from sys import stdout, stderr, stdin, exit
 import os
 import pyrite
 import platform
@@ -23,6 +23,26 @@ class UI(object):
     def __init__(self):
         self.stdout = stdout
         self.stderr = stderr
+        self.stdin = stdin
+
+    def ask(self, question, responses, default):
+        while True:
+            self.stdout.write(question + ' [')
+            first = True
+            for r in responses:
+                if not first:
+                    self.stdout.write('/')
+                else:
+                    first = False
+                if default == r:
+                    r = r.upper()
+                self.stdout.write(r)
+            self.stdout.write('] ')
+            answer = self.stdin.readline()
+            answer = answer.strip().lower()
+            if answer in responses:
+                print answer
+                return answer
 
     def _write(self, stream, msg):
         did_write = False
