@@ -50,7 +50,7 @@ def run(cmd, *args, **flags):
     use_message = flags.get('message', None)
     #need to decide if ament or use_commit mean that editor should not
     #be invoked by default
-    edit = (not use_message or flags.has_key('edit')) and not use_commit
+    edit = flags.has_key('edit') or (not use_message and not use_commit)
     amend = flags.has_key('amend')
     sign = flags.has_key('signoff')
     verify = not flags.has_key('no-verify')
@@ -119,7 +119,6 @@ def run(cmd, *args, **flags):
         commitdata[Repo.SUBJECT] = use_message
         if Repo.BODY in commitdata:
             del commitdata[Repo.BODY]
-        paths=args
         pyrite.repo.commit(commit=commitdata, verify=verify)
         amend = False
     finally:
