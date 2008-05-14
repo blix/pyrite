@@ -359,26 +359,13 @@ class Repo(object):
                 line = sstream.readline()
             yield commit
             commit = {}
-            
 
     def get_commit_info(self, commit='HEAD', data=None):
-        self.validate()
-        args = ['git', 'show']
-        if not data:
-            data = [Repo.ID]
-        args.extend(self._get_format_args(data))
-        args.append(commit)
-        proc = self._popen(args)
+        gen = self.get_history(commit, None, 1, data)
         try:
-            retval = self._parse_git_data(data, proc.stdout).next()
+            return gen.next()
         except StopIteration:
-            retval = None
-
-        if proc.wait():
             return None
-        if retval:
-            return retval
-        return None
 
     def update_index(self, paths=None):
         self.validate()
