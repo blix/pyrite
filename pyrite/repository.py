@@ -280,7 +280,6 @@ class Repo(object):
 
     def _parse_git_log(self, commit, firstline, stream):
         commit[Repo.SUBJECT] = stream.readline().strip()
-        stream.readline()
         buf = []
         while True:
             line = stream.readline()
