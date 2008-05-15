@@ -53,8 +53,24 @@ def run(cmd, *args, **flags):
         raise HelpError(cmd, _('missing -u/--undo <commit>'))
 
     if files:
-        output = pyrite.repo.checkout('HEAD', paths=args)
-        pyrite.ui.info(output)
+        changed = pyrite.repo.changed_files()
+        if not changed:
+            pyrite.ui.info(_('No files can be reverted, working directory '
+                             'is clean.\n\n'))
+            return
+        if args:
+            for l in pyrite.repo.checkout('HEAD', paths=args):
+                pass
+        else:
+            pyrite.repo.move_head_to('HEAD', True)
+
+        changed = changed - pyrite.repo.changed_files()
+        if changed:
+            pyrite.ui.info(_('Reverted the following files:'))
+            for status, filename in changed:
+                pyrite.ui.info(filename)
+        else:
+            pyrite.ui.info(_('No files reverted.'))
     else:
         if not commit:
             raise HelpError(cmd, _('No action chosen! You must use either '

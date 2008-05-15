@@ -218,7 +218,7 @@ class Repo(object):
         if proc.wait():
              raise RepoError(_('Failed to switch to %s: %s') % (commit,
                                 proc.stderr.read()))
-        
+
     def _read_remotes(self):
         self._remotes = []
         if not self.is_repo:
@@ -393,14 +393,13 @@ class Repo(object):
             proc = self._popen(('git', 'diff', '--name-status', commit,
                                 commit + '^'))
         else:
-            proc = self._popen(('git', 'diff-index',
+            proc = self._popen(('git', 'diff',
                                 '--name-status', 'HEAD'))
-        for line in proc.stdout.readlines():
-            parts = line.split()
-            yield parts[0], parts[1]
+        retval = set((line[0], line[2:]) for line in proc.stdout.readlines())
         if proc.wait():
             raise RepoError(_('Failed to get changed files: %s') %
                                 proc.stderr.read())
+        return retval
 
     def commit(self, commit=None, verify=True):
         self.validate()
@@ -903,7 +902,7 @@ class Repo(object):
         if workdir:
             args.append('--hard')
         args.append(commit)
-        proc = self._popen(args)
+        proc = self._popen(args, stdout=None)
         if proc.wait():
             raise RepoError(_('Failed to move head: %s') % proc.stderr.read())
 
@@ -1076,33 +1075,6 @@ class Repo(object):
             raise RepoError(_('Failed to get untracked files: %s') %
                             proc.stderr.read())
 
-    def continue_rebase(self):
-        self.validate()
-        proc = self._popen(('git', 'rebase', '--continue'))
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to continue rebase: %s') %
-                            proc.stderr.read())
-
-    def abort_rebase(self):
-        self.validate()
-        proc = self._popen(('git', 'rebase', '--abort'))
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to abort rebase: %s') %
-                            proc.stderr.read())
-
-    def skip_rebase_commit(self):
-        self.validate()
-        proc = self._popen(('git', 'rebase', '--continue'))
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to skip rebase commit: %s') %
-                            proc.stderr.read())
-
     def alter_current_hist(self, start):
         self.validate()
         proc = self._popen(('git', 'rebase', '--interactive', start))
@@ -1126,27 +1098,3 @@ class Repo(object):
             if cat_to.__class__ == ''.__class__:
                 stream.close()
         return True
-
-    def rebase(self, base, branch, onto, interactive, merge=False,
-               preserve=False):
-        self.validate()
-
-        args = ['git', 'rebase']
-        if interactive:
-            args.append('--interactive')
-        if merge:
-            args.append('--merge')
-        if preserve:
-            args.append('-p')
-        if onto:
-            args.append('--onto')
-            args.append(onto)
-        args.append(base)
-        if branch:
-            args.append(branch)
-
-        proc = self._popen(args, stderr=subprocess.STDOUT)
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to rebase'))
