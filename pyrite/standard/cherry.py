@@ -23,11 +23,12 @@ options = [
 ('n', 'no-commit', _('limit number of candidates to find'), 0),
 ('r', 'record-origin', _('note on the commit where the change came from'), 0),
 ('i', 'identify', _('find candidates to cherry pick from a branch'), 1),
-('v', 'verbose', _('show full sha1 id'), 0)
+('v', 'verbose', _('show full sha1 id'), 0),
+('p', 'pick', _('cherry pick this commit'), 0)
 ]
 
 help_str =_("""
-pyt cherry  [--record-origin] [--no-commit ] [--edit] <commit>
+pyt cherry  [--record-origin] [--no-commit ] [--edit] -p <commit>
 pyt cherry [--limit <limit commit>] --identify <search from commit>
 
 The cherry command allows you to find and apply changes from another
@@ -87,12 +88,14 @@ def run(cmd, *args, **flags):
     limit = flags.get('limit-commit', None)
     downstream = flags.get('identify', None)
     verbose = 'verbose' in flags
+    pick = 'pick' in flags
 
     if (edit or record or dryrun) and (limit or downstream):
         raise HelpError(cmd, _('Incompatable arguments passed'))
 
-    if not args and not downstream:
-        raise HelpError(cmd, _('Need commmit(s) to cherry pick or -i'))
+    if (not args or not pick) and not downstream:
+        raise HelpError(cmd, _('Need commmit(s) with -p to cherry pick or'
+                               '-i to find eligible commits'))
 
     output = None
     if downstream:
