@@ -42,7 +42,9 @@ def run(cmd, *args, **flags):
     output = pyrite.repo.diff(commit, None, args, detect=True, stat=True,
                                 patch=False)
 
-    did_print = pyrite.ui.info(output)
+    if color:
+        output = pyrite.UI.color_diffstat(output)
+    did_print = pyrite.ui.info(''.join(output))
     if did_print:
         pyrite.ui.info('\n')
 

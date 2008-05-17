@@ -19,42 +19,6 @@ from datetime import datetime
 import time
 import os.path
 
-reset_color = '\033[m'
-
-def get_diff_color(line):
-    if line[0] == '@':
-        return '\033[36m'
-    if line[0] == '+':
-        return '\033[32m'
-    if line[0] == '-':
-        return '\033[31m'
-    if line[0] != ' ':
-        return '\033[1m'
-    return reset_color
-
-def color_diff(lines, stream=None):
-    if stream:
-        try:
-            for line in lines:
-                stream.write(get_diff_color(line))
-                stream.write(line)
-                stream.write(reset_color)
-        except IOError:
-            pass
-        finally:
-            try:
-                stream.flush()
-            except IOError:
-                pass
-    else:
-        buf = []
-        for line in lines:
-            buf.append(get_diff_color(line))
-            buf.append(line)
-            buf.append(reset_color)
-        return buf
-
-
 class Template(object):
     def __init__(self, style, color):
         self._style = style
@@ -181,7 +145,12 @@ class Template(object):
     def color_diff(self, item):
         if not self.color:
             return item
-        return color_diff(item)
+        return pyrite.UI.color_diff(item)
+
+    def color_diffstat(self, item):
+        if not self.color:
+            return item
+        return pyrite.UI.color_diffstat(item)
 
     def _get_data(self, data, repo, what):
         if what in data:

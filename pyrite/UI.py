@@ -18,7 +18,76 @@ import os
 import pyrite
 import platform
 from subprocess import Popen, PIPE
+from types import GeneratorType
 
+reset_color = '\033[m'
+bold_color = '\033[1m'
+error_color = '\033[31m'
+
+diff_colors = {
+    '@': '\033[36m',
+    '+': '\033[32m',
+    '-': '\033[31m',
+    ' ': '\033[m',
+    '\\': '\033[m',
+}
+
+def color_diffstat(lines, stream=None):
+    if stream:
+        output = stream.write
+    else:
+        buf = []
+        output = buf.append
+
+    plusstr = diff_colors['+'] + '+'
+    minstr = diff_colors['-'] + '-'
+    for idx, line in enumerate(lines):
+        if line[0] != ' ':
+            output(line)
+            if stream:
+                return idx + 1
+            else:
+                return buf
+        idx = line.find('|') + 7
+        if idx < 7:
+            output(line)
+            continue
+        output(line[:idx])
+        endline = line[idx:].replace('+', plusstr).replace('-', minstr)
+        output(endline)
+        output(reset_color)
+    if stream:
+        return -1
+    else:
+        return buf
+
+def color_diff(lines, stream=None):
+    if stream:
+        try:
+            startidx = color_diffstat(lines, stream)
+            if startidx < 0:
+                return
+            if lines.__class__ != GeneratorType:
+                lines = lines[startidx]
+            for line in lines:
+                stream.write(diff_colors.get(line[0], bold_color))
+                stream.write(line)
+                stream.write(reset_color)
+        except IOError:
+            pass
+        finally:
+            try:
+                stream.flush()
+            except IOError:
+                pass
+    else:
+        buf = []
+        for line in lines:
+            if line:
+                buf.append(diff_colors.get(line[0], bold_color))
+                buf.append(line)
+                buf.append(reset_color)
+        return buf
 
 def affirmative(response):
     return response.lower() in ('true', 'yes', '1')

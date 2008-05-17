@@ -62,7 +62,6 @@ def run(cmd, *args, **flags):
                                 patch=show_patch)
 
     if color:
-        from pyrite.template import color_diff
-        color_diff(output, pyrite.ui.info_stream())
+        pyrite.UI.color_diff(output, pyrite.ui.info_stream())
     else:
         pyrite.ui.info(output)
