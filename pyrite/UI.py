@@ -110,7 +110,8 @@ class UI(object):
                 msg.append(strip_prefix)
                 msg.append(' ')
                 msg.append(line)
-                msg.append('\n')
+                if line[-1] != '\n':
+                    msg.append('\n')
 
         editor = pyrite.config.get_option('ui.editor')
         if not editor:
