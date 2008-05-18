@@ -40,7 +40,8 @@ to narrow down the result of the patch.
 def run(cmd, *args, **flags):
     stat = 'stat' in flags
     patch_stat = 'patch-stat' in flags
-    color = 'color' in flags
+    color = 'color' in flags or \
+            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
     detect = 'detect' in flags
     startcommit = flags.get('revision-start', 'HEAD')
     endcommit = flags.get('revision-end', None)

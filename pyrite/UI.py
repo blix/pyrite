@@ -19,6 +19,13 @@ import pyrite
 import platform
 from subprocess import Popen, PIPE
 
+
+def affirmative(response):
+    return response.lower() in ('true', 'yes', '1')
+
+def negative(response):
+    return response.lower() in ('false', 'no', '0')
+
 class UI(object):
     def __init__(self):
         self.stdout = stdout

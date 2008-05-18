@@ -32,7 +32,8 @@ like checkin, you can use paths to limit what is reported by status.
 
 def run(cmd, *args, **flags):
     amend = 'amend' in flags
-    color = 'color' in flags
+    color = 'color' in flags or \
+            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
 
     commit = 'HEAD'
     if amend:

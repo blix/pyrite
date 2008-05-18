@@ -72,10 +72,12 @@ def run(cmd, *args, **flags):
         paths = args
 
     formatter = None
+    color = 'color' in flags or \
+            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
     if style:
-        formatter = Template(style, 'color' in flags)
+        formatter = Template(style, color)
     else:
-        formatter = FileTemplate(template, 'color' in flags)
+        formatter = FileTemplate(template, color)
 
     data = formatter.compile()
     if not show_patch and Repo.PATCH in data:
