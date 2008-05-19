@@ -914,7 +914,9 @@ class Repo(object):
         if dryrun:
             args.append('--no-commit')
         args.append(commit)
-        proc = self._popen(args, stdout=None)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            pass
         if proc.wait():
             raise RepoError(proc.stderr.read())
 
