@@ -125,7 +125,7 @@ class UI(object):
         try:
             if msg.__class__ == ''.__class__:
                 did_write = True
-                if msg[-1] == '\n':
+                if msg and msg[-1] == '\n':
                     stream.write(msg)
                 else:
                     stream.write(msg)
