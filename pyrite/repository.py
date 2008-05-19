@@ -359,7 +359,7 @@ class Repo(object):
         else:
             proc = self._popen(('git', 'diff',
                                 '--name-status', 'HEAD'))
-        retval = set((line[0], line[2:]) for line in proc.stdout.readlines())
+        retval = set((line[0], line[2:-1]) for line in proc.stdout.readlines())
         if proc.wait():
             raise RepoError(_('Failed to get changed files: %s') %
                                 proc.stderr.read())
@@ -967,8 +967,9 @@ class Repo(object):
         args.append('-')
         proc = self._popen(args, stdin=True)
         proc.stdin.writelines(diff)
+        proc.stdin.close()
         for line in proc.stdout.readlines():
-            yield line
+            pass
         if proc.wait():
             raise RepoError(_('Failed to apply %s') % proc.stderr.read())
 

@@ -67,7 +67,8 @@ def run(cmd, *args, **flags):
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
-            _('To abort checkin, do not save this file'),
+            _('To abort checkin, remove the contents of the file '
+              'before saving.'),
             _('  On branch %s') % pyrite.repo.branch(),
             _('  '),
             _('Changed Files...'),
@@ -85,7 +86,8 @@ def run(cmd, *args, **flags):
                 args = list(args)
                 for f in pyrite.repo.changed_files('HEAD'):
                     args.append(f[1])
-                diff = pyrite.repo.diff('HEAD^', 'HEAD', None, binary=True)
+                diff = [l for l in pyrite.repo.diff('HEAD^', 'HEAD',
+                                                    None, binary=True)]
                 pyrite.repo.move_head_to('HEAD^')
                 pyrite.repo.apply(diff, toindex=True)
             else:
