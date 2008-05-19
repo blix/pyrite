@@ -117,11 +117,6 @@ class Template(object):
             return fn
         raise NameError(fn_name)
 
-    def absent_ok(self, item):
-        if not item:
-            return ''
-        return item
-
     def add_if_present(self, item, to_append='\n'):
         if item:
             return item + to_append
@@ -172,7 +167,7 @@ class Template(object):
         static_item = getattr(self, 'static_prop_' + what, None)
         if static_item:
             return static_item()
-        return None
+        return ''
 
     def indent(self, item):
         if item.__class__ == ''.__class__:
