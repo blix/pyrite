@@ -1042,15 +1042,6 @@ class Repo(object):
             raise RepoError(_('Failed to get untracked files: %s') %
                             proc.stderr.read())
 
-    def alter_current_hist(self, start):
-        self.validate()
-        proc = self._popen(('git', 'rebase', '--interactive', start))
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to skip rebase commit: %s') %
-                            proc.stderr.read())
-
     def cat_file(self, filename, cat_to=None, commit='HEAD'):
         self.validate()
         try:
