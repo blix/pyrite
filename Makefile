@@ -17,6 +17,7 @@ install:
 install-home:
 	$(PYTHON) setup.py version
 	$(PYTHON) setup.py install --home="$(HOME)" --force
+	$(PYTHON) setup.py fix-home-path
 
 test: local
 	(cd test && $(PYTHON) TestSuite.py)

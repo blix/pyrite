@@ -33,6 +33,21 @@ if sys.argv[1] == 'version':
     f = open('pyrite/__version__.py', 'w+')
     f.write('version = \'' + version + '\'\n')
 
+elif sys.argv[1] == 'fix-home-path':
+    path = os.path.expanduser(os.path.join('~', 'bin', 'pyt'))
+    libpath = os.path.expanduser(os.path.join('~', 'lib', 'python'))
+    if os.path.isfile(path) and os.path.isdir(libpath):
+        f = open(path, 'r')
+        try:
+            lines = f.readlines()
+            f.close()
+            lines.insert(1, 'import sys\n')
+            lines.insert(2, 'sys.path.insert(1, "%s")\n' % libpath)
+            f = open(path, 'w+')
+            f.writelines(lines)
+        finally:
+            if f:
+                f.close()
 else:
     setup(name='pyrite', version='0', description='Pyrite git porcelain',
           license='GNU GPL', scripts=['pyt'],
