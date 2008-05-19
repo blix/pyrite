@@ -555,7 +555,7 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
         
-    def diff(self, start, end, paths, stat=False, patch=True,
+    def diff(self, start, end, paths=None, stat=False, patch=True,
                 detect=False, ignorewhite='none', binary=False):
         self.validate()
         args = ['git', 'diff']
