@@ -87,7 +87,6 @@ def run(cmd, *args, **flags):
             if not mine or not theirs:
                 pyrite.ui.error_out(_('Could not get all versions of file %s')
                                     % f)
-            print toolspec
             if not base:
                 base = ''
             cmd = toolspec.replace('{base}', '"' + base + '"')
