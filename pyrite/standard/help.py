@@ -60,12 +60,12 @@ def show_command_help(cmd, message):
     pyrite.ui.info(cmd_info[2])
     pyrite.ui.info(mod.help_str)
     if len(mod.options) > 0:
-        pyrite.ui.info(_('options:\n'))
+        pyrite.ui.info(_('\noptions:'))
         for s, l, m, f in mod.options:
             if len(s) > 0:
-                pyrite.ui.info(' -%s --%s %s' % (s.ljust(2), l.ljust(10), m))
+                pyrite.ui.info(' -%s, --%s %s' % (s, l.ljust(15), m))
             elif len(l) > 0:
-                pyrite.ui.info('     --%s %s' % (l.ljust(10), m))
+                pyrite.ui.info('      --%s %s' % (l.ljust(15), m))
             else:
                 pyrite.ui.info('\n*' + m)
     pyrite.ui.info('\n' + _('For other commands run "pyt help"'))
