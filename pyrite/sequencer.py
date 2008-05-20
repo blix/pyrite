@@ -212,6 +212,7 @@ class Sequencer(object):
             message.append(_('# Commit message from %s\n\n') %
                            commit[Repo.ID])
             message.append(commit[Repo.SUBJECT])
+            message.append('\n')
             message.append(''.join(commit[Repo.BODY]))
             message.append('\n')
 
