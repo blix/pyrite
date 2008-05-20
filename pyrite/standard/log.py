@@ -21,15 +21,17 @@ from pyrite.template import FileTemplate, Template
 options = [
 ('s', 'style', _('specify a predefined style'), 1),
 ('t', 'template', _('specify a template for the output'), 1),
-('l', 'limit', _('specify the maximum number or commits to show (defualt 10)'), 1),
+('l', 'limit', _('max number or commits to show (defualt 10)'), 1),
 ('p', 'patch', _('show the patch for the commit'), 0),
 ('f', 'follow-renames', _('show history of files beyond renames'), 0),
 ('a', 'all', _('do not limit the number of commits to show'), 0),
+('r', 'revision-start', _('first commit to show'), 1),
+('R', 'revision-end', _('last commit to show, default is current HEAD'), 1),
 ('c', 'color', _('show log in living color'), 0)
 ]
 
 help_str=_("""
-pyt log [options] [firstcommit[..[lastcommit]]] [paths]...
+pyt log [options] -- [paths]...
 
 The log command is used to show the history for commits.  A range can be
 specified using either commit IDs or symbolic names. If no range is specified
@@ -47,6 +49,8 @@ def run(cmd, args, flags):
     limit = flags.get('limit', 10)
     show_patch = flags.has_key('patch')
     follow = flags.has_key('follow-renames')
+    first = flags.get('revision-start', None)
+    last = flags.get('revision-end', args and args.pop(0) or 'HEAD')
     if flags.has_key('all'):
         limit = -1
 
@@ -56,21 +60,9 @@ def run(cmd, args, flags):
     if flags.has_key('limit') and flags.has_key('all'):
         raise HelpError(cmd, _('"limit" and "all" conflict.'))
 
-    first = last = None
-    paths = None
-    if len(args) > 0:
-        idx = args[0].find('..')
-        if idx < 0:
-            if pyrite.repo.get_commit_info(args[0]):
-                first = args[0]
-        else:
-            first = args[0][:idx]
-            last = args[0][idx + 2:]
+    #massage start position to make git show it to us
     if first:
-        paths = args[1:]
-    else:
-        paths = args
-
+        first += '^'
     formatter = None
     color = 'color' in flags or \
             pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))

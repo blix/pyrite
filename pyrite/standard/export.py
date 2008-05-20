@@ -77,8 +77,8 @@ def _run_patch_export(args, flags):
     outdir = flags.get('output-dir', None)
     numbered = 'numbered' in flags
     force = 'force' in flags
-    firstcommit = flags.get('revision-start', 'HEAD')
-    lastcommit = flags.get('revision-end', None)
+    firstcommit = flags.get('revision-start', None)
+    lastcommit = flags.get('revision-end', 'HEAD')
 
     if compose:
         hist = pyrite.repo.get_history(firstcommit, lastcommit, -1)

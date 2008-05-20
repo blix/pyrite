@@ -62,7 +62,8 @@ from pyrite.repository import Repo
 
 def print_branch_stats(repo_dir, branch):
     repo = Repo(repo_dir)
-    hist = repo.get_history(branch, None, -1, [Repo.AUTHOR, Repo.AUTHOR_EMAIL])
+    hist = repo.get_history(None, branch, -1, [Repo.AUTHOR,
+                                               Repo.AUTHOR_EMAIL])
     count = 0
     authors = {}
     for commit in hist:

@@ -17,14 +17,14 @@ import pyrite
 from pyrite.standard.help import HelpError
 
 options = [
-('r', 'revision-start', _('revision to use as base for comparison'), 1),
-('R', 'revision-end', _('revision to diff against revision-start'), 1),
+('r', 'revision-start', _('base for comparison, defaults to current HEAD'), 1),
+('R', 'revision-end', _('what to compare, default is current changes'), 1),
 ('s', 'stat', _('show a diffstat'), 0),
 ('p', 'patch-stat', _('show both the diff and a diffstat'), 0),
 ('c', 'color', _('show colored diff'), 0),
 ('d', 'detect', _('detect renames and copies'), 0),
 ('e', 'ignore-eol', _('ignore end of line whitespace differences'), 0),
-('w', 'ignore-whitespace', _('ignore all whitespace'), 0)
+('w', 'ignore-ws', _('ignore all whitespace'), 0)
 ]
 
 help_str =_("""

@@ -328,7 +328,7 @@ class Repo(object):
             commit = {}
 
     def get_commit_info(self, commit='HEAD', data=None):
-        gen = self.get_history(commit, None, 1, data)
+        gen = self.get_history(None, commit, 1, data)
         try:
             return gen.next()
         except StopIteration:
@@ -554,7 +554,7 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
-        
+
     def diff(self, start, end, paths=None, stat=False, patch=True,
                 detect=False, ignorewhite='none', binary=False):
         self.validate()
@@ -615,13 +615,11 @@ class Repo(object):
         return files
 
     def _convert_range(self, first, last):
-        if not first:
-            first = 'HEAD^'
-        else:
-            first += '^'
         if not last:
             last = 'HEAD'
-        first = first + '..' + last
+        if not first:
+            first = 'HEAD'
+        first = first + '^..' + last
         return first
 
     def get_history(self, first, last, limit, data=None, follow=False,
@@ -637,12 +635,12 @@ class Repo(object):
             args.append('--follow')
         if skip:
             args.append('--skip=' + str(skip))
-        if not first:
-            first = 'HEAD'
-        if last:
+        if not last:
+            last = 'HEAD'
+        if first:
             args.append(first + '..' + last)
         else:
-            args.append(first)
+            args.append(last)
         if paths:
             args.append('--')
             args.extend(paths)
