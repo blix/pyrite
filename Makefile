@@ -21,3 +21,6 @@ install-home:
 
 test: local
 	(cd test && $(PYTHON) TestSuite.py)
+
+stats:
+	$(PYTHON) collect_stats.py | tee STATS
