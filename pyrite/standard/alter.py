@@ -171,6 +171,8 @@ def run(cmd, args, flags):
                 return
             message = message.splitlines()
 
+        if pyrite.repo.changed_files():
+            raise SequencerDirtyWorkdirError()
         done = False
         if branch:
             pyrite.repo.checkout(branch)
@@ -190,12 +192,11 @@ def run(cmd, args, flags):
         pyrite.ui.error_out('internal error:' + inst.message)
 
     except SequencerDirtyWorkdirError:
-        pyrite.ui.info(_('The working directory has changes.\n'
-            'The working directory must be clean to start a rebase.\n\n'
-            'You can either abandon your current changes by doing\n'
-            'pyt revert" \n'
-            'or you can commit your changes and then go back and change\n'
-            'it later if you desire'))
+        pyrite.ui.info(_('The working directory has changes.  '
+            'The working directory must be clean to \nstart a rebase.\n\n'
+            'You can either abandon your current changes by doing '
+            '"pyt revert" or you \ncan commit your changes and then go '
+            'back and change it later if you desire.'))
 
     except SequencerMergeNeeded:
         pyrite.ui.info(_('\nOne or more files have conflicting changes.'))
