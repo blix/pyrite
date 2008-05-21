@@ -152,6 +152,9 @@ class UI(object):
     def info(self, msg):
         return self._write(self.stdout, msg)
 
+    def warn(self, msg):
+        return self._write(self.stderr, _('Warning: ') + msg)
+
     def error(self, msg):
         return self._write(self.stderr, msg)
 
