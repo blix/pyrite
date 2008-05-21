@@ -146,7 +146,8 @@ def run(cmd, args, flags):
 
         end = branch or 'HEAD'
         commits = pyrite.repo.get_history(base, end, limit=-1,
-                                data=[Repo.ID, Repo.SUBJECT, Repo.PARENTS])
+                                data=[Repo.ID, Repo.SUBJECT, Repo.PARENTS],
+                                symmetric=True)
         message = []
         for commit in reversed([c for c in commits]):
             message.append('pick %s %s\n' % (commit[Repo.ID][:8],
