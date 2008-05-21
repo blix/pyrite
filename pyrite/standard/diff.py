@@ -37,7 +37,7 @@ be between the working set and the commit.  You can specify a set of paths
 to narrow down the result of the patch.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     stat = 'stat' in flags
     patch_stat = 'patch-stat' in flags
     color = 'color' in flags or \

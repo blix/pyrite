@@ -44,7 +44,7 @@ The commit option allows you to re-use the commit message, author and timestamp
 of a previous commit as the default messages for the current commit.
 """
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     use_commit = flags.get('commit', None)
     use_author = flags.get('author', None)
     use_message = flags.get('message', None)
@@ -82,7 +82,6 @@ def run(cmd, *args, **flags):
                                 ''.join(commitdata[Repo.BODY])
             amend = commitdata[Repo.ID]
             del commitdata[Repo.ID]
-            args = list(args)
             if args:
                 for f in pyrite.repo.changed_files('HEAD'):
                     args.append(f[1])

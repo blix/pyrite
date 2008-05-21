@@ -30,7 +30,7 @@ The move command will either move a set of existing files/directories to
 another directory or it will rename a single existing file or directory. 
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     force = 'force' in flags
     ignore = 'ignore' in flags
     noop = 'no-move' in flags
@@ -38,9 +38,10 @@ def run(cmd, *args, **flags):
     if len(args) < 2:
         raise HelpError(cmd, _('Need at least a source and a destination'))
 
-    sources = args[:-1]
-    dest = args[-1]
-    output = pyrite.repo.move(sources, dest, force=force, ignore=ignore,
+
+    dest = args.pop()
+
+    output = pyrite.repo.move(args, dest, force=force, ignore=ignore,
                                 noop=noop)
 
     pyrite.ui.info(output)

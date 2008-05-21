@@ -46,7 +46,7 @@ pyt resolve -t "meld {mine} {result} {theirs}" -f foo
 which will cause Pyrite to launch meld to do the merge.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     f = flags.get('file', None)
     toolspec = flags.get('tool', pyrite.config.get_option('pyrite.mergetool'))
 

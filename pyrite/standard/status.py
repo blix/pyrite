@@ -30,7 +30,7 @@ you to see what would happen if you did a checkin with the --amend flag.  Also
 like checkin, you can use paths to limit what is reported by status.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     amend = 'amend' in flags
     color = 'color' in flags or \
             pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))

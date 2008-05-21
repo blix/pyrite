@@ -49,7 +49,7 @@ The branch command will not switch to the new branch, use checkout.
 'pyt help checkout' for more.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     is_verbose = 'verbose' in flags
     is_force = 'force' in flags
     show_remote = 'remote' in flags

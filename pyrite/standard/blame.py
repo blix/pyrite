@@ -36,7 +36,7 @@ information based on a different revision of the file.
 a "+" or "-" infront of it, it will be used as a range from start-line.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     use_long = 'long' in flags
     commit = flags.get('commit', None)
     start = flags.get('start-line', None)

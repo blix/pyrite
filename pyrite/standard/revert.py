@@ -39,7 +39,7 @@ The form using -u will apply a reverse-commit that undoes the patch of an
 existing commit.  -e, -m and -n can only be used with this form.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     commit = flags.get('undo', None)
     files = 'files' in flags
     edit = 'edit' in flags

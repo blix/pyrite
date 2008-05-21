@@ -81,7 +81,7 @@ def _run_cherry_pick(commit, edit, record, dryrun):
         pyrite.repo.move_head_to('HEAD^')
     return True, None, orig_id
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     edit = 'edit' in flags
     dryrun = 'no-commit' in flags
     record = 'record-origin' in flags

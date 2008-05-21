@@ -181,7 +181,7 @@ class Config(object):
         self.user = user + ' ' + email
         return self.user
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     is_user = True
     is_all = False
     if flags.has_key('repo-only'):

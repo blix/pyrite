@@ -37,7 +37,7 @@ You can also choose to search previous revisions without having to check
 them out.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     ignore = 'ignore-case' in flags
     whole = 'whole-word' in flags
     no_bin = 'no-binary' in flags
@@ -60,8 +60,7 @@ def run(cmd, *args, **flags):
     if not args:
         raise HelpError(cmd, _('Need a pattern to search for'))
 
-    pattern = args[0]
-    args = args[1:]
+    pattern = args.pop(0)
 
     found_matches = False
     for line in pyrite.repo.grep(pattern, args, commit=commit, ignore=ignore,

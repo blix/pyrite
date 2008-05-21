@@ -126,7 +126,7 @@ def _run_patch_export(args, flags):
     pyrite.ui.info(pyrite.repo.export_patch(firstcommit, lastcommit, outdir,
                                             force=force, numbered=numbered))
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     bundle = flags.get('bundle', None)
     verify = flags.get('verify', None)
     archive = flags.get('archive', None)
@@ -156,8 +156,8 @@ def run(cmd, *args, **flags):
         if not args:
             commit = 'HEAD'
         else:
-            commit = args[0]
-            args = args[1:]
+            commit = args.pop(0)
+
         pyrite.repo.export_archive(archive, commit, paths=args, format=format)
     else:
         _run_patch_export(args, flags)

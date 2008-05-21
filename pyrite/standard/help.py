@@ -101,7 +101,7 @@ def on_help_error(err):
     else:
         show_command_help(err.cmd, err.message)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     if 'verbose' in flags:
         raise HelpError(verbose=True)
     if args:

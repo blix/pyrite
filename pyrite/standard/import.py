@@ -45,7 +45,7 @@ def _read_pending(import_file):
     files = [ line.strip() for line in f.readlines() ]
     return files
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     bundle = flags.get('bundle', None)
     is_interactive = 'interactive' in flags
     sign = 'signoff' in flags

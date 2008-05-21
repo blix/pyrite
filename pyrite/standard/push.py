@@ -39,7 +39,7 @@ out branch.  If you do not specify localsource or targetbranch, then all
 heads that exist in both repositories will be update.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     is_all = flags.has_key('all')
     all_tags = flags.has_key('all-tags')
     is_force = flags.has_key('force')
@@ -50,10 +50,10 @@ def run(cmd, *args, **flags):
     if len(args) > 2:
         raise HelpError(cmd, _('Wrong number of arguments'))
                         
-    if len(args) > 0:
-        repo = args[0]
-    if len(args) > 1:
-        refspec = args[1].split(':')
+    if args:
+        repo = args.pop(0)
+    if args:
+        refspec = args[0].split(':')
         if len(refspec) > 2:
             raise HelpError(cmd, _('Invalid ref spec'))
         source = target = refspec[0]

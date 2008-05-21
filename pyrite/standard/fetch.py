@@ -37,7 +37,7 @@ for updating local branches from one another.  If no destination branch is
 given, then the current branch is assumed.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     force = 'force' in flags
     notags = 'no-tags' in flags
     depth = flags.get('depth', -1)
@@ -56,8 +56,8 @@ def run(cmd, *args, **flags):
     if len(args) == 1:
         branchspecs.append(split_branches(args[0]))
     else:
-        repo = args[0]
-        branchspecs = [ split_branches(s) for s in args[1:] ]
+        repo = args.pop(0)
+        branchspecs = [ split_branches(s) for s in args ]
 
     output = pyrite.repo.fetch(repo, branchspecs, force=force, depth=depth,
                                 notags=notags)

@@ -31,7 +31,7 @@ command can also be used to mark a file deleted in the repository but not
 actually remove it from the disk.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     force = 'force' in flags
     recurse = 'recursive' in flags
     noop = 'no-remove' in flags

@@ -32,7 +32,7 @@ pyt pull [options] <sourcerepo> [sourcebranch[:targetbranch]]
 The pull commands fetches history from the sourcerepo and merges it.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     is_force = flags.has_key('force')
     tags = not flags.has_key('no-tags')
     extra_tags = flags.has_key('extra-tags')
@@ -53,10 +53,10 @@ def run(cmd, *args, **flags):
     else:
         tags = 'none'
 
-    if len(args) > 0:
-        repo = args[0]
-    if len(args) > 1:
-        refspec = args[1].split(':')
+    if args:
+        repo = args.pop(0)
+    if args:
+        refspec = args[0].split(':')
         if len(refspec) > 2:
             raise HelpError(cmd, _('Invalid ref spec'))
         source = target = refspec[0]

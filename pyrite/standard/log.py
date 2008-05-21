@@ -41,7 +41,7 @@ given then the history of that commit is shown.  If the range is given as
 You can also limit the history searched to a one or more paths.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     style = flags.get('style', None)
     template = flags.get('template', 'medium')
     limit = flags.get('limit', 10)
@@ -49,10 +49,10 @@ def run(cmd, *args, **flags):
     follow = flags.has_key('follow-renames')
     if flags.has_key('all'):
         limit = -1
-    
+
     if flags.has_key('style') and flags.has_key('template'):
         raise HelpError(cmd, _('"style" and "template" are redundant.'))
-                        
+
     if flags.has_key('limit') and flags.has_key('all'):
         raise HelpError(cmd, _('"limit" and "all" conflict.'))
 
@@ -83,7 +83,7 @@ def run(cmd, *args, **flags):
     if not show_patch and Repo.PATCH in data:
         data.remove(Repo.PATCH)
     output = pyrite.repo.get_history(first, last, limit, data=data,
-                                       follow=follow, paths=paths)
+                                       follow=follow, paths=args)
 
     stream = pyrite.ui.info_stream()
     for commit_data in output:

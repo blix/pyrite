@@ -100,7 +100,7 @@ def _finish(done, last_id):
         pyrite.ui.info(_('Once you are done editing, you can run'))
         pyrite.ui.info(_('"pyt alter continue."\n\n'))
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
 
     curbranch = pyrite.repo.branch()
     interactive = 'interactive' in flags

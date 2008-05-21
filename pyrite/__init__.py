@@ -156,7 +156,7 @@ def run():
         if 'debug-profile' in flags:
             import cProfile
             import pstats
-            cProfile.runctx('modules[cmd_info[0]].run(cmd, *args, **flags)',
+            cProfile.runctx('modules[cmd_info[0]].run(cmd, args, flags)',
                             globals(), locals(), 'pyt-profile')
             p = pstats.Stats('pyt-profile')
             p.sort_stats(flags.get('debug-profile-sort', 'cumulative'))
@@ -165,7 +165,7 @@ def run():
             if 'debug-profile-extra' in flags:
                 p.print_callers()
         else:
-            modules[cmd_info[0]].run(cmd, *args, **flags)
+            modules[cmd_info[0]].run(cmd, args, flags)
 
     except pythelp.HelpError, inst:
         pythelp.on_help_error(inst)

@@ -31,18 +31,7 @@ patch series, since it minimizes the work that needs to be done.
 """)
 
 
-def run(cmd, *args, **flags):
-
-    startcommit = endcommit = None
-    if len(args) > 0:
-        commits = args[0].split('..')
-        if pyrite.repo.get_commit_info(commits[0]):  
-            startcommit = commits[0]
-            if len(commits) == 2:
-                endcommit = commits[1]
-            args = args[1:]
-    else:
-        startcommit = 'HEAD'
+def run(cmd, args, flags):
 
     buf = [
         _('From: ') + pyrite.config.get_option('user.name') + ' <' +

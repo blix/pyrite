@@ -53,26 +53,25 @@ def _get_message(message, name):
         raise HelpError(cmd, _('No commit message'))
     return message
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     
     if flags.has_key('list'):
         lines = None
-        if len(args) > 0:
+        if args:
             lines = pyrite.repo.list_tags(args[0])
         else:
             lines = pyrite.repo.list_tags(None)
         pyrite.ui.info(lines)
         return
-    
-    if len(args) < 1:
+
+    if args:
             raise HelpError(cmd, _('No tag name specified'))
-  
+
     if flags.has_key('verify'):
         pyrite.ui.info(pyrite.repo.verify_tag(args[0]))
     elif flags.has_key('delete'):
         pyrite.ui.info(pyrite.repo.delete_tags(args))
     else:
-        
         message = flags.get('message', None)
         key = flags.get('key', None)
         commit = flags.get('revision', 'HEAD')

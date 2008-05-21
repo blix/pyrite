@@ -31,7 +31,7 @@ When <commit> is a branch with no paths, it checks out and switches to that
 branch.  The --branch flag will create a branch and switch to it in one step.
 """)
 
-def run(cmd, *args, **flags):
+def run(cmd, args, flags):
     is_force = False
     is_merge = False
     if flags.has_key('force'):
