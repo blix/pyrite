@@ -246,6 +246,8 @@ def run(cmd, args, flags):
                 f.close()
         else:
             try:
-                os.remove(sequencer_file)
-            except OSError:
-                pass
+                if os.path.isfile(sequencer_file):
+                    os.remove(sequencer_file)
+            except OSError, inst:
+                pyrite.ui.warn(_('Failed to remove sequencer %s') %
+                               sequencer_file)
