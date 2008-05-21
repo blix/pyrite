@@ -64,18 +64,30 @@ class ConfigError(Exception):
 
 class Config(object):
     _not_under_repo_error = _("Not under a repository")
-    _cant_load_user_config = _("User config not available")
     _missing_config_arg = _("Category and Name must be supplied")
     def __init__(self):
         self.user = None
         self.user_config_path = os.path.expanduser('~/.pytrc')
         self.user_config = ConfigParser.SafeConfigParser()
-        self.user_config.readfp(self._get_file())
+        f = None
+        try:
+            f = open(self.user_config_path, 'rw')
+            self.user_config.readfp(f)
+        except (IOError, OSError):
+            pass
+        finally:
+            f.close()
         if pyrite.repo.is_repo():
             self.repo_config_path = os.path.join(pyrite.repo.get_repo_dir(),
                                                     'pytrc')
             self.repo_config = ConfigParser.SafeConfigParser()
-            self.repo_config.readfp(self._get_file(True))
+        try:
+            f = open(self.repo_config_path, 'rw')
+            self.repo_config.readfp(f)
+        except (IOError, OSError), inst:
+            pass
+        finally:
+            f.close()
 
     def set_repo_option(self, item, value, is_all):
         if not pyrite.repo.is_repo():
@@ -155,7 +167,7 @@ class Config(object):
             return parts[0], parts[1]
         else:
             return parts[0] + ' "' + parts[1] + '"', parts[2]
-        
+
     def _del_option(self, config, file_obj, item, is_all):
         category, name = self._split_option(item)
         if category == None or name == None:
@@ -179,17 +191,6 @@ class Config(object):
         except:
             raise ParseError(_('Could not write to config file'))
 
-    def _get_file(self, is_global=True):
-        rcpath = None
-        if is_global:
-            f = self.user_config_path
-        else:
-            f = self.repo_config_path
-        try: return open(f, "r+")
-        except IOError:
-            try: return open(f, "w+")
-            except: raise ConfigError()
-            
     def get_user(self):
         if self.user:
             return self.user
@@ -202,13 +203,26 @@ class Config(object):
         self.user = user + ' ' + email
         return self.user
 
+    def _all_config(self, config):
+        for section in config.sections():
+            section = '.'.join([part.strip("\"")
+                                for part in section.split()])
+            for name, value in self._items(section, config):
+                yield section + '.' + name, value
+
+    def all_user(self):
+        return self._all_config(self.user_config)
+
+    def all_repo(self):
+        return self._all_config(self.repo_config)
+
 def run(cmd, args, flags):
     is_user = True
     is_all = False
     if flags.has_key('repo-only'):
         is_user = False
 
-    if flags.has_key('all'):
+    if 'all' in flags and 'set' in flags:
         raise Exception("Sorry, multiple config lines with the same name not"
                             "implemented yet.")
         is_all = True
@@ -242,8 +256,13 @@ def run(cmd, args, flags):
                 pyrite.config.set_repo_option(args[0], ' '.join(args[1:]),
                                                 is_all)
         else:
-            if len(args) == 0:
-                pass
+            if not args:
+                pyrite.ui.info(_('Global config values...\n\n'))
+                for k,v in pyrite.config.all_user():
+                    pyrite.ui.info(_(' %s %s') % (k.ljust(30), v))
+                pyrite.ui.info(_('\nThis repository\'s config values...\n\n'))
+                for k,v in pyrite.config.all_repo():
+                    pyrite.ui.info(_(' %s %s') % (k.ljust(30), v))
             else:
                 for option in args:
                     value = pyrite.config.get_option(option, is_all)
