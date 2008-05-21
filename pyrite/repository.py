@@ -555,6 +555,21 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
 
+    def num_stat(self, start, end):
+        self.validate()
+        spec = start
+        if not start:
+            spec = 'HEAD'
+        elif end:
+            spec = start + '..' + end
+        proc = self._popen(('git', 'diff', '--numstat', spec))
+        for line in proc.stdout.readlines():
+            added, lost, name = line.split(None, 2)
+            yield int(added), int(lost), name
+        if proc.wait():
+            raise RepoError(_('Failed to get numstat: %s') %
+                            proc.stderr.read())
+
     def diff(self, start, end, paths=None, stat=False, patch=True,
                 detect=False, ignorewhite='none', binary=False):
         self.validate()
