@@ -168,15 +168,19 @@ class Config(object):
         else:
             return parts[0] + ' "' + parts[1] + '"', parts[2]
 
-    def _del_option(self, config, file_obj, item, is_all):
+    def _del_option(self, config, path, item, is_all):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise ValueError(_missing_config_arg)
         if config.has_section(category):
             config.remove_option(category, name)
-            if config.options(category).empty():
+            if not config.options(category):
                 config.remove_section(category)
-            config.write(file_obj)
+            try:
+                f = open(path, 'w+')
+                config.write(f)
+            except:
+                raise ParseError(_('Could not write to config file'))
 
     def _set_option(self, config, path, item, value, is_all):
         category, name = self._split_option(item)
@@ -243,11 +247,9 @@ def run(cmd, args, flags):
                 pyrite.config.add_repo_option(args[0], ' '.join(args[1:]))
         elif flags.has_key('delete'):
             if is_user:
-                pyrite.config.del_user_option(args[0], ' '.join(args[1:]),
-                                                is_all)
+                pyrite.config.del_user_option(args[0], is_all)
             else:
-                pyrite.config.del_repo_option(args[0], ' '.join(args[1:]),
-                                                is_all)
+                pyrite.config.del_repo_option(args[0], is_all)
         elif flags.has_key('set'):
             if is_user:
                 pyrite.config.set_user_option(args[0], ' '.join(args[1:]),
