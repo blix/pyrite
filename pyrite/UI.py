@@ -117,7 +117,6 @@ class UI(object):
             answer = self.stdin.readline()
             answer = answer.strip().lower()
             if answer in responses:
-                print answer
                 return answer
 
     def _write(self, stream, msg):

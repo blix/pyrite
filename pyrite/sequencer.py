@@ -90,7 +90,6 @@ class Sequencer(object):
                                    'or "pyt rebase skip"'))
 
         cmd, id, rest = self._seq[self._last_action].split(None, 2)
-        print 'doing ', cmd, id, rest
         if cmd in ('pick', 'edit') and not self._message:
             c = self._repo.get_commit_info(id, [Repo.SUBJECT, Repo.BODY])
             self._message = c[Repo.SUBJECT] + '\n' + ''.join(c[Repo.BODY])

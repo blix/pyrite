@@ -53,7 +53,6 @@ def run(cmd, args, flags):
     extra = [_('The above information will be used for all'
                ' patches to be sent')]
     buf = pyrite.ui.edit(buf, extra, 'pyt-email').splitlines()
-    print buf
     if len(buf) != 9:
         raise pyrite.ui.error_out(_('invalid email options'))
     fromaddr = buf[0].split(':')[1].strip()
