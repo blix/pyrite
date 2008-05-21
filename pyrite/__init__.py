@@ -114,16 +114,31 @@ global_options = [
 ]
 
 def dyn_import(module, is_extension=False, path=None):
-    if module in modules: return
+    if module in modules:
+        return
     package = None
-    if extensions.is_extension(module):
-        package = exensions.get_package(module)
+    if is_extension:
+        if path:
+            raise Exception('custom extension paths not yet supported')
+        else:
+            package = 'pyrite.addons'
     else:
         package = 'pyrite.standard'
-    m = __import__(package, fromlist=module)
-    f, p, d = imp.find_module(module, m.__path__)
-    modules[module] = m = imp.load_module(package + '.' + module, f, p, d)
-    return m
+    try:
+        m = __import__(package, fromlist=module)
+        f, p, d = imp.find_module(module, m.__path__)
+        modules[module] = m = imp.load_module(package + '.' + module,
+                                              f, p, d)
+        return m
+    except ImportError, inst:
+        ui.warn(_('Failed to load extension %s: %s') %
+                       (module, inst.message))
+        return None
+
+def exec_command(module, cmd, args, flags):
+    extensions.on_before_command(cmd, args, flags)
+    module.run(cmd, args, flags)
+    extensions.on_after_command(cmd, args, flags)
 
 def run():
     show_trace = False
@@ -133,7 +148,7 @@ def run():
         repo = repository.Repo()
         global config
         config = pytconfig.Config()
-        extensions.load(commands, modules) #TODO:implement extension loading
+        extensions.on_load(commands)
 
         if len(sys.argv) < 2:
             raise pythelp.HelpError()
@@ -144,6 +159,8 @@ def run():
 
         m = dyn_import(cmd_info[0])
         flags,args = options.parse(m.options, sys.argv[2:], cmd)
+        module = modules[cmd_info[0]]
+
         if 'help' in flags:
             raise pythelp.HelpError(cmd)
         if 'debug-subcommands' in flags:
@@ -156,7 +173,7 @@ def run():
         if 'debug-profile' in flags:
             import cProfile
             import pstats
-            cProfile.runctx('modules[cmd_info[0]].run(cmd, args, flags)',
+            cProfile.runctx('exec_command(module, cmd, args, flags)',
                             globals(), locals(), 'pyt-profile')
             p = pstats.Stats('pyt-profile')
             p.sort_stats(flags.get('debug-profile-sort', 'cumulative'))
@@ -165,7 +182,7 @@ def run():
             if 'debug-profile-extra' in flags:
                 p.print_callers()
         else:
-            modules[cmd_info[0]].run(cmd, args, flags)
+            exec_command(module, cmd, args, flags)
 
     except pythelp.HelpError, inst:
         pythelp.on_help_error(inst)

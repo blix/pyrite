@@ -106,6 +106,27 @@ class Config(object):
         else:
             return ''
 
+    def _items(self, category, config):
+        parts = category.split('.')
+        if len(parts) == 1:
+            category = parts[0]
+        elif parts:
+            category = parts[0] + ' "' + parts[1] + '"'
+        if self.user_config.has_section(category):
+            for k, v in self.user_config.items(category):
+                yield k, v
+
+    def items(self, category):
+        items = {}
+        for k, v in self._items(category, self.user_config):
+            items[k] = v
+
+        for k, v in self._items(category, self.repo_config):
+            items[k] = v
+
+        for k, v in items.items():
+            yield k, v
+
     def update_ignore(self, item, remove):
         if not pyrite.repo.is_repo():
             raise ConfigError(self._not_under_repo_error)
