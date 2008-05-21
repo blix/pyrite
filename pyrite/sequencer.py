@@ -74,8 +74,9 @@ class Sequencer(object):
     def skip(self):
         if 0 > self._last_action:
             raise UnintializedSequencerError(_('last action unkown'))
+        cmd, id, rest = self._seq[self._last_action].split(None, 2)
         self._repo.move_head_to('HEAD', True)
-        self._last_action += 1
+        return id, rest
 
     def finish_last(self):
         if 0 > self._last_action:
@@ -89,9 +90,12 @@ class Sequencer(object):
                                    'or "pyt rebase skip"'))
 
         cmd, id, rest = self._seq[self._last_action].split(None, 2)
+        print 'doing ', cmd, id, rest
         if cmd in ('pick', 'edit') and not self._message:
             c = self._repo.get_commit_info(id, [Repo.SUBJECT, Repo.BODY])
             self._message = c[Repo.SUBJECT] + '\n' + ''.join(c[Repo.BODY])
+        elif cmd == 'squash':
+            return True
         else:
             raise SequencerError(_('don\'t know what to do with %s right '
                                    'now') % item)
@@ -118,7 +122,8 @@ class Sequencer(object):
         c = {Repo.SUBJECT: self._message}
         self._repo.commit(c)
         self._message = []
-        self._last_action += 1
+        if cmd == 'squash':
+            self._squashed = []
         return True
 
     def run(self):
@@ -145,40 +150,42 @@ class Sequencer(object):
             'tag': self._tag
         }
         if self._last_action >= len(self._seq):
-            return True, None
+            yield True, None, None
+            return
         for item in self._seq[self._last_action + 1:]:
             self._last_action += 1
 
             cmd, rest = item.split(None, 1)
             if cmd not in commands:
                 raise SequencerError(_('Bad sequence command: %s') % cmd)
-            if cmd != 'squash':
-                if not self._complete_squash()[0]:
-                    return False, None
-            tup = commands[cmd](rest)
-            if not tup[0]:
-                return tup
-        return self._complete_squash()
+            if cmd != 'squash' and self._squashed:
+                cont, id, subject = self._complete_squash()
+                yield cont, 'squish', id, subject
+            cont, id, subject = commands[cmd](rest)
+            yield cont, cmd, id, subject
+        if self._squashed:
+            cont, id, subject = self._complete_squash()
+            yield cont, 'squish', id, subject
 
     def _pick(self, rest, nocommit=False):
         try:
-            cid = self._get_commit_id(rest)
+            cid, subject = self._get_commit_id(rest)
             self._repo.cherry_pick(cid, nocommit)
         except RepoError, inst:
             raise SequencerMergeNeeded(inst.message)
-        return True, cid
+        return True, cid, subject
 
     def _edit(self, rest):
         try:
-            cid = self._get_commit_id(rest)
+            cid, subject = self._get_commit_id(rest)
             self._repo.cherry_pick(cid, True)
         except RepoError, inst:
             raise SequencerMergeNeeded(inst.message)
-        return False, cid
+        return False, cid, subject
 
     def _squash(self, rest):
         try:
-            cid = self._get_commit_id(rest)
+            cid, subject = self._get_commit_id(rest)
             if not self._squashed:
                 commit = self._repo.get_commit_info('HEAD',
                                                     [Repo.SUBJECT,
@@ -197,14 +204,11 @@ class Sequencer(object):
                 return False
             self._squashed.append(commit)
             self._repo.cherry_pick(cid, True)
-            return True, cid
+            return True, cid, subject
         except RepoError, inst:
-            raise SequencerError(inst.message)
+            raise SequencerMergeNeeded()
 
-    def _complete_squash(self):
-        if not self._squashed:
-            return True, None
-
+    def _squash_message(self):
         message = []
         for num, commit in enumerate(self._squashed):
             if num:
@@ -228,19 +232,27 @@ class Sequencer(object):
 
         for x in self._repo.changed_files():
             extra.append('  ' + ' '.join(x))
+        return message, extra
+
+    def _complete_squash(self):
+        if not self._squashed:
+            return True, None, None
+
+        message, extra = self._squash_message()
 
         message = pyrite.ui.edit(message, extra, 'pyt-message')
         if not message:
-            return False, None
+            return False, None, None
         commit = {Repo.SUBJECT: message}
         self._repo.commit(commit)
         self._squashed = []
-        return True, None
+        commit = self._repo.get_commit_info('HEAD', (Repo.ID, Repo.SUBJECT))
+        return True, commit[Repo.ID], commit[Repo.SUBJECT]
 
     def _merge(self, rest):
         commits = rest.split()
         self._repo.merge(commits)
-        return True, None
+        return True, None, None
 
     def _reset(self, rest):
         try:
@@ -248,7 +260,7 @@ class Sequencer(object):
             self._repo.move_head_to(cid, True)
         except RepoError, inst:
             raise SequencerError(inst.message)
-        return True, None
+        return True, None, None
 
     def _mark(self, rest):
         try:
@@ -256,15 +268,15 @@ class Sequencer(object):
             self._marks[rest] = id
         except RepoError, inst:
             raise SequencerError(inst.message)
-        return True, None
+        return True, None, None
 
     def _tag(self, rest):
         pass
 
     def _get_commit_id(self, rest):
-        cid = rest.split(None, 1)[0]
+        cid, subject = rest.split(None, 1)
         if cid[0] == ':':
             if not cid[1:] in self._marks:
                 raise SequencerError(_('Bad mark %s') % cid[1:])
             cid = self._marks[cid[1:]]
-        return cid
+        return cid, subject

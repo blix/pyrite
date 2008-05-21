@@ -62,43 +62,67 @@ You can combine both modes if you want to change history based on the history
 of another branch.
 """)
 
+def _display_message(format, id, subject):
+    if len(subject) > 50:
+            subject = subject[:50] + '...'
+    pyrite.ui.info(format % (id[:8], '"' + subject + '"'))
+
 def _handle_subcommands(command, sequencer):
     if command in ('cont', 'continue', 'skip'):
         if command == 'skip':
-            sequencer.skip()
+            id, subject = sequencer.skip()
+            _display_message(_('Skipping %s: %s'), id, subject)
         else:
             sequencer.finish_last()
-        return sequencer.run()
+            commit = pyrite.repo.get_commit_info('HEAD',
+                                                 [Repo.ID, Repo.SUBJECT])
+            _display_message(_('Commited %s: %s'), commit[Repo.ID],
+                                                  commit[Repo.SUBJECT])
+        return _do_sequence(sequencer)
 
     elif command == 'abort':
         sequencer.abort()
         commit = pyrite.repo.get_commit_info('HEAD',
                                              [Repo.ID, Repo.SUBJECT])
-        subj = commit[Repo.SUBJECT]
-        if len(subj) > 30:
-            subj = subj[:30] + '...'
-        pyrite.ui.info(_('Rebase aborted, HEAD is at %s: %s') %
-                       (commit[Repo.ID][:8], subj))
-        return True, None
-
+        _display_message(_('Rebase aborted, HEAD is at %s: %s'),
+                         commit[Repo.ID], commit[Repo.SUBJECT])
+        return True
     else:
         raise HelpError(cmd, _('%s is not a command') % args[0])
 
-def _finish(done, last_id):
-    if done:
+def _do_sequence(sequencer):
+    messages = {
+        'squash': _('Applied %s: %s'),
+        'pick': _('Commited %s: %s'),
+        'edit': _('Commited %s: %s'),
+        'merge': _('Merged %s: %s'),
+        'revert': _('Reverted to %s: %s'),
+        'mark': _('Marked %s: %s'),
+        'squish': _('Squish! Previous commit is now %s: %s')
+    }
+    id = subject = None
+    for cont, cmd, id, subject in sequencer.run():
+        if cont:
+            if id:
+                _display_message(messages[cmd], id, subject)
+        else:
+            c = pyrite.repo.get_commit_info('HEAD', [Repo.ID, Repo.SUBJECT])
+            _display_message(_('HEAD is at %s: %s'), c[Repo.ID],
+                                                    c[Repo.SUBJECT])
+            _display_message(_('Changes from %s %s have been applied.'),
+                          id, subject)
+            pyrite.ui.info(_('Once you are done editing, you can run'))
+            pyrite.ui.info(_('"pyt alter continue."\n\n'))
+            pyrite.ui.info(_('You can also use "pyt ci -c %s to re-use the'
+                             'last commit message.') % id)
+            break
+    else:
         pyrite.ui.info(_('Rebase completed.\n\n'))
         #pyrite.ui.info(_('If you wish to go back to your original state'
         #                 'run\n"pyt revert -'))
         # need to provide a git reset --hard sequencer._head cmd
-    else:
-        c = pyrite.repo.get_commit_info('HEAD', [Repo.ID, Repo.SUBJECT])
-        pyrite.ui.info(_('HEAD is at %s "%s"') % (c[Repo.ID][:8],
-                                                c[Repo.SUBJECT][:30]))
-        c = pyrite.repo.get_commit_info(last_id, [Repo.ID, Repo.SUBJECT])
-        pyrite.ui.info(_('Changes from %s "%s" have been applied.') %
-                      (c[Repo.ID][:8], c[Repo.SUBJECT]))
-        pyrite.ui.info(_('Once you are done editing, you can run'))
-        pyrite.ui.info(_('"pyt alter continue."\n\n'))
+        return True
+    return False
 
 def run(cmd, args, flags):
 
@@ -117,8 +141,9 @@ def run(cmd, args, flags):
     try:
         if in_progress:
             if base or branch or onto or interactive:
-                raise HelpError(cmd, _('Already modifying this branch.\n'
-                                       'You can "pyt %s abort" to cancel.') % cmd)
+                raise HelpError(cmd,
+                                _('Already modifying this branch.\n'
+                                'You can "pyt %s abort" to cancel.') % cmd)
 
             if not args:
                 raise HelpError(cmd, _('Tell me an action to take.'))
@@ -126,16 +151,21 @@ def run(cmd, args, flags):
             f = open(sequencer_file, 'rb')
             try:
                 sequencer = cPickle.load(f)
-                done, last_id = _handle_subcommands(args[0], sequencer)
-                _finish(done, last_id)
+                if not sequencer:
+                    pyrite.ui.error_out(_('Unable to restore sequencer, '
+                                          'aborting'))
+                done = _handle_subcommands(args[0], sequencer)
                 return
             finally:
                 f.close()
 
+        done = not in_progress
+        if pyrite.repo.changed_files():
+            raise SequencerDirtyWorkdirError()
+
         sequencer = pyrite.sequencer.Sequencer(pyrite.repo)
         head_id = pyrite.repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID]
         sequencer.set_head(head_id)
-        done = not in_progress
         if not base:
             pyrite.ui.error_out(_('%s not in progress, nothing to do') % cmd)
 
@@ -149,7 +179,7 @@ def run(cmd, args, flags):
                                 data=[Repo.ID, Repo.SUBJECT, Repo.PARENTS],
                                 symmetric=True)
         message = []
-        for commit in reversed([c for c in commits]):
+        for commit in commits:
             message.append('pick %s %s\n' % (commit[Repo.ID][:8],
                                            commit[Repo.SUBJECT]))
         message.append('\n\n')
@@ -172,8 +202,6 @@ def run(cmd, args, flags):
                 return
             message = message.splitlines()
 
-        if pyrite.repo.changed_files():
-            raise SequencerDirtyWorkdirError()
         done = False
         if branch:
             pyrite.repo.checkout(branch)
@@ -186,8 +214,8 @@ def run(cmd, args, flags):
             if not line.strip():
                 continue
             sequencer.add(line)
-        done, last_id = sequencer.run()
-        _finish(done, last_id)
+
+        done = _do_sequence(sequencer)
 
     except UnintializedSequencerError, inst:
         pyrite.ui.error_out('internal error:' + inst.message)
