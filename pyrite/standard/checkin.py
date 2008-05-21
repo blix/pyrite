@@ -82,16 +82,14 @@ def run(cmd, *args, **flags):
                                 ''.join(commitdata[Repo.BODY])
             amend = commitdata[Repo.ID]
             del commitdata[Repo.ID]
+            args = list(args)
             if args:
-                args = list(args)
                 for f in pyrite.repo.changed_files('HEAD'):
                     args.append(f[1])
-                diff = [l for l in pyrite.repo.diff('HEAD^', 'HEAD',
-                                                    None, binary=True)]
-                pyrite.repo.move_head_to('HEAD^')
-                pyrite.repo.apply(diff, toindex=True)
-            else:
-                pyrite.repo.move_head_to('HEAD^')
+            diff = [l for l in pyrite.repo.diff('HEAD^', 'HEAD',
+                                                None, binary=True)]
+            pyrite.repo.move_head_to('HEAD^')
+            pyrite.repo.apply(diff, toindex=True)
         elif args:
             pyrite.repo.move_head_to('HEAD')
         pyrite.repo.update_index(args)
