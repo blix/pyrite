@@ -99,12 +99,9 @@ def run(cmd, args, flags):
 
     output = None
     if downstream:
-        output = pyrite.repo.cherry(downstream, limit=limit)
-        for line in output:
-            if line[0] == '-':
-                continue
-            c = pyrite.repo.get_commit_info(line[2:-1],
-                                            [Repo.ID, Repo.SUBJECT])
+        commits = pyrite.repo.get_history('HEAD', downstream, -1,
+                                         data=[Repo.ID, Repo.SUBJECT])
+        for c in commits:
             id = c[Repo.ID]
             if not verbose:
                 id = id[:8]

@@ -625,7 +625,7 @@ class Repo(object):
     def get_history(self, first, last, limit, data=None, follow=False,
                     paths=None, skip=0, symmetric=False):
         self.validate()
-        args = ['git', 'log']
+        args = ['git', 'log', '--topo-order']
         if not data:
             data = [Repo.ID]
         args.extend(self._get_format_args(data))
@@ -637,6 +637,7 @@ class Repo(object):
             args.append('--skip=' + str(skip))
         if symmetric:
             args.append('--cherry-pick')
+            args.append('--reverse')
         if not last:
             last = 'HEAD'
         if first:
@@ -894,18 +895,6 @@ class Repo(object):
             yield line
         if proc.wait():
             raise RepoError(_('Failed to revert: %s') % proc.stderr.read())
-
-    def cherry(self, downstream, limit=None):
-        self.validate()
-        args = ['git', 'cherry', 'HEAD', downstream]
-        if limit:
-            args.append(limit)
-        proc = self._popen(args)
-        for line in proc.stdout.readlines():
-            yield line
-        if proc.wait():
-            raise RepoError(_('Failed to get cherry info %s') %
-                            proc.stderr.read())
 
     def cherry_pick(self, commit, dryrun=False):
         self.validate()
