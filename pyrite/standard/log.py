@@ -43,6 +43,18 @@ given then the history of that commit is shown.  If the range is given as
 You can also limit the history searched to a one or more paths.
 """)
 
+def get_template(style, template, color):
+    tmpl = None
+    if style:
+        tmpl = Template(style, color)
+    else:
+        tmpl = FileTemplate(template, color)
+    data = tmpl.compile()
+    return data, tmpl
+
+def show_commit(commit, template, stream):
+    template.write_to_stream(commit, stream, pyrite.repo)
+
 def run(cmd, args, flags):
     style = flags.get('style', None)
     template = flags.get('template', 'medium')
@@ -60,23 +72,19 @@ def run(cmd, args, flags):
     if flags.has_key('limit') and flags.has_key('all'):
         raise HelpError(cmd, _('"limit" and "all" conflict.'))
 
-    #massage start position to make git show it to us
-    if first:
+    # massage start position to make git show it to us, not valid for
+    # reflog queries
+    if first and first[-1] != '}':
         first += '^'
-    formatter = None
+
     color = 'color' in flags or \
             pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
-    if style:
-        formatter = Template(style, color)
-    else:
-        formatter = FileTemplate(template, color)
+    data, template = get_template(style, template, color)
 
-    data = formatter.compile()
     if not show_patch and Repo.PATCH in data:
         data.remove(Repo.PATCH)
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=args)
 
-    stream = pyrite.ui.info_stream()
     for commit_data in output:
-        formatter.write_to_stream(commit_data, stream, pyrite.repo)
+        show_commit(commit_data, template, pyrite.ui.info_stream())
