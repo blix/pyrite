@@ -136,9 +136,9 @@ def dyn_import(module, is_extension=False, path=None):
         return None
 
 def exec_command(module, cmd, args, flags):
-    extensions.on_before_command(cmd, args, flags)
+    extensions.on_before_command(module, cmd, args, flags)
     module.run(cmd, args, flags)
-    extensions.on_after_command(cmd, args, flags)
+    extensions.on_after_command(module, cmd, args, flags)
 
 def run():
     show_trace = False
