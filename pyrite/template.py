@@ -25,6 +25,9 @@ class Template(object):
         self._compiled_buffer = []
         self.color = color
 
+    def compiled_buffer(self):
+        return self._compiled_buffer
+
     def compile(self):
         parts_len = len(self._style)
         start_pos = self._style.find('{')
@@ -34,35 +37,47 @@ class Template(object):
         empty_dict = {}
         while start_pos > -1:
             if start_pos > end_pos + 1:
+                # just text, tuple with just a string
                 buffer.append((self._style[end_pos + 1:start_pos],))
             if self._style[start_pos + 1] == '{':
+                # start new variable
                 end_pos = start_pos
                 start_pos = self._style.find('{', start_pos + 2)
             else:
                 end_pos = self._style.find('}', start_pos)
                 if end_pos < 0:
+                    # first text segment, tuple with just a str
                     buffer.append(self._style[start_pos:],)
                 else:
                     cmd = self._style[start_pos + 1:end_pos]
+                    # separate formatters
                     parts = cmd.split('|')
+                    # formaters are a list of (function, args-dict)
                     formatters = []
                     for p in parts[1:]:
+                        # formatters can have args, put any in dict
+                        # args start at the ":"
                         arg_start = p.find(':')
                         if arg_start > -1:
                             args = {}
+                            # args are comma separated
                             for arg in p[arg_start + 1:].split(','):
                                 name, value = arg.split('=')
                                 args[name] = value
                             fn = self._get_fn(p[:arg_start])
                             formatters.append((fn, args))
                         else:
+                            # get formatter func
                             fn = self._get_fn(p)
                             formatters.append((fn, empty_dict))
+                    # we are parsing out what this wants to show
+                    # so we can return it to caller
                     repo_props.add(self._get_repo_prop(parts[0]))
                     buffer.append((parts[0], formatters))
+                    # move on
                     start_pos = self._style.find('{', end_pos + 1)
         buffer.append((self._style[end_pos + 1:],))
-        return sorted(repo_props)
+        return repo_props
 
     def short(self, input, length=7):
         length = int(length)
