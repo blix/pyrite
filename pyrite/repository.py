@@ -638,7 +638,7 @@ class Repo(object):
         return first
 
     def get_history(self, first, last, limit, data=None, follow=False,
-                    paths=None, skip=0, symmetric=False):
+                    paths=None, skip=0, symmetric=False, reverse=False):
         self.validate()
         args = ['git', 'log', '--topo-order']
         if not data:
@@ -652,6 +652,7 @@ class Repo(object):
             args.append('--skip=' + str(skip))
         if symmetric:
             args.append('--cherry-pick')
+        if symmetric or reverse:
             args.append('--reverse')
         if not last:
             last = 'HEAD'
