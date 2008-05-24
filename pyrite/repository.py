@@ -638,7 +638,7 @@ class Repo(object):
         return first
 
     def get_history(self, first, last, limit, data=None, follow=False,
-                    paths=None, skip=0, symmetric=False, reverse=False):
+                    paths=None, skip=0, incoming=False, reverse=False):
         self.validate()
         args = ['git', 'log', '--topo-order']
         if not data:
@@ -650,14 +650,15 @@ class Repo(object):
             args.append('--follow')
         if skip:
             args.append('--skip=' + str(skip))
-        if symmetric:
+        if incoming:
             args.append('--cherry-pick')
-        if symmetric or reverse:
+            args.append('--left-right')
+        if incoming or reverse:
             args.append('--reverse')
         if not last:
             last = 'HEAD'
         if first:
-            args.append(first + (symmetric and '...' or '..') + last)
+            args.append(first + (incoming and '...' or '..') + last)
         else:
             args.append(last)
         if paths:
@@ -665,6 +666,12 @@ class Repo(object):
             args.extend(paths)
         proc = self._popen(args)
         for commit in self._parse_git_data(data, proc.stdout):
+            if incoming:
+                id = commit[Repo.ID]
+                if id[0] == '>':
+                    commit[Repo.ID] = id[1:]
+                else:
+                    continue
             yield commit
         if proc.wait():
             raise RepoError(_('Failed to get log: %s') % proc.stderr.read())
