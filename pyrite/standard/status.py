@@ -30,6 +30,16 @@ you to see what would happen if you did a checkin with the --amend flag.  Also
 like checkin, you can use paths to limit what is reported by status.
 """)
 
+def print_header():
+    branch = pyrite.repo.branch()
+    tag, distance, id = pyrite.repo.describe()
+
+    pyrite.ui.info(_('Currently on branch "%s"') % branch)
+    pyrite.ui.info(_('tip points to %s') % id[:8])
+    if tag:
+        pyrite.ui.info(_('You are %d commits ahead of %s') % (distance, tag))
+    pyrite.ui.info('')
+
 def run(cmd, args, flags):
     amend = 'amend' in flags
     color = 'color' in flags or \
@@ -39,21 +49,30 @@ def run(cmd, args, flags):
     if amend:
         commit = 'HEAD^'
 
+    print_header()
     output = pyrite.repo.diff(commit, None, args, detect=True, stat=True,
                                 patch=False)
 
     if color:
         output = pyrite.UI.color_diffstat(output)
-    did_print = pyrite.ui.info(''.join(output))
-    if did_print:
-        pyrite.ui.info('\n')
+    if pyrite.ui.info(''.join(output)):
+        pyrite.ui.info('')
 
-    first = True
-    for f in pyrite.repo.list(tracked=False, untracked=True):
-        if first:
-            pyrite.ui.info(_('## The following files are neither tracked '
-                             'nor ignored\n'))
-            first = False
-        pyrite.ui.info(f)
-    if not first:
-        pyrite.ui.info('\n')
+    changed = pyrite.repo.list(tracked=False, untracked=True)
+    if changed:
+        pyrite.ui.info(_('## The following files are neither tracked '
+                             'nor ignored'))
+        pyrite.ui.info('')
+
+        for f in changed:
+            pyrite.ui.info(' ' + f)
+        pyrite.ui.info('')
+
+    unresolved = pyrite.repo.get_unresolved()
+    if unresolved:
+        pyrite.ui.info(_('## The following files need conflict resolution.'))
+        pyrite.ui.info('')
+        for f in unresolved:
+            pyrite.ui.info(' ' + f)
+
+        pyrite.ui.info('')
