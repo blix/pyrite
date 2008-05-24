@@ -50,7 +50,7 @@ def run(cmd, args, flags):
     f = flags.get('file', None)
     toolspec = flags.get('tool', pyrite.config.get_option('pyrite.mergetool'))
 
-    files_to_resolve = pyrite.repo.list(unresolved=True)
+    files_to_resolve = pyrite.repo.get_unresolved()
 
     if f and not f in files_to_resolve:
         pyrite.ui.error_out(_('%s does not need to be resolved') % f)

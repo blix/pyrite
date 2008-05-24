@@ -49,7 +49,7 @@ def run(cmd, args, flags):
         pyrite.ui.info('\n')
 
     first = True
-    for f in pyrite.repo.get_untracked():
+    for f in pyrite.repo.list(tracked=False, untracked=True):
         if first:
             pyrite.ui.info(_('## The following files are neither tracked '
                              'nor ignored\n'))

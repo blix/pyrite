@@ -230,7 +230,7 @@ def run(cmd, args, flags):
     except SequencerMergeNeeded:
         pyrite.ui.info(_('\nOne or more files have conflicting changes.'))
         pyrite.ui.info(_('\nThe following files need resolving'))
-        for f in pyrite.repo.list(unresolved=True).keys():
+        for f in pyrite.repo.get_unresolved().keys():
             pyrite.ui.info('..' + f)
         pyrite.ui.info(_('\nRun "pyt resolve" to run a merge program.\n\n'))
 

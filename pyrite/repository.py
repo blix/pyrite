@@ -606,23 +606,31 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
 
-    def list(self, unresolved=False):
+    def get_unresolved(self):
         self.validate()
-        if unresolved:
-            args = ['git', 'ls-files', '--unmerged']
-        else:
-            args = ['git', 'ls-files', '-o', '-c', '-t']
+        proc = self._popen(('git', 'ls-files', '-t', '--exclude-standard',
+                            '--unmerged'))
+        files = {}
+        for item in proc.stdout.readlines():
+            parts = item.split()
+            files[parts[4]] = parts[0]
+        proc.wait()
+        return files
+
+    def list(self, tracked=True, untracked=False):
+        self.validate()
+        args = ['git', 'ls-files', '-t', '--exclude-standard']
+        if tracked:
+            args.append('-c')
+        if untracked:
+            args.append('-o')
         proc = self._popen(args)
         files = {}
-        if unresolved:
-            for item in proc.stdout.readlines():
-                parts = item.split()
-                files[parts[3]] = 'M'
-        else:
-            for item in proc.stdout.readlines():
-                status = item[0]
-                f = item[2:].strip()
-                files[f] = Repo._status[status]
+        for item in proc.stdout.readlines():
+            status = item[0]
+            f = item[2:].strip()
+            files[f] = Repo._status[status]
+        if tracked:
             proc.wait()
             proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
             for line in proc.stdout.readlines():
@@ -1049,16 +1057,6 @@ class Repo(object):
             yield data
         if proc.wait():
             raise RepoError(_('Failed to get blame info: %s') %
-                            proc.stderr.read())
-
-    def get_untracked(self):
-        self.validate()
-        proc = self._popen(('git', 'ls-files', '-o',
-                            '--exclude-standard'))
-        for line in proc.stdout.readlines():
-            yield line.strip()
-        if proc.wait():
-            raise RepoError(_('Failed to get untracked files: %s') %
                             proc.stderr.read())
 
     def cat_file(self, filename, cat_to=None, commit='HEAD'):
