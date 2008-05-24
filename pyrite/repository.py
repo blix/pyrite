@@ -491,7 +491,7 @@ class Repo(object):
         self.validate()
         args = ['git', 'push']
         if force:
-            args.append('f')
+            args.append('-f')
         if all_branches:
             args.append('--all')
         if all_tags:
