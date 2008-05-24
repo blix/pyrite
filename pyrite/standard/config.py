@@ -204,7 +204,7 @@ class Config(object):
         email = self.get_option('user.email')
         if not email:
             email = os.getlogin() + '@' + os.uname()[1]
-        self.user = user + ' ' + email
+        self.user = user + ' <' + email + '>'
         return self.user
 
     def _all_config(self, config):
