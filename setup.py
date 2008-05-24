@@ -24,11 +24,13 @@ if sys.argv[1] == 'version':
     repo = Repo()
     
     version=''
-    try:
-        version = repo.most_recent_tag()
-    except:
-        c = repo.get_commit_info()
-        version = c[Repo.ID][:10]
+    tup = repo.describe()
+    if tup[0] and tup[1]:
+        version = '%s-%d-%s' % tup
+    elif tup[0]:
+        version = tup[0]
+    else:
+        version = tup[2]
 
     f = open('pyrite/__version__.py', 'w+')
     f.write('version = \'' + version + '\'\n')

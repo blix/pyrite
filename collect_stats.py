@@ -107,9 +107,9 @@ def print_branch_stats(repo, branch, others):
             return True
         return False
 
-    tag = repo.most_recent_tag(branch, abbrev=0)
+    tag, dummy, dummy = repo.describe(branch)
     if not show_changes(tag, branch):
-        tag = repo.most_recent_tag(branch + '^', abbrev=0)
+        tag, dummy, dummy = repo.describe(branch + '^')
         show_changes(tag, branch)
 
     for b in others:

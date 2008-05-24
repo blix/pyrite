@@ -894,15 +894,20 @@ class Repo(object):
         if proc.wait():
             raise RepoError(_('Failed to move head: %s') % proc.stderr.read())
 
-    def most_recent_tag(self, branch=None, abbrev=10):
+    def describe(self, branch=None):
         self.validate()
         if not branch:
             branch = 'HEAD'
-        proc = self._popen(('git', 'describe', '--abbrev=' + str(abbrev),
-                            branch))
+        proc = self._popen(('git', 'describe', '--abbrev=40', branch))
+        parts = proc.stdout.read().split('-')
         if proc.wait():
-            return None
-        return proc.stdout.read().strip()
+            id = self.get_commit_info(branch, [Repo.ID])[Repo.ID]
+            return None, 0, id
+        if len(parts) == 3:
+            return parts[0], int(parts[1]), parts[2].strip()[1:]
+        tag = parts[0].strip()
+        id = self.get_commit_info(branch, [Repo.ID])[Repo.ID]
+        return tag, 0, id
 
     def revert(self, commit, dryrun=False, mainline=None):
         self.validate()
