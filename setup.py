@@ -22,13 +22,13 @@ import os, sys
 if sys.argv[1] == 'version':
     from pyrite.repository import Repo, RepoError
     repo = Repo()
-    
+
     version=''
-    tup = repo.describe()
-    if tup[0] and tup[1]:
-        version = '%s-%d-%s' % tup
-    elif tup[0]:
-        version = tup[0]
+    tag, distance, id = repo.describe()
+    if tag and distance:
+        version = '%s-%d-%s' % (tag, distance, id[:8])
+    elif tag:
+        version = tag
     else:
         version = tup[2]
 
