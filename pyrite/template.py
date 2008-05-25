@@ -197,13 +197,13 @@ class Template(object):
             return buf
 
     def write_to_stream(self, data, stream, repo=None):
+        write = stream.write
         try:
             for chunk in self._generate(data, repo):
                 if chunk.__class__ == ''.__class__:
-                    stream.write(chunk)
+                    write(chunk)
                 else:
-                    for l in chunk:
-                        stream.write(l)
+                    map(write, chunk)
         except IOError:
             pass
         finally:

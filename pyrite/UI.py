@@ -63,7 +63,9 @@ def color_diffstat(lines, stream=None):
         return buf
 
 def color_diff(lines, stream=None):
+    get = diff_colors.get
     if stream:
+        write = stream.write
         try:
             startidx = color_diffstat(lines, stream)
             if startidx < 0:
@@ -71,9 +73,7 @@ def color_diff(lines, stream=None):
             if lines.__class__ != GeneratorType:
                 lines = lines[startidx]
             for line in lines:
-                stream.write(diff_colors.get(line[0], bold_color))
-                stream.write(line)
-                stream.write(reset_color)
+                write("%s%s%s" % (get(line[0], bold_color), line, reset_color))
         except IOError:
             pass
         finally:
@@ -83,11 +83,11 @@ def color_diff(lines, stream=None):
                 pass
     else:
         buf = []
+        append = buf.append
         for line in lines:
             if line:
-                buf.append(diff_colors.get(line[0], bold_color))
-                buf.append(line)
-                buf.append(reset_color)
+                append("%s%s%s" % (get(line[0], bold_color), line,
+                                   reset_color))
         return buf
 
 def affirmative(response):
@@ -122,22 +122,21 @@ class UI(object):
 
     def _write(self, stream, msg):
         did_write = False
+        write = stream.write
         try:
             if msg.__class__ == ''.__class__:
                 did_write = True
                 if msg and msg[-1] == '\n':
-                    stream.write(msg)
+                    write(msg)
                 else:
-                    stream.write(msg)
-                    stream.write('\n')
+                    write(msg + '\n')
             else:
                 for l in msg:
                     did_write = True
                     if l[-1] == '\n':
-                        stream.write(l)
+                        write(l)
                     else:
-                        stream.write(l)
-                        stream.write('\n')
+                        write(l + '\n')
         except IOError:
             pass
         finally:

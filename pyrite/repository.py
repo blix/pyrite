@@ -248,34 +248,43 @@ class Repo(object):
     def _parse_git_log(self, commit, firstline, stream):
         commit[Repo.SUBJECT] = stream.readline().strip()
         buf = []
+        append = buf.append
+        readline = stream.readline
+        type = Repo.BODY
         while True:
-            line = stream.readline()
+            line = readline()
             if not line or line[0] != ' ':
-                commit[Repo.BODY] = buf
+                commit[type] = buf
                 return line
-            buf.append(line[4:])
+            append(line[4:])
 
     def _parse_git_stat(self, commit, firstline, stream):
         if firstline.startswith('commit'):
             return firstline
         buf = []
+        append = buf.append
+        readline = stream.readline
+        type = Repo.DIFFSTAT
         while True:
-            line = stream.readline()
+            line = readline()
             if not line or line[0] != ' ':
-                commit[Repo.DIFFSTAT] = buf
+                commit[type] = buf
                 return line
-            buf.append(line)
+            append(line)
 
     def _parse_git_patch(self, commit, firstline, stream):
         if firstline.startswith('commit'):
             return firstline
         buf = [firstline]
+        append = buf.append
+        readline = stream.readline
+        type = Repo.PATCH
         while True:
-            line = stream.readline()
-            if not line or line.startswith('commit'):
-                commit[Repo.PATCH] = buf
+            line = readline()
+            if not line or line[0] == 'c':
+                commit[type] = buf
                 return line
-            buf.append(line)
+            append(line)
 
     def _parse_raw_header(Self, commit, firstline, stream):
         parents = commit[Repo.PARENTS] = []

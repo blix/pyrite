@@ -86,5 +86,6 @@ def run(cmd, args, flags):
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=args)
 
+    stream = pyrite.ui.info_stream()
     for commit_data in output:
-        show_commit(commit_data, template, pyrite.ui.info_stream())
+        show_commit(commit_data, template, stream)
