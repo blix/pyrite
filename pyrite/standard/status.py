@@ -30,12 +30,17 @@ you to see what would happen if you did a checkin with the --amend flag.  Also
 like checkin, you can use paths to limit what is reported by status.
 """)
 
-def print_header():
+def print_header(color):
     branch = pyrite.repo.branch()
     tag, distance, id = pyrite.repo.describe()
 
-    pyrite.ui.info(_('Currently on branch "%s"') % branch)
-    pyrite.ui.info(_('tip points to %s') % id[:8])
+    pyrite.ui.info(_('Currently on branch "%s%s%s"') %
+                   ((color and pyrite.UI.bold_color or ''),
+                    branch, pyrite.UI.reset_color))
+
+    pyrite.ui.info(_('tip points to %s%s%s') %
+                   ((color and pyrite.UI.commit_color or ''), id[:8],
+                    pyrite.UI.reset_color))
     if tag:
         pyrite.ui.info(_('You are %d commits ahead of %s') % (distance, tag))
     pyrite.ui.info('')
@@ -49,7 +54,7 @@ def run(cmd, args, flags):
     if amend:
         commit = 'HEAD^'
 
-    print_header()
+    print_header(color)
     output = pyrite.repo.diff(commit, None, args, detect=True, stat=True,
                                 patch=False)
 

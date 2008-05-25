@@ -23,6 +23,7 @@ from types import GeneratorType
 reset_color = '\033[m'
 bold_color = '\033[1m'
 error_color = '\033[31m'
+commit_color = '\033[33m'
 
 diff_colors = {
     '@': '\033[36m',
