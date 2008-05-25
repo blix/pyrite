@@ -278,37 +278,61 @@ class Repo(object):
             buf.append(line)
 
     def _parse_raw_header(Self, commit, firstline, stream):
-        parts = firstline.split()
-        commit[Repo.ID] = parts[1]
-        refs = commit[Repo.REFS] = []
-        for part in parts[2:]:
-            part = part.strip('()')
-            if not part.startswith('refs'):
-                continue
-            refs.append(part)
-        stream.readline()
         parents = commit[Repo.PARENTS] = []
+
+        def parse_id(line):
+            parts = line.split()
+            commit[Repo.ID] = parts[0]
+            refs = commit[Repo.REFS] = []
+            for part in parts[1:]:
+                part = part.strip('()')
+                if not part.startswith('refs'):
+                    continue
+                refs.append(part)
+
+        def skip(line):
+            pass
+
+        def parse_parent(line):
+            parents.append(line)
+
+        def parse_author(line):
+            idx = line.find('<')
+            commit[Repo.AUTHOR] = line[:idx - 1]
+            idx2 = line.rfind('>') + 1
+            commit[Repo.AUTHOR_EMAIL] = line[idx + 1:idx2 - 1]
+            commit[Repo.AUTHOR_DATE] = line[idx2 + 1:-6]
+            commit[Repo.AUTHOR_DATE_OFFSET] = line[-6:-1]
+
+        def parse_commiter(line):
+            idx = line.find('<')
+            commit[Repo.COMMITER] = line[:idx - 1]
+            idx2 = line.rfind('>') + 1
+            commit[Repo.COMMITER_EMAIL] = line[idx + 1:idx2 - 1]
+            commit[Repo.COMMIT_DATE] = line[idx2 + 1:-6]
+            commit[Repo.COMMITER_DATE_OFFSET] = line[-6:-1]
+
+        types = {
+            'commit': parse_id,
+            'tree': skip,
+            'Reflog': skip,
+            'Reflog:': skip,
+            'parent': parse_parent,
+            'author': parse_author,
+            'committer': parse_commiter
+        }
+
+        type, rest = firstline.strip().split(None, 1)
+        types[type](rest)
         while True:
             line = stream.readline()
-            parts = line.split()
-            if parts[0] != 'parent':
+            stripped = line.strip()
+            if not stripped:
                 break
-            parents.append(parts[1])
-        idx = line.find('<')
-        commit[Repo.AUTHOR] = line[len('author '):idx - 1]
-        idx2 = line.rfind('>') + 1
-        commit[Repo.AUTHOR_EMAIL] = line[idx + 1:idx2 - 1]
-        commit[Repo.AUTHOR_DATE] = line[idx2 + 1:-6]
-        commit[Repo.AUTHOR_DATE_OFFSET] = line[-6:-1]
+            type, rest = stripped.split(None, 1)
+            types[type](rest)
 
-        line = stream.readline()
-        idx = line.find('<')
-        commit[Repo.COMMITER] = line[len('committer '):idx - 1]
-        idx2 = line.rfind('>') + 1
-        commit[Repo.COMMITER_EMAIL] = line[idx + 1:idx2 - 1]
-        commit[Repo.COMMIT_DATE] = line[idx2 + 1:-6]
-        commit[Repo.COMMITER_DATE_OFFSET] = line[-6:-1]
-        return stream.readline()
+        return line
 
     def _parse_git_data(self, prop_types, stream):
         commit = {}
@@ -650,7 +674,7 @@ class Repo(object):
 
     def get_history(self, first, last, limit, data=None, follow=False,
                     paths=None, skip=0, incoming=False, reverse=False,
-                    ordered=False):
+                    reflog=False, ordered=False):
         self.validate()
         args = ['git', 'log']
         if not data:
@@ -667,6 +691,8 @@ class Repo(object):
             args.append('--left-right')
         if incoming or reverse:
             args.append('--reverse')
+        if reflog:
+            args.append('-g')
         if ordered:
             args.append('--topo-order')
         if not last:
