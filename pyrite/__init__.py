@@ -81,6 +81,8 @@ commands = {
             _('Fetch and merge in one operation')),
 ('push',): ('push', 1,
             _('Update remote refs and their associated objects')),
+('recover',): ('recover', 0,
+            _('Recover the previous state of a branch.')),
 ('remove', 'rm'): ('remove', 0,
             _('Remove files from the working set and tell pyt about it')),
 ('resolve', 'res'): ('resolve', 1,
