@@ -97,7 +97,8 @@ _orig_get_template = None
 def _update_cache(id):
     if id in _id_cache:
         return
-    commits = pyrite.repo.get_history(None, id, -1, [Repo.ID], reverse=True)
+    commits = pyrite.repo.get_history(None, id, -1, [Repo.ID], ordered=True,
+                                      reverse=True)
     done = False
     for num, c in enumerate(commits):
         if done:

@@ -649,9 +649,10 @@ class Repo(object):
         return first
 
     def get_history(self, first, last, limit, data=None, follow=False,
-                    paths=None, skip=0, incoming=False, reverse=False):
+                    paths=None, skip=0, incoming=False, reverse=False,
+                    ordered=False):
         self.validate()
-        args = ['git', 'log', '--topo-order']
+        args = ['git', 'log']
         if not data:
             data = [Repo.ID]
         args.extend(self._get_format_args(data))
@@ -666,6 +667,8 @@ class Repo(object):
             args.append('--left-right')
         if incoming or reverse:
             args.append('--reverse')
+        if ordered:
+            args.append('--topo-order')
         if not last:
             last = 'HEAD'
         if first:
