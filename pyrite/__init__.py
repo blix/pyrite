@@ -115,6 +115,11 @@ global_options = [
 ('', 'debug-exceptions', _(''), 0)
 ]
 
+def get_command_info(cmd):
+    for c, info in commands.iteritems():
+        if cmd in c:
+            return info
+
 def dyn_import(module, is_extension=False, path=None):
     if module in modules:
         return
@@ -155,7 +160,7 @@ def run():
         if len(sys.argv) < 2:
             raise pythelp.HelpError()
         cmd = sys.argv[1]
-        cmd_info = options.get_command_info(cmd)
+        cmd_info = get_command_info(cmd)
         if not cmd_info:
             raise pythelp.HelpError(cmd)
 
@@ -190,10 +195,6 @@ def run():
         pythelp.on_help_error(inst)
         if show_trace:
             raise
-    except options.ParseError, inst:
-        if show_trace:
-            raise
-        ui.error_out(inst)
     except repository.RepoError, inst:
         if show_trace:
             raise

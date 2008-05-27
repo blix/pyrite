@@ -15,7 +15,6 @@
 
 
 import pyrite
-from pyrite import options as pytoptions
 
 options = [('v', 'verbose', _('print full help and aliases'), 0)]
 
@@ -55,7 +54,7 @@ def show_full_help():
                 '\n' + _('For more aliases type "%s"\n\n') % 'pyt help -v')
 
 def show_command_help(cmd, message):
-    cmd_info = pytoptions.get_command_info(cmd)
+    cmd_info = pyrite.get_command_info(cmd)
     if not cmd_info:
         raise HelpError(cmd)
 
@@ -116,7 +115,7 @@ def on_help_error(err):
                         'pyt help'))
         return
 
-    info = pytoptions.get_command_info(err.cmd)
+    info = pyrite.get_command_info(err.cmd)
     if not info:
         if err.cmd == 'addons':
             show_extensions()
