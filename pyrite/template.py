@@ -190,10 +190,7 @@ class Template(object):
             item = '   ' + item
             return item
         else:
-            buf = []
-            for line in item:
-                buf.append('   ')
-                buf.append(line)
+            buf = ['   ' + line for line in item]
             return buf
 
     def write_to_stream(self, data, stream, repo=None):

@@ -17,36 +17,21 @@ class SmartStream(object):
     def __init__(self, stream):
         self.stream = stream
         self.buffer = None
-        self.lastidx = 0
+        self.lastindex = 0
+        self.buflen = 0
         self.done = False
 
-    def readlines(self):
-        for line in self.readline():
-            yield line
-
     def readline(self):
-        if not self.buffer:
-            self.buffer = self.stream.read(1024 * 20)
-        nextidx = self.buffer.find('\n', self.lastidx) + 1
-        if self.lastidx > -1:
-            if nextidx > 0:
-                s = self.buffer[self.lastidx:nextidx]
-                self.lastidx = nextidx
-                return s
-            arrbuf = [self.buffer[self.lastidx:]]
-            while True:
-                buf2 = self.stream.read(1024 * 20)
-                if not buf2:
-                    self.buffer = buf2
-                    s = ''.join(arrbuf)
-                    return s
-                nextidx = buf2.find('\n') + 1
-                if nextidx > 0:
-                    arrbuf.append(buf2[:nextidx])
-                    self.lastidx = nextidx
-                    self.buffer = buf2
-                    s = ''.join(arrbuf)
-                    return s
-                else:
-                    arrbuf.append(buf2)
+        line = ''
+        while not line or line[-1] != '\n':
+            if not self.buffer or self.lastindex >= self.buflen:
+                self.buffer = self.stream.read(1024 * 30)
+                self.lastindex = 0
+                if not self.buffer:
+                    break
+                self.buffer = self.buffer.splitlines(True)
+                self.buflen = len(self.buffer)
+            line += self.buffer[self.lastindex]
+            self.lastindex += 1
+        return line
 
