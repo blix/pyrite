@@ -1,3 +1,4 @@
+*.so
 *.py[cod]
 *.bak
 *.kpf
