@@ -14,8 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import ConfigParser, os
-import pyrite
+import os, pyrite
 from pyrite.standard.help import HelpError
 
 options = [
@@ -62,32 +61,112 @@ option=value
 class ConfigError(Exception):
     """Raised when unable to load config"""
 
+class IniParser(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self._options = {}
+
+    def read(self):
+        f = None
+        try:
+            f = open(self.filename, 'r')
+            current_section = None
+            for line in f.readlines():
+                line = line.strip()
+                if not line or line[0] == '#' or line[0] == ';':
+                     continue
+                if len(line) < 3:
+                     raise ConfigError(_('Bad config line!'))
+                if line[0] == '[':
+                    if line[-1] != ']':
+                        raise ConfigError(_('Bad Config block!'))
+                    section_name = line[1:-1]
+                    if section_name in self._options:
+                        current_section = self._options[section_name]
+                    else:
+                        current_section = self._options[section_name] = {}
+                else:
+                    parts = line.split('=', 1)
+                    if len(parts) != 2:
+                        raise ConfigError(_('Bad config line!'))
+                    if current_section == None:
+                        raise ConfigError(_('Config line outside of block!'))
+                    name = parts[0].strip()
+                    value = parts[1].strip()
+                    if name in current_section:
+                        current_section[name].append(value)
+                    current_section[name] = [value]
+        except (IOError, OSError):
+            pass
+        finally:
+            if f:
+                f.close()
+
+    def get(self, section, name, default=None, num=0):
+        if section in self._options:
+            sec = self._options[section]
+            if name in sec:
+                return sec[name][num]
+        return default
+
+    def items(self, section):
+        if section in self._options.keys():
+           for name, values in self._options[section].items():
+               for v in values:
+                   yield name, v
+
+    def write(self, filename):
+        f = None
+        try:
+            f = open(filename, 'w+')
+            for section, names in self._options.items():
+                 f.write('\n[%s]\n' % section)
+                 for name, values in names.items():
+                     for v in values:
+                         f.write('%s=%s\n' % (name, v))
+        finally:
+            if f:
+                f.close()
+
+    def set(self, section, name, value, num=0):
+        if section in self._options:
+            sec = self._options[section]
+        else:
+            sec = self._options[section] = {}
+        if name in sec:
+            sec[name][num] = value
+        else:
+            sec[name] = [value]
+
+    def remove_option(self, section, name, num=0):
+        if section in self._options:
+           sec = self._options[section]
+           if name in sec:
+               del sec[name][num]
+               if not sec[name]:
+                  del sec[name]
+           if not sec:
+              del self._options[section]
+
+    def sections(self):
+        for section in self._options.keys():
+            yield section
+
+
 class Config(object):
     _not_under_repo_error = _("Not under a repository")
     _missing_config_arg = _("Category and Name must be supplied")
     def __init__(self):
         self.user = None
-        self.user_config_path = os.path.expanduser('~/.pytrc')
-        self.user_config = ConfigParser.SafeConfigParser()
-        f = None
-        try:
-            f = open(self.user_config_path, 'rw')
-            self.user_config.readfp(f)
-        except (IOError, OSError):
-            pass
-        finally:
-            f.close()
+        self.user_config_path = os.path.expanduser('~/.gitconfig')
+        self.user_config = IniParser(self.user_config_path)
+        self.user_config.read()
+
         if pyrite.repo.is_repo():
             self.repo_config_path = os.path.join(pyrite.repo.get_repo_dir(),
-                                                    'pytrc')
-            self.repo_config = ConfigParser.SafeConfigParser()
-        try:
-            f = open(self.repo_config_path, 'rw')
-            self.repo_config.readfp(f)
-        except (IOError, OSError), inst:
-            pass
-        finally:
-            f.close()
+                                                 'config')
+            self.repo_config = IniParser(self.repo_config_path)
+            self.repo_config.read()
 
     def set_repo_option(self, item, value, is_all):
         if not pyrite.repo.is_repo():
@@ -111,12 +190,12 @@ class Config(object):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise ConfigError(_missing_config_arg)
-        if pyrite.repo.is_repo() and self.repo_config.has_option(category, name):
-            return self.repo_config.get(category, name)
-        elif self.user_config.has_option(category, name):
-            return self.user_config.get(category, name)
-        else:
-            return ''
+        value = None
+        if pyrite.repo.is_repo():
+            value = self.repo_config.get(category, name)
+        if not value:
+            value = self.user_config.get(category, name)
+        return value
 
     def _items(self, category, config):
         parts = category.split('.')
@@ -124,9 +203,8 @@ class Config(object):
             category = parts[0]
         elif parts:
             category = parts[0] + ' "' + parts[1] + '"'
-        if self.user_config.has_section(category):
-            for k, v in self.user_config.items(category):
-                yield k, v
+        for k, v in config.items(category):
+            yield k, v
 
     def items(self, category):
         items = {}
@@ -172,28 +250,15 @@ class Config(object):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise ValueError(_missing_config_arg)
-        if config.has_section(category):
-            config.remove_option(category, name)
-            if not config.options(category):
-                config.remove_section(category)
-            try:
-                f = open(path, 'w+')
-                config.write(f)
-            except:
-                raise ParseError(_('Could not write to config file'))
+        config.remove_option(category, name)
+        config.write(path)
 
     def _set_option(self, config, path, item, value, is_all):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise ValueError(_missing_config_arg)
-        if not config.has_section(category):
-            config.add_section(category)
         config.set(category, name, value)
-        try:
-            f = open(path, 'w+')
-            config.write(f)
-        except:
-            raise ParseError(_('Could not write to config file'))
+        config.write(path)
 
     def get_user(self):
         if self.user:
@@ -203,8 +268,11 @@ class Config(object):
             user = os.getlogin()
         email = self.get_option('user.email')
         if not email:
-            email = os.getlogin() + '@' + os.uname()[1]
-        self.user = user + ' <' + email + '>'
+            email = '<%s@%s>' % (os.getlogin(), os.uname()[1])
+        else:
+            if email[0] != '<':
+                email = '<' + email + '>'
+        self.user = user + ' ' + email
         return self.user
 
     def _all_config(self, config):

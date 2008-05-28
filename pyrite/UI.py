@@ -91,10 +91,10 @@ def color_diff(lines, stream=None):
         return buf
 
 def affirmative(response):
-    return response.lower() in ('true', 'yes', '1')
+    return response and response.lower() in ('true', 'yes', '1')
 
 def negative(response):
-    return response.lower() in ('false', 'no', '0')
+    return response and response.lower() in ('false', 'no', '0')
 
 class UI(object):
     def __init__(self):
