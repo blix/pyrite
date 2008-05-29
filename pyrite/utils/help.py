@@ -33,8 +33,7 @@ def show_help(prefix, template, threshold, suffix, io):
 
     io.info(prefix)
     commands = {}
-    for c in pyrite.commands.keys():
-        options = pyrite.commands[c]
+    for c, options in pyrite._commands.items():
         if 2 > options[1] >= threshold:
             commands[c[0]] = template % (c[0].ljust(10), options[2])
     for c in sorted(commands.keys()):

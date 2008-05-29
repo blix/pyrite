@@ -32,7 +32,7 @@ import sys, imp
 # commands with the second element as 0 are shown only in extended help
 # commands with the second element as 1 are shown in normal help
 
-commands = {
+_commands = {
 ('alter','rebase'): ('alter', 0,
             _('Alter the history to change order, contents partens etc')),
 ('bisect',): ('bisect', 0,
@@ -112,7 +112,7 @@ global_options = [
 ]
 
 def get_command_info(cmd):
-    for c, info in commands.iteritems():
+    for c, info in _commands.iteritems():
         if cmd in c:
             return info
 
@@ -126,7 +126,7 @@ def dyn_import(module, is_extension=False, path=None):
         else:
             package = 'pyrite.addons'
     else:
-        package = 'pyrite.standard'
+        package = 'pyrite.commands'
     try:
         m = __import__(package, fromlist=module)
         f, p, d = imp.find_module(module, m.__path__)
@@ -152,7 +152,7 @@ def run():
     try:
         repo = repository.Repo()
         settings = Settings(repo)
-        extensions.on_load(commands, settings)
+        extensions.on_load(_commands, settings)
         io.initialize(settings, repo)
 
         if len(sys.argv) < 2:
