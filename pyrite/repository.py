@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import subprocess, os
-from pyrite.smartstream import SmartStream
+from pyrite.utils.smartstream import SmartStream
 
 class RepoError(Exception):
     """Thrown when repo fails"""
