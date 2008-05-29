@@ -44,4 +44,4 @@ def run(cmd, args, flags):
     output = pyrite.repo.move(args, dest, force=force, ignore=ignore,
                                 noop=noop)
 
-    pyrite.ui.info(output)
+    pyrite.utils.io.info(output)

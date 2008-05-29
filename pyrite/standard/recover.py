@@ -74,15 +74,15 @@ def run(cmd, args, flags):
         data = template.compile()
         output = pyrite.repo.get_history(None, None, -1, data, reflog=True)
         for c in output:
-            template.write_to_stream(c, pyrite.ui.info_stream())
+            template.write_to_stream(c, pyrite.utils.io.info_stream())
         return
 
     branch = pyrite.repo.branch()
     id = pyrite.repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID][:8]
     pyrite.repo.move_head_to(c[Repo.ID], True)
-    pyrite.ui.info(_('You are on branch "%s", its tip was "%s".') %
+    pyrite.utils.io.info(_('You are on branch "%s", its tip was "%s".') %
                    (branch, id))
-    pyrite.ui.info(_('Run "pyt recover -c %s" to undo.') % id)
+    pyrite.utils.io.info(_('Run "pyt recover -c %s" to undo.') % id)
     c = pyrite.repo.get_commit_info(commit, [Repo.ID])
-    pyrite.ui.info(_('Tip now points to "%s"') % c[Repo.ID])
-    pyrite.ui.info('')
+    pyrite.utils.io.info(_('Tip now points to "%s"') % c[Repo.ID])
+    pyrite.utils.io.info('')

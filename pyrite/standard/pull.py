@@ -66,4 +66,4 @@ def run(cmd, args, flags):
     output = pyrite.repo.pull(repo, source, target, force=is_force, tags=tags,
                                 depth=depth, commit=commit, rebase=is_rebase)
     for line in output:
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)

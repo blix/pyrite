@@ -61,7 +61,7 @@ def _run_cherry_pick(commit, edit, record, dryrun):
             message.append(_('\n(Cherry Picked From: %s)\n') % orig_id)
         if edit:
             extra = []
-            message = pyrite.ui.edit(message, extra, 'cherry-' + orig_id)
+            message = pyrite.utils.io.edit(message, extra, 'cherry-' + orig_id)
 
             if not message:
                 pyrite.repo.move_head_to(head[Repo.ID])
@@ -105,16 +105,16 @@ def run(cmd, args, flags):
             id = c[Repo.ID]
             if not verbose:
                 id = id[:8]
-            pyrite.ui.info(id + ' ' + c[Repo.SUBJECT])
+            pyrite.utils.io.info(id + ' ' + c[Repo.SUBJECT])
     else:
         for commit in args:
             succ, err, id = _run_cherry_pick(commit, edit, record, dryrun)
             if not succ:
-                pyrite.ui.info([
+                pyrite.utils.io.info([
                     _('Failed to cherry pick %s') % id, 'Reason: ' + err,
                     _('Please resolve any problem and commit using '
                                'pyt commit -c %s\n\n  ') % id[:10]
                 ])
             else:
-                pyrite.ui.info(_('Cherry picked: %s') % id)
+                pyrite.utils.io.info(_('Cherry picked: %s') % id)
 

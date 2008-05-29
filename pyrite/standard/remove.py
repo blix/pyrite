@@ -43,4 +43,4 @@ def run(cmd, args, flags):
     output = pyrite.repo.delete(args, force=force, recursive=recurse,
                                 noop=noop, cached=untrack)
 
-    pyrite.ui.info(output)
+    pyrite.utils.io.info(output)

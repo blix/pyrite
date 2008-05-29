@@ -106,14 +106,14 @@ def run(cmd, args, flags):
             if not use_message:
                 use_message = '\n'
 
-            new_msg = pyrite.ui.edit(use_message, extra,
+            new_msg = pyrite.utils.io.edit(use_message, extra,
                                      pyrite.repo.get_commit_info()[Repo.ID])
             use_message = new_msg
 
         if not use_message.strip():
             if amend:
                 pyrite.repo.move_head_to(amend)
-            pyrite.ui.error_out(_('No commit message, aborting'))
+            pyrite.utils.io.error_out(_('No commit message, aborting'))
 
         commitdata[Repo.SUBJECT] = use_message
         if Repo.BODY in commitdata:

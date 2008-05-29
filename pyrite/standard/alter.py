@@ -65,7 +65,7 @@ of another branch.
 def _display_message(format, id, subject):
     if len(subject) > 50:
             subject = subject[:50] + '...'
-    pyrite.ui.info(format % (id[:8], '"' + subject + '"'))
+    pyrite.utils.io.info(format % (id[:8], '"' + subject + '"'))
 
 def _handle_subcommands(command, sequencer):
     if command in ('cont', 'continue', 'skip'):
@@ -111,14 +111,14 @@ def _do_sequence(sequencer):
                                                     c[Repo.SUBJECT])
             _display_message(_('Changes from %s %s have been applied.'),
                           id, subject)
-            pyrite.ui.info(_('Once you are done editing, you can run'))
-            pyrite.ui.info(_('"pyt alter continue."\n\n'))
-            pyrite.ui.info(_('You can also use "pyt ci -c %s to re-use the'
+            pyrite.utils.io.info(_('Once you are done editing, you can run'))
+            pyrite.utils.io.info(_('"pyt alter continue."\n\n'))
+            pyrite.utils.io.info(_('You can also use "pyt ci -c %s to re-use the'
                              'last commit message.') % id)
             break
     else:
-        pyrite.ui.info(_('Rebase completed.\n\n'))
-        #pyrite.ui.info(_('If you wish to go back to your original state'
+        pyrite.utils.io.info(_('Rebase completed.\n\n'))
+        #pyrite.utils.io.info(_('If you wish to go back to your original state'
         #                 'run\n"pyt revert -'))
         # need to provide a git reset --hard sequencer._head cmd
         return True
@@ -152,7 +152,7 @@ def run(cmd, args, flags):
             try:
                 sequencer = cPickle.load(f)
                 if not sequencer:
-                    pyrite.ui.error_out(_('Unable to restore sequencer, '
+                    pyrite.utils.io.error_out(_('Unable to restore sequencer, '
                                           'aborting'))
                 done = _handle_subcommands(args[0], sequencer)
                 return
@@ -167,7 +167,7 @@ def run(cmd, args, flags):
         head_id = pyrite.repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID]
         sequencer.set_head(head_id)
         if not base:
-            pyrite.ui.error_out(_('%s not in progress, nothing to do') % cmd)
+            pyrite.utils.io.error_out(_('%s not in progress, nothing to do') % cmd)
 
         for c in (base, branch, onto):
             if not pyrite.repo.get_commit_info(c):
@@ -196,9 +196,9 @@ def run(cmd, args, flags):
                 _('merge'),
                 _('mark'),
             ]
-            message = pyrite.ui.edit(message, extra, 'pyt-seq-file')
+            message = pyrite.utils.io.edit(message, extra, 'pyt-seq-file')
             if not message:
-                pyrite.ui.info(_('Nothing to do, rebase cancelled.'))
+                pyrite.utils.io.info(_('Nothing to do, rebase cancelled.'))
                 return
             message = message.splitlines()
 
@@ -218,24 +218,24 @@ def run(cmd, args, flags):
         done = _do_sequence(sequencer)
 
     except UnintializedSequencerError, inst:
-        pyrite.ui.error_out('internal error:' + inst.message)
+        pyrite.utils.io.error_out('internal error:' + inst.message)
 
     except SequencerDirtyWorkdirError:
-        pyrite.ui.info(_('The working directory has changes.  '
+        pyrite.utils.io.info(_('The working directory has changes.  '
             'The working directory must be clean to \nstart a rebase.\n\n'
             'You can either abandon your current changes by doing '
             '"pyt revert" or you \ncan commit your changes and then go '
             'back and change it later if you desire.'))
 
     except SequencerMergeNeeded:
-        pyrite.ui.info(_('\nOne or more files have conflicting changes.'))
-        pyrite.ui.info(_('\nThe following files need resolving'))
+        pyrite.utils.io.info(_('\nOne or more files have conflicting changes.'))
+        pyrite.utils.io.info(_('\nThe following files need resolving'))
         for f in pyrite.repo.get_unresolved().keys():
-            pyrite.ui.info('..' + f)
-        pyrite.ui.info(_('\nRun "pyt resolve" to run a merge program.\n\n'))
+            pyrite.utils.io.info('..' + f)
+        pyrite.utils.io.info(_('\nRun "pyt resolve" to run a merge program.\n\n'))
 
     except SequencerError, inst:
-        pyrite.ui.error_out(inst.message)
+        pyrite.utils.io.error_out(inst.message)
 
     finally:
         if not done:
@@ -249,5 +249,5 @@ def run(cmd, args, flags):
                 if os.path.isfile(sequencer_file):
                     os.remove(sequencer_file)
             except OSError, inst:
-                pyrite.ui.warn(_('Failed to remove sequencer %s') %
+                pyrite.utils.io.warn(_('Failed to remove sequencer %s') %
                                sequencer_file)

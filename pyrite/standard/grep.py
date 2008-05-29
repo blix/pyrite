@@ -67,7 +67,7 @@ def run(cmd, args, flags):
                                  whole=whole, ignore_binary=no_bin,
                                  invert=invert, path=path, not_regex=basic,
                                  count=count):
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)
         found_matches = True
     if not found_matches:
         sys.exit(128)

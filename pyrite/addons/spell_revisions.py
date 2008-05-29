@@ -287,7 +287,7 @@ def _get_template(style, template, color):
 
 def on_before_command(module, cmd, args, flags):
     if cmd in ('log', 'hist', 'history'):
-        if pyrite.UI.affirmative(
+        if pyrite.utils.io.affirmative(
                                 pyrite.config.get_option(
                                 'pyrite.spell_rev.modify_logs')):
             global _orig_show_commit

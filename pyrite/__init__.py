@@ -22,8 +22,10 @@ def noop(message):return message #Don't know if I really want to localize the
 import __builtin__
 __builtin__.__dict__['_'] = noop
 
-import extensions, options, UI, repository
+import extensions, repository
+from pyrite.utils.io import IO
 import pyrite.standard.config as pytconfig
+import pyrite.options as options
 import pyrite.standard.help as pythelp
 import sys, imp
 
@@ -31,7 +33,7 @@ config = None
 
 repo = None
 
-ui = UI.UI()
+io = IO()
 
 # commands with the second element as 0 are shown only in extended help
 # commands with the second element as 1 are shown in normal help
@@ -198,7 +200,7 @@ def run():
     except repository.RepoError, inst:
         if show_trace:
             raise
-        ui.error_out(inst)
+        io.error_out(inst)
     finally:
         if dummy_out:
             dummy_out.close()

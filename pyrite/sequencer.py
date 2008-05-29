@@ -112,7 +112,7 @@ class Sequencer(object):
             ]
             for x in pyrite.repo.changed_files():
                 extra.append('  ' + ' '.join(x))
-            self._message = pyrite.ui.edit(self._message, extra,
+            self._message = pyrite.utils.io.edit(self._message, extra,
                                             'pyt-message')
         if not self._message:
             raise SequencerError(_('Empty commit message, aborting commit.'))
@@ -239,7 +239,7 @@ class Sequencer(object):
 
         message, extra = self._squash_message()
 
-        message = pyrite.ui.edit(message, extra, 'pyt-message')
+        message = pyrite.utils.io.edit(message, extra, 'pyt-message')
         if not message:
             return False, None, None
         commit = {Repo.SUBJECT: message}

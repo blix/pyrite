@@ -62,4 +62,4 @@ def run(cmd, args, flags):
     for lineno, c, line, orig_lineno in gen:
         c['LINE'] = line
         c['LINENO'] = lineno
-        pyrite.ui.info(template.get_complete(c))
+        pyrite.utils.io.info(template.get_complete(c))

@@ -48,7 +48,7 @@ def _get_message(message, name):
             _('Lines beginning with "#" will be removed'),
             _('To abort tagging, do not save this file')]
 
-    message = pyrite.ui.edit('', extra, 'pyt-edit-' + name)
+    message = pyrite.utils.io.edit('', extra, 'pyt-edit-' + name)
     if not message:
         raise HelpError(cmd, _('No commit message'))
     return message
@@ -61,16 +61,16 @@ def run(cmd, args, flags):
             lines = pyrite.repo.list_tags(args[0])
         else:
             lines = pyrite.repo.list_tags(None)
-        pyrite.ui.info(lines)
+        pyrite.utils.io.info(lines)
         return
 
     if args:
             raise HelpError(cmd, _('No tag name specified'))
 
     if flags.has_key('verify'):
-        pyrite.ui.info(pyrite.repo.verify_tag(args[0]))
+        pyrite.utils.io.info(pyrite.repo.verify_tag(args[0]))
     elif flags.has_key('delete'):
-        pyrite.ui.info(pyrite.repo.delete_tags(args))
+        pyrite.utils.io.info(pyrite.repo.delete_tags(args))
     else:
         message = flags.get('message', None)
         key = flags.get('key', None)
@@ -78,17 +78,17 @@ def run(cmd, args, flags):
 
         if key:
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+            pyrite.utils.io.info(pyrite.repo.create_tag(args[0], message,
                                                   commit=commit, key=key))
         elif flags.has_key('sign'):
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+            pyrite.utils.io.info(pyrite.repo.create_tag(args[0], message,
                                                   commit=commit, sign=True))
         elif flags.has_key('annotated'):
             message = _get_message(message, args[0])
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], message,
+            pyrite.utils.io.info(pyrite.repo.create_tag(args[0], message,
                                                   commit=commit))
         else:
-            pyrite.ui.info(pyrite.repo.create_tag(args[0], None,
+            pyrite.utils.io.info(pyrite.repo.create_tag(args[0], None,
                                                   commit=commit))
 

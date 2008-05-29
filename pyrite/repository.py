@@ -65,7 +65,7 @@ class Repo(object):
             stdin = None
         if self._debug_commands:
             import pyrite
-            pyrite.ui.error(str(args))
+            pyrite.utils.io.error(str(args))
         return subprocess.Popen(args, cwd=cwd,
                                     stdout=stdout,
                                     stderr=stderr,

@@ -50,4 +50,4 @@ def run(cmd, args, flags):
     output = pyrite.repo.clone(source, directory=target, bare=is_bare,
                                 depth=depth, checkout=checkout)
     for line in output:
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)

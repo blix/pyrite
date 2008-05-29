@@ -52,9 +52,9 @@ def run(cmd, args, flags):
 
     extra = [_('The above information will be used for all'
                ' patches to be sent')]
-    buf = pyrite.ui.edit(buf, extra, 'pyt-email').splitlines()
+    buf = pyrite.utils.io.edit(buf, extra, 'pyt-email').splitlines()
     if len(buf) != 9:
-        raise pyrite.ui.error_out(_('invalid email options'))
+        raise pyrite.utils.io.error_out(_('invalid email options'))
     fromaddr = buf[0].split(':')[1].strip()
     server = buf[1].split(':')[1].strip()
     user = buf[2].split(':')[1].strip()
@@ -66,17 +66,17 @@ def run(cmd, args, flags):
     bcc = [ e.strip() for e in buf[8].split(':')[1].split(',') ]
 
     if not to:
-        pyrite.ui.error_out(_('Must specify a "to" address.'))
+        pyrite.utils.io.error_out(_('Must specify a "to" address.'))
     if not fromaddr:
-        pyrite.ui.error_out(_('Must specify a "from" address.'))
+        pyrite.utils.io.error_out(_('Must specify a "from" address.'))
     if not server:
-        pyrite.ui.error_out(_('Must specify a mail server.'))
+        pyrite.utils.io.error_out(_('Must specify a mail server.'))
     if not port:
-        pyrite.ui.error_out(_('Must specify a mail server port.'))
+        pyrite.utils.io.error_out(_('Must specify a mail server port.'))
     if not passwd:
-        pyrite.ui.error_out(_('Must specify a mail server password.'))
+        pyrite.utils.io.error_out(_('Must specify a mail server password.'))
     if not user:
-        pyrite.ui.error_out(_('Must specify a mail server user.'))
+        pyrite.utils.io.error_out(_('Must specify a mail server user.'))
 
     emai_args = ['git', 'send-email', '--from', fromaddr,
             '--smtp-server', server, '--smtp-server-port', port,
@@ -95,4 +95,4 @@ def run(cmd, args, flags):
     emai_args.extend(args)
     import subprocess
     for line in subprocess.Popen(emai_args).stdout.readlines():
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)

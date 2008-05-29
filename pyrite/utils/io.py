@@ -96,7 +96,7 @@ def affirmative(response):
 def negative(response):
     return response and response.lower() in ('false', 'no', '0')
 
-class UI(object):
+class IO(object):
     def __init__(self):
         self.stdout = stdout
         self.stderr = stderr

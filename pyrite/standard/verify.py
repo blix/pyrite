@@ -25,4 +25,4 @@ Verify checks the validity of the repository and reports any problems.
 
 def run(cmd, args, flags):
     output = pyrite.repo.verify(flags.has_key('verbose'))
-    pyrite.ui.info(output)
+    pyrite.utils.io.info(output)

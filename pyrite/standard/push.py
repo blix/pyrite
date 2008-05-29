@@ -63,4 +63,4 @@ def run(cmd, args, flags):
                                 all_branches=is_all, all_tags=all_tags,
                                 verbose=is_verbose)
     for line in output:
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)

@@ -155,12 +155,12 @@ class Template(object):
     def color_diff(self, item):
         if not self.color:
             return item
-        return pyrite.UI.color_diff(item)
+        return pyrite.utils.io.color_diff(item)
 
     def color_diffstat(self, item):
         if not self.color:
             return item
-        return pyrite.UI.color_diffstat(item)
+        return pyrite.utils.io.color_diffstat(item)
 
     def _get_data(self, data, repo, what):
         if what in data:
@@ -224,7 +224,7 @@ class Template(object):
                 for formatter, args in t[1]:
                     prop = formatter(prop, **args)
                 if prop == None: #dont want empty string to trigger fail
-                    pyrite.ui.error_out(_('Could not display %s with %s') % t)
+                    pyrite.utils.io.error_out(_('Could not display %s with %s') % t)
                 yield(prop)
 
 class FileTemplate(Template):
@@ -237,13 +237,13 @@ class FileTemplate(Template):
                 try:
                     f = file(os.path.join(filedir, 'templates', realname))
                 except IOError:
-                    pyrite.ui.error_out(_('%s is not a standard '
+                    pyrite.io.error_out(_('%s is not a standard '
                                           'template') % filename)
             else:
                 try:
                     f = file(filename)
                 except IOError:
-                    pyrite.ui.error_out(_('Cannot open %s') % filename)
+                    pyrite.io.error_out(_('Cannot open %s') % filename)
             style = f.read()
             Template.__init__(self, style, color)
         finally:

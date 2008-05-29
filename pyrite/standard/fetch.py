@@ -45,7 +45,7 @@ def run(cmd, args, flags):
     branchspecs = []
     
     if not args:
-        pyrite.ui.error_out('Defaults not supported yet, '
+        pyrite.utils.io.error_out('Defaults not supported yet, '
                             'specify at least a branch')
     def split_branches(s):
         parts = s.split(':')
@@ -61,4 +61,4 @@ def run(cmd, args, flags):
 
     output = pyrite.repo.fetch(repo, branchspecs, force=force, depth=depth,
                                 notags=notags)
-    pyrite.ui.info(output)
+    pyrite.utils.io.info(output)

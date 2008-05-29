@@ -60,7 +60,7 @@ def run(cmd, args, flags):
 
     if bundle:
         pyrite.repo.import_bundle(bundle, args)
-        pyrite.ui.info(_('Bundle successfully imported'))
+        pyrite.utils.io.info(_('Bundle successfully imported'))
         return
 
     if len(args) < 1 and not skip and not resolved:
@@ -75,11 +75,11 @@ def run(cmd, args, flags):
     import_file = os.path.join(pyrite.repo.get_repo_dir(), 'import_status')
     import_file_exists = os.path.exists(import_file)
     if import_file_exists and not skip and not resolved:
-        pyrite.ui.error_out(_('Import in progress, run with --skip or'
+        pyrite.utils.io.error_out(_('Import in progress, run with --skip or'
                                 ' --resolve'))
     if skip:
         if not import_file_exists:
-            pyrite.ui.error_out(_('No pending import; nothing to skip'))
+            pyrite.utils.io.error_out(_('No pending import; nothing to skip'))
         files = _read_pending(import_file)
         if len(files) > 1:
             files = args[1:]
@@ -89,7 +89,7 @@ def run(cmd, args, flags):
 
     if resolved:
         if not import_file_exists:
-            pyrite.ui.error_out(_('No pending import; nothing to '
+            pyrite.utils.io.error_out(_('No pending import; nothing to '
                                     'apply resolved'))
         files = _read_pending(import_file)
 
@@ -103,7 +103,7 @@ def run(cmd, args, flags):
     f = message = None
     for filename in files:
         if not os.path.isfile(filename):
-            pyrite.ui.error_out(_('%s does not exits') % filename)
+            pyrite.utils.io.error_out(_('%s does not exits') % filename)
         if not status:
             f.write(filename + '\n')
             continue
@@ -113,8 +113,8 @@ def run(cmd, args, flags):
             f.write(filename + '\n')
 
     if not status:
-        pyrite.ui.error(message)
-        pyrite.ui.error_out(_('failed to apply %s, run with --skip to skip '
+        pyrite.utils.io.error(message)
+        pyrite.utils.io.error_out(_('failed to apply %s, run with --skip to skip '
                             'or --resolve to fix the conflict and complete '
                             'the import.') % filename )
 

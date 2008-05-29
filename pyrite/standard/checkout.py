@@ -43,5 +43,5 @@ def run(cmd, args, flags):
         raise HelpError(cmd, _('Need a commit'))
 
     for line in pyrite.repo.checkout(args[0], is_merge, paths=args[1:]):
-        pyrite.ui.info(line)
+        pyrite.io.info(line)
 

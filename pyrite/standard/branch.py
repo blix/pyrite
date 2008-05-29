@@ -82,17 +82,17 @@ def run(cmd, args, flags):
                 if show_all or not show_remote:
                     for b in pyrite.repo.branches():
                         if b == current:
-                            pyrite.ui.info('* ' + b)
+                            pyrite.utils.io.info('* ' + b)
                         else:
-                            pyrite.ui.info('  ' + b)
+                            pyrite.utils.io.info('  ' + b)
                 if show_all or show_remote:
                     for r in pyrite.repo.remotes():
                         if r == current:
-                            pyrite.ui.info('* ' + r)
+                            pyrite.utils.io.info('* ' + r)
                         else:
-                            pyrite.ui.info('  ' + r)
+                            pyrite.utils.io.info('  ' + r)
             else:
                 pyrite.repo.create_branch(args[0], force=is_force,
                                             track=is_tracking)
     except pyrite.repository.RepoError, inst:
-        pyrite.ui.error_out(inst)
+        pyrite.utils.io.error_out(inst)

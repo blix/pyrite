@@ -41,7 +41,7 @@ def run(cmd, args, flags):
     stat = 'stat' in flags
     patch_stat = 'patch-stat' in flags
     color = 'color' in flags or \
-            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
     detect = 'detect' in flags
     startcommit = flags.get('revision-start', 'HEAD')
     endcommit = flags.get('revision-end', None)
@@ -62,6 +62,6 @@ def run(cmd, args, flags):
                                 patch=show_patch)
 
     if color:
-        pyrite.UI.color_diff(output, pyrite.ui.info_stream())
+        pyrite.utils.io.color_diff(output, pyrite.utils.io.info_stream())
     else:
-        pyrite.ui.info(output)
+        pyrite.utils.io.info(output)

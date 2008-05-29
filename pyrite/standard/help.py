@@ -34,20 +34,23 @@ class HelpError(Exception):
 
 def output_header():
     from pyrite.__version__ import version
-    pyrite.ui.info(pyrite.help_str + _(' version ') + version)
-    pyrite.ui.info('')
+    info = pyrite.io.info
+    info(pyrite.help_str + _(' version ') + version)
+    info('')
 
 def show_help(prefix, template, threshold, suffix):
     output_header()
-    pyrite.ui.info(prefix)
+
+    info = pyrite.io.info
+    info(prefix)
     commands = {}
     for c in pyrite.commands.keys():
         options = pyrite.commands[c]
         if 2 > options[1] >= threshold:
             commands[c[0]] = template % (c[0].ljust(10), options[2])
     for c in sorted(commands.keys()):
-        pyrite.ui.info(commands[c])
-    pyrite.ui.info(suffix)
+        info(commands[c])
+    info(suffix)
 
 def show_full_help():
     show_help(_('All commands...\n'), _(' %s %s'), 0,
@@ -60,43 +63,46 @@ def show_command_help(cmd, message):
 
     pyrite.dyn_import(cmd_info[0])
     mod = pyrite.modules[cmd_info[0]]
-    pyrite.ui.info(cmd_info[2])
-    pyrite.ui.info(mod.help_str)
+
+    info = pyrite.io.info
+    info(cmd_info[2])
+    info(mod.help_str)
     if len(mod.options) > 0:
-        pyrite.ui.info(_('\noptions:'))
+        info(_('\noptions:'))
         for s, l, m, f in mod.options:
             if len(s) > 0:
-                pyrite.ui.info(' -%s, --%s %s' % (s, l.ljust(15), m))
+                info(' -%s, --%s %s' % (s, l.ljust(15), m))
             elif len(l) > 0:
-                pyrite.ui.info('      --%s %s' % (l.ljust(15), m))
+                info('      --%s %s' % (l.ljust(15), m))
             else:
-                pyrite.ui.info('\n*' + m)
-    pyrite.ui.info('\n' + _('For other commands run "%s"') % 'pyt help"')
+                info('\n*' + m)
+    info('\n' + _('For other commands run "%s"') % 'pyt help"')
     if message:
-        pyrite.ui.info('')
-        pyrite.ui.info(message)
-    pyrite.ui.info('')
+        info('')
+        info(message)
+    info('')
 
 def show_extensions():
     output_header()
 
-    pyrite.ui.info(_('The following extensions have been loaded...\n\n'))
-    pyrite.ui.info(_(' name:').ljust(31) + _(' description'))
-    pyrite.ui.info('-' * 80 + '\n\n')
+    info = pyrite.io.info
+    info(_('The following extensions have been loaded...\n\n'))
+    info(_(' name:').ljust(31) + _(' description'))
+    info('-' * 80 + '\n\n')
     
     for name, module in pyrite.extensions.extensions().items():
-        pyrite.ui.info(' ' + (name + ':').ljust(30) + ' ' +
-                       module.description)
-    pyrite.ui.info('')
-    pyrite.ui.info(_('For help on an extension, type "%s"\n\n') %
+        info(' ' + (name + ':').ljust(30) + ' ' + module.description)
+    info('')
+    info(_('For help on an extension, type "%s"\n\n') %
                    'pyt help <extension-name>')
 
 def show_extension_help(ext, message):
     output_header()
-    pyrite.ui.info(pyrite.extensions.extensions()[ext].description)
-    pyrite.ui.info(pyrite.extensions.extensions()[ext].help_str)
+    info = pyrite.io.info
+    info(pyrite.extensions.extensions()[ext].description)
+    info(pyrite.extensions.extensions()[ext].help_str)
     if message:
-        pyrite.ui.info('\n\n' + message)
+        info('\n\n' + message)
 
 def on_help_error(err):
     if not err.cmd:
@@ -108,7 +114,7 @@ def on_help_error(err):
                 cmd = c[0]
                 messages[cmd] = ', '.join(c) + ':\n\t' + info[2] + '\n\n'
             for m in sorted(messages.keys()):
-                pyrite.ui.info(messages[m])
+                pyrite.utils.io.info(messages[m])
         else:
             show_help(_('Basic commands...\n'), _(' %s %s'), 1,
                       _('\n' + _('For more options type "%s"\n\n') %

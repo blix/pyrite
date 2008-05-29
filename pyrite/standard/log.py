@@ -78,7 +78,7 @@ def run(cmd, args, flags):
         first += '^'
 
     color = 'color' in flags or \
-            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
     data, template = get_template(style, template, color)
 
     if not show_patch and Repo.PATCH in data:
@@ -86,6 +86,6 @@ def run(cmd, args, flags):
     output = pyrite.repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=args)
 
-    stream = pyrite.ui.info_stream()
+    stream = pyrite.io.info_stream()
     for commit_data in output:
         show_commit(commit_data, template, stream)

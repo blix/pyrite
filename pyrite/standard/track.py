@@ -33,5 +33,5 @@ def run(cmd, args, flags):
     is_verbose = flags.has_key('verbose')
 
     for line in pyrite.repo.add_files(is_force, is_verbose, args):
-        pyrite.ui.info(line)
+        pyrite.utils.io.info(line)
 

@@ -327,19 +327,19 @@ def run(cmd, args, flags):
                                                 is_all)
         else:
             if not args:
-                pyrite.ui.info(_('Global config values...\n\n'))
+                pyrite.utils.io.info(_('Global config values...\n\n'))
                 for k,v in pyrite.config.all_user():
-                    pyrite.ui.info(_(' %s %s') % (k.ljust(30), v))
-                pyrite.ui.info(_('\nThis repository\'s config values...\n\n'))
+                    pyrite.utils.io.info(_(' %s %s') % (k.ljust(30), v))
+                pyrite.utils.io.info(_('\nThis repository\'s config values...\n\n'))
                 for k,v in pyrite.config.all_repo():
-                    pyrite.ui.info(_(' %s %s') % (k.ljust(30), v))
+                    pyrite.utils.io.info(_(' %s %s') % (k.ljust(30), v))
             else:
                 for option in args:
                     value = pyrite.config.get_option(option, is_all)
                     if not value:
                         value = ''
-                    pyrite.ui.info(_('%s = %s') % (option, value))
+                    pyrite.utils.io.info(_('%s = %s') % (option, value))
     except ConfigError, inst:
-        pyrite.ui.error_out(inst)
+        pyrite.utils.io.error_out(inst)
 
 

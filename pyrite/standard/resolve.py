@@ -53,13 +53,13 @@ def run(cmd, args, flags):
     files_to_resolve = pyrite.repo.get_unresolved()
 
     if f and not f in files_to_resolve:
-        pyrite.ui.error_out(_('%s does not need to be resolved') % f)
+        pyrite.utils.io.error_out(_('%s does not need to be resolved') % f)
 
     if f:
         files_to_resolve = {f:'M'}
 
     if not files_to_resolve:
-        pyrite.ui.info(_('No files to resolve.'))
+        pyrite.utils.io.info(_('No files to resolve.'))
         import sys
         sys.exit(0)
 
@@ -85,7 +85,7 @@ def run(cmd, args, flags):
                 theirs = None
 
             if not mine or not theirs:
-                pyrite.ui.error_out(_('Could not get all versions of file %s')
+                pyrite.utils.io.error_out(_('Could not get all versions of file %s')
                                     % f)
             if not base:
                 base = ''
@@ -97,7 +97,7 @@ def run(cmd, args, flags):
                               + '"')
             os.system(cmd)
 
-            answer = pyrite.ui.ask(_('Accept Merge'), ['y', 'n'], 'y')
+            answer = pyrite.utils.io.ask(_('Accept Merge'), ['y', 'n'], 'y')
             if answer == 'y':
                 for l in pyrite.repo.add_files(False, False, [f]):
                     pass

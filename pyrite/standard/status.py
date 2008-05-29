@@ -34,21 +34,21 @@ def print_header(color):
     branch = pyrite.repo.branch()
     tag, distance, id = pyrite.repo.describe()
 
-    pyrite.ui.info(_('Currently on branch "%s%s%s"') %
-                   ((color and pyrite.UI.bold_color or ''),
-                    branch, pyrite.UI.reset_color))
+    pyrite.io.info(_('Currently on branch "%s%s%s"') %
+                   ((color and pyrite.utils.io.bold_color or ''),
+                    branch, pyrite.utils.io.reset_color))
 
-    pyrite.ui.info(_('tip points to %s%s%s') %
-                   ((color and pyrite.UI.commit_color or ''), id[:8],
-                    pyrite.UI.reset_color))
+    pyrite.io.info(_('tip points to %s%s%s') %
+                   ((color and pyrite.utils.io.commit_color or ''), id[:8],
+                    pyrite.utils.io.reset_color))
     if tag:
-        pyrite.ui.info(_('You are %d commits ahead of %s') % (distance, tag))
-    pyrite.ui.info('')
+        pyrite.io.info(_('You are %d commits ahead of %s') % (distance, tag))
+    pyrite.io.info('')
 
 def run(cmd, args, flags):
     amend = 'amend' in flags
     color = 'color' in flags or \
-            pyrite.UI.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
 
     commit = 'HEAD'
     if amend:
@@ -59,25 +59,25 @@ def run(cmd, args, flags):
                                 patch=False)
 
     if color:
-        output = pyrite.UI.color_diffstat(output)
-    if pyrite.ui.info(''.join(output)):
-        pyrite.ui.info('')
+        output = pyrite.utils.io.color_diffstat(output)
+    if pyrite.io.info(''.join(output)):
+        pyrite.io.info('')
 
     changed = pyrite.repo.list(tracked=False, untracked=True)
     if changed:
-        pyrite.ui.info(_('## The following files are neither tracked '
+        pyrite.io.info(_('## The following files are neither tracked '
                              'nor ignored'))
-        pyrite.ui.info('')
+        pyrite.io.info('')
 
         for f in changed:
-            pyrite.ui.info(' ' + f)
-        pyrite.ui.info('')
+            pyrite.io.info(' ' + f)
+        pyrite.io.info('')
 
     unresolved = pyrite.repo.get_unresolved()
     if unresolved:
-        pyrite.ui.info(_('## The following files need conflict resolution.'))
-        pyrite.ui.info('')
+        pyrite.io.info(_('## The following files need conflict resolution.'))
+        pyrite.io.info('')
         for f in unresolved:
-            pyrite.ui.info(' ' + f)
+            pyrite.io.info(' ' + f)
 
-        pyrite.ui.info('')
+        pyrite.io.info('')

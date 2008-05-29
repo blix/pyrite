@@ -88,7 +88,7 @@ def _run_patch_export(args, flags):
         endname = lastcommit
         if not endname:
             endname = pyrite.repo.get_commit_info()[Repo.ID]
-        message = pyrite.ui.edit(None, None,
+        message = pyrite.utils.io.edit(None, None,
                     'pyt-header-' + firstcommit + '-' + endname + '.txt')
         message = message.lstrip()
         idx = message.find(os.linesep)
@@ -123,7 +123,7 @@ def _run_patch_export(args, flags):
         
         fd.write(message)
 
-    pyrite.ui.info(pyrite.repo.export_patch(firstcommit, lastcommit, outdir,
+    pyrite.utils.io.info(pyrite.repo.export_patch(firstcommit, lastcommit, outdir,
                                             force=force, numbered=numbered))
 
 def run(cmd, args, flags):
@@ -144,13 +144,13 @@ def run(cmd, args, flags):
     if bundle:
         last = flags.get('revision-end', 'HEAD')
         first = flags.get('revision-start', last + '^') + '^'
-        pyrite.ui.info(pyrite.repo.export_bundle(bundle, first, last))
+        pyrite.utils.io.info(pyrite.repo.export_bundle(bundle, first, last))
     elif verify:
         success, reason = pyrite.repo.verify_bundle(verify)
         if success:
-            pyrite.ui.info(_('Its good!'))
+            pyrite.utils.io.info(_('Its good!'))
         else:
-            pyrite.ui.error_out(reason)
+            pyrite.utils.io.error_out(reason)
     elif archive:
         commit = None
         if not args:

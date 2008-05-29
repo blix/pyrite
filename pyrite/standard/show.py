@@ -53,4 +53,4 @@ def run(cmd, args, flags):
 
     output = pyrite.repo.show(args, commit=commit, tag=tag)
 
-    pyrite.ui.info(output)
+    pyrite.utils.io.info(output)

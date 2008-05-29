@@ -55,7 +55,7 @@ def run(cmd, args, flags):
     if files:
         changed = pyrite.repo.changed_files()
         if not changed:
-            pyrite.ui.info(_('No files can be reverted, working directory '
+            pyrite.utils.io.info(_('No files can be reverted, working directory '
                              'is clean.\n\n'))
             return
         if args:
@@ -66,11 +66,11 @@ def run(cmd, args, flags):
 
         changed = changed - pyrite.repo.changed_files()
         if changed:
-            pyrite.ui.info(_('Reverted the following files:'))
+            pyrite.utils.io.info(_('Reverted the following files:'))
             for status, filename in changed:
-                pyrite.ui.info(filename)
+                pyrite.utils.io.info(filename)
         else:
-            pyrite.ui.info(_('No files reverted.'))
+            pyrite.utils.io.info(_('No files reverted.'))
     else:
         if not commit:
             raise HelpError(cmd, _('No action chosen! You must use either '
@@ -89,10 +89,10 @@ def run(cmd, args, flags):
                 _('  ')
             ]
 
-            message = pyrite.ui.edit(message, extra, 'revert-' + c[Repo.ID])
+            message = pyrite.utils.io.edit(message, extra, 'revert-' + c[Repo.ID])
             if not message:
-                pyrite.ui.error_out(_('No commit message, aborting.'))
+                pyrite.utils.io.error_out(_('No commit message, aborting.'))
 
         output = pyrite.repo.revert(commit, dryrun=dryrun, mainline=mainline)
         for line in output:
-            pyrite.ui.info(line)
+            pyrite.utils.io.info(line)
