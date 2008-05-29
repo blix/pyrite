@@ -15,7 +15,7 @@
 
 import pyrite
 from pyrite.repository import Repo, RepoError
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('e', 'edit', _('edit the commit message before commiting'), 0),

@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite, os
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
     ('t', 'tool', _('tool to use for merge'), 1),

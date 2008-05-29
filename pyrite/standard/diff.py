@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('r', 'revision-start', _('base for comparison, defaults to current HEAD'), 1),

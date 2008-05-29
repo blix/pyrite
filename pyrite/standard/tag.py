@@ -15,7 +15,7 @@
 
 import pyrite
 import os
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('d', 'delete', _('delete the given tag'), 0),

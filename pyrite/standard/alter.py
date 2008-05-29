@@ -17,7 +17,7 @@ import pyrite
 from pyrite.sequencer import *
 from pyrite.repository import Repo
 import os, cPickle
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('i', 'interactive', _('ask before commiting a change, allowing an edit'), 0),

@@ -15,7 +15,7 @@
 
 import pyrite
 from pyrite.repository import Repo
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('f', 'files', _('Revert files in the working directory'), 0),

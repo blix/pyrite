@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite, os
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 # this should probably be done such that you can give the patches rather than
 # a two step process to gen the patch files and then send them

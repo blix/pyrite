@@ -16,7 +16,7 @@
 
 import pyrite
 from pyrite.utils.settings import Settings
-from pyrite.standard.help import HelpError
+from pyrite.utils.help import HelpError
 
 options = [
 ('r', 'repo-only', _('option only applies to current repo'), 0),

@@ -26,7 +26,7 @@ import extensions, repository
 from pyrite.utils.io import IO
 from pyrite.utils.settings import Settings
 from pyrite.utils.options import OptionParser
-import pyrite.standard.help as pythelp
+from pyrite.utils.help import HelpError, on_help_error
 import sys, imp
 
 settings = None
@@ -160,11 +160,11 @@ def run():
         extensions.on_load(commands)
 
         if len(sys.argv) < 2:
-            raise pythelp.HelpError()
+            raise HelpError()
         cmd = sys.argv[1]
         cmd_info = get_command_info(cmd)
         if not cmd_info:
-            raise pythelp.HelpError(cmd)
+            raise HelpError(cmd)
 
         m = dyn_import(cmd_info[0])
         options = OptionParser(cmd, m, global_options)
@@ -174,7 +174,7 @@ def run():
         module = modules[cmd_info[0]]
 
         if 'help' in flags:
-            raise pythelp.HelpError(cmd)
+            raise HelpError(cmd)
         if 'debug-subcommands' in flags:
             repo._debug_commands = True
         if 'debug-exceptions' in flags:
@@ -196,8 +196,8 @@ def run():
         else:
             exec_command(module, cmd, args, flags)
 
-    except pythelp.HelpError, inst:
-        pythelp.on_help_error(inst)
+    except HelpError, inst:
+        on_help_error(inst)
         if show_trace:
             raise
     except repository.RepoError, inst:
