@@ -235,7 +235,8 @@ class FileTemplate(Template):
                 filedir = os.path.dirname(__file__)
                 realname = filename + '.tmpl'
                 try:
-                    f = file(os.path.join(filedir, 'templates', realname))
+                    f = file(os.path.join(filedir, '..', 'templates',
+                                          realname))
                 except IOError:
                     pyrite.io.error_out(_('%s is not a standard '
                                           'template') % filename)

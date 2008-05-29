@@ -68,7 +68,7 @@ def run(cmd, args, flags):
                               'want to lose them, use "--force"'))
 
     if show_reflog:
-        from pyrite.template import Template
+        from pyrite.utils.template import Template
         template = Template('{ID|short} {AUTHOR_DATE|humandate} '
                             '{SUBJECT|short:length=50}\n', False)
         data = template.compile()

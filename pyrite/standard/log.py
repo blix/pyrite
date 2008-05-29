@@ -16,7 +16,7 @@
 import pyrite
 from pyrite.standard.help import HelpError
 from pyrite.repository import Repo
-from pyrite.template import FileTemplate, Template
+from pyrite.utils.template import FileTemplate, Template
 
 options = [
 ('s', 'style', _('specify a predefined style'), 1),

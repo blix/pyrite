@@ -15,7 +15,7 @@
 
 import pyrite
 from pyrite.repository import Repo
-from pyrite.template import Template
+from pyrite.utils.template import Template
 from pyrite.standard.help import HelpError
 
 options = [
