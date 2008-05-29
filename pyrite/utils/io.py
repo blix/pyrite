@@ -184,7 +184,7 @@ class IO(object):
                 if line[-1] != '\n':
                     msg.append('\n')
 
-        editor = pyrite.config.get_option('ui.editor')
+        editor = pyrite.settings.get_option('ui.editor')
         if not editor:
             editor = self.get_platform_editor()
 

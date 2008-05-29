@@ -41,7 +41,7 @@ def run(cmd, args, flags):
     stat = 'stat' in flags
     patch_stat = 'patch-stat' in flags
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
     detect = 'detect' in flags
     startcommit = flags.get('revision-start', 'HEAD')
     endcommit = flags.get('revision-end', None)

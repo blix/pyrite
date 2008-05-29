@@ -54,7 +54,7 @@ def run(cmd, args, flags):
     is_force = 'force' in flags
     show_remote = 'remote' in flags
     show_all = 'all' in flags
-    is_tracking = pyrite.config.get_option('branch.track', False)
+    is_tracking = pyrite.settings.get_option('branch.track', False)
     delete = flags.get('delete', None)
     switch = flags.get('switch', None)
     is_move = 'move' in flags

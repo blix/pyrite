@@ -116,7 +116,7 @@ def _run_patch_export(args, flags):
         mode = 'w'
         if force: mode = '+w'
         fd = open(filename, mode)
-        from_field = 'From: ' + pyrite.config.get_user() + '\n'
+        from_field = 'From: ' + pyrite.settings.get_user() + '\n'
         date_field = 'Date: ' + strftime("%a, %d %b %Y %H:%M:%S +0000",
                                             gmtime()) + '\n'
         message = from_field + date_field + subject + message

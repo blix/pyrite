@@ -21,7 +21,7 @@ def extensions():
     return _extensions
 
 def on_load(commands):
-    for name, path in pyrite.config.items('pyrite.addons'):
+    for name, path in pyrite.settings.items('pyrite.addons'):
         module = pyrite.dyn_import(name, True, None)
         if not module:
             continue

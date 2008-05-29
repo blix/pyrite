@@ -96,7 +96,7 @@ def run(cmd, args, flags):
         if sign:
             if not use_message: use_message = ''
             use_message += _('\n\nSigned-off-by: %s\n\n') % \
-                                    pyrite.config.get_user()
+                                    pyrite.settings.get_user()
 
         if edit:
             for x in pyrite.repo.changed_files():

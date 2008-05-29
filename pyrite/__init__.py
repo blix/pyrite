@@ -24,12 +24,12 @@ __builtin__.__dict__['_'] = noop
 
 import extensions, repository
 from pyrite.utils.io import IO
-import pyrite.standard.config as pytconfig
+from pyrite.utils.settings import Settings
 from pyrite.utils.options import OptionParser
 import pyrite.standard.help as pythelp
 import sys, imp
 
-config = None
+settings = None
 
 repo = None
 
@@ -155,8 +155,8 @@ def run():
     try:
         global repo
         repo = repository.Repo()
-        global config
-        config = pytconfig.Config()
+        global settings
+        settings = Settings()
         extensions.on_load(commands)
 
         if len(sys.argv) < 2:

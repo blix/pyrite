@@ -78,7 +78,7 @@ def run(cmd, args, flags):
         first += '^'
 
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
     data, template = get_template(style, template, color)
 
     if not show_patch and Repo.PATCH in data:

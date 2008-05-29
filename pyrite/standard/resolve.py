@@ -48,7 +48,7 @@ which will cause Pyrite to launch meld to do the merge.
 
 def run(cmd, args, flags):
     f = flags.get('file', None)
-    toolspec = flags.get('tool', pyrite.config.get_option('pyrite.mergetool'))
+    toolspec = flags.get('tool', pyrite.settings.get_option('pyrite.mergetool'))
 
     files_to_resolve = pyrite.repo.get_unresolved()
 

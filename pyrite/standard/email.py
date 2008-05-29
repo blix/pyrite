@@ -34,20 +34,20 @@ patch series, since it minimizes the work that needs to be done.
 def run(cmd, args, flags):
 
     buf = [
-        _('From: ') + pyrite.config.get_option('user.name') + ' <' +
-                    pyrite.config.get_option('user.email') + '>\n',
-        _('SMTP-Server: ') +  pyrite.config.get_option('sendemail.smtpserver')
+        _('From: ') + pyrite.settings.get_option('user.name') + ' <' +
+                    pyrite.settings.get_option('user.email') + '>\n',
+        _('SMTP-Server: ') +  pyrite.settings.get_option('sendemail.smtpserver')
                             + '\n',
-        _('SMTP-User: ') + pyrite.config.get_option('sendemail.smtpuser')
+        _('SMTP-User: ') + pyrite.settings.get_option('sendemail.smtpuser')
                             + '\n',
-        _('SMTP-Password: ') + pyrite.config.get_option('sendemail.smtppass')
+        _('SMTP-Password: ') + pyrite.settings.get_option('sendemail.smtppass')
                             + '\n',
-        _('SMTP-Port: ') + pyrite.config.get_option('sendemail.smtpport')
+        _('SMTP-Port: ') + pyrite.settings.get_option('sendemail.smtpport')
                             + '\n',
-        _('SSL: ') + pyrite.config.get_option('sendemail.smtpssl') + '\n',
-        _('To: ') + pyrite.config.get_option('sendemail.to') + '\n',
-        _('CC: ') + pyrite.config.get_option('sendemail.cc') + '\n',
-        _('BCC: ') + pyrite.config.get_option('sendemail.bcc') + '\n'
+        _('SSL: ') + pyrite.settings.get_option('sendemail.smtpssl') + '\n',
+        _('To: ') + pyrite.settings.get_option('sendemail.to') + '\n',
+        _('CC: ') + pyrite.settings.get_option('sendemail.cc') + '\n',
+        _('BCC: ') + pyrite.settings.get_option('sendemail.bcc') + '\n'
         ]
 
     extra = [_('The above information will be used for all'

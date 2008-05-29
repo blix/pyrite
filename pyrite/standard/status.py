@@ -48,7 +48,7 @@ def print_header(color):
 def run(cmd, args, flags):
     amend = 'amend' in flags
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.config.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
 
     commit = 'HEAD'
     if amend:
