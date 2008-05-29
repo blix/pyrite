@@ -19,24 +19,29 @@ from pyrite.standard.help import HelpError
 from collections import deque
 
 class OptionParser(object):
-    def __init__(self, command):
+    def __init__(self, command, module, global_options):
         self._options = {}
-        self._args = []
         self._switches = {}
         self._short_switches = {}
+        self._args = []
         self._command = command
-        
+
+        for short, longopt, m, flags in module.options:
+            self._short_switches[short] = longopt
+            self._switches[longopt] = not not flags
+
+        for short, longopt, m, flags in global_options:
+            self._short_switches[short] = longopt
+            self._switches[longopt] = not not flags
+
     def get_args(self):
         return self._args
 
-    def get_switches(self):
+    def get_flags(self):
         return self._options
 
-    def add_option(self, short, longopt, flags):
-        self._short_switches[short] = longopt
-        self._switches[longopt] = not not flags
-
     def parse(self, arguments):
+        arguments = deque(arguments)
         malformed_message = _('Malformed argument "%s".')
         missing_message = _('Missing required value for "%s".')
         unknown_message = _('Unknown arguement "%s".')
@@ -73,14 +78,3 @@ class OptionParser(object):
                     self._options[longopt] = True
             else:
                 self._args.append(arg)
-
-def parse(options, arguments, command):
-    parser = OptionParser(command)
-    for s,l,m, f in options:
-        parser.add_option(s, l, f)
-    for s, l, m, f in pyrite.global_options:
-        parser.add_option(s, l, f)
-
-    parser.parse(deque(arguments))
-    return parser.get_switches(), parser.get_args()
-

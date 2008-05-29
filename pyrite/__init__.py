@@ -25,7 +25,7 @@ __builtin__.__dict__['_'] = noop
 import extensions, repository
 from pyrite.utils.io import IO
 import pyrite.standard.config as pytconfig
-import pyrite.options as options
+from pyrite.utils.options import OptionParser
 import pyrite.standard.help as pythelp
 import sys, imp
 
@@ -167,7 +167,10 @@ def run():
             raise pythelp.HelpError(cmd)
 
         m = dyn_import(cmd_info[0])
-        flags,args = options.parse(m.options, sys.argv[2:], cmd)
+        options = OptionParser(cmd, m, global_options)
+        options.parse(sys.argv[2:])
+        flags = options.get_flags()
+        args = options.get_args()
         module = modules[cmd_info[0]]
 
         if 'help' in flags:
