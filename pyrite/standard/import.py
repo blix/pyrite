@@ -45,7 +45,7 @@ def _read_pending(import_file):
     files = [ line.strip() for line in f.readlines() ]
     return files
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     bundle = flags.get('bundle', None)
     is_interactive = 'interactive' in flags
     sign = 'signoff' in flags
@@ -59,8 +59,8 @@ def run(cmd, args, flags):
                                'arguments'))
 
     if bundle:
-        pyrite.repo.import_bundle(bundle, args)
-        pyrite.utils.io.info(_('Bundle successfully imported'))
+        repo.import_bundle(bundle, args)
+        io.info(_('Bundle successfully imported'))
         return
 
     if len(args) < 1 and not skip and not resolved:
@@ -72,14 +72,14 @@ def run(cmd, args, flags):
     else:
         files = args
 
-    import_file = os.path.join(pyrite.repo.get_repo_dir(), 'import_status')
+    import_file = os.path.join(repo.get_repo_dir(), 'import_status')
     import_file_exists = os.path.exists(import_file)
     if import_file_exists and not skip and not resolved:
-        pyrite.utils.io.error_out(_('Import in progress, run with --skip or'
+        io.error_out(_('Import in progress, run with --skip or'
                                 ' --resolve'))
     if skip:
         if not import_file_exists:
-            pyrite.utils.io.error_out(_('No pending import; nothing to skip'))
+            io.error_out(_('No pending import; nothing to skip'))
         files = _read_pending(import_file)
         if len(files) > 1:
             files = args[1:]
@@ -89,7 +89,7 @@ def run(cmd, args, flags):
 
     if resolved:
         if not import_file_exists:
-            pyrite.utils.io.error_out(_('No pending import; nothing to '
+            io.error_out(_('No pending import; nothing to '
                                     'apply resolved'))
         files = _read_pending(import_file)
 
@@ -103,18 +103,18 @@ def run(cmd, args, flags):
     f = message = None
     for filename in files:
         if not os.path.isfile(filename):
-            pyrite.utils.io.error_out(_('%s does not exits') % filename)
+            io.error_out(_('%s does not exits') % filename)
         if not status:
             f.write(filename + '\n')
             continue
-        status, message = pyrite.repo.import_patch(filename, sign=sign)
+        status, message = repo.import_patch(filename, sign=sign)
         if not status:
             f = open(import_file, 'w+')
             f.write(filename + '\n')
 
     if not status:
-        pyrite.utils.io.error(message)
-        pyrite.utils.io.error_out(_('failed to apply %s, run with --skip to skip '
+        io.error(message)
+        io.error_out(_('failed to apply %s, run with --skip to skip '
                             'or --resolve to fix the conflict and complete '
                             'the import.') % filename )
 

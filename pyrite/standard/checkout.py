@@ -31,7 +31,7 @@ When <commit> is a branch with no paths, it checks out and switches to that
 branch.  The --branch flag will create a branch and switch to it in one step.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_force = False
     is_merge = False
     if flags.has_key('force'):
@@ -42,6 +42,6 @@ def run(cmd, args, flags):
     if len(args) < 1:
         raise HelpError(cmd, _('Need a commit'))
 
-    for line in pyrite.repo.checkout(args[0], is_merge, paths=args[1:]):
-        pyrite.io.info(line)
+    for line in repo.checkout(args[0], is_merge, paths=args[1:]):
+        io.info(line)
 

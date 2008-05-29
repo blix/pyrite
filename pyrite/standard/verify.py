@@ -23,6 +23,6 @@ pyt verify [-v | --verbose]
 Verify checks the validity of the repository and reports any problems.
 """)
 
-def run(cmd, args, flags):
-    output = pyrite.repo.verify(flags.has_key('verbose'))
-    pyrite.utils.io.info(output)
+def run(cmd, args, flags, io, settings, repo):
+    output = repo.verify(flags.has_key('verbose'))
+    io.info(output)

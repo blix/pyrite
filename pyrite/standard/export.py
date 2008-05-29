@@ -81,14 +81,14 @@ def _run_patch_export(args, flags):
     lastcommit = flags.get('revision-end', 'HEAD')
 
     if compose:
-        hist = pyrite.repo.get_history(firstcommit, lastcommit, -1)
+        hist = repo.get_history(firstcommit, lastcommit, -1)
         count = 0
         for item in hist:
             count += 1
         endname = lastcommit
         if not endname:
-            endname = pyrite.repo.get_commit_info()[Repo.ID]
-        message = pyrite.utils.io.edit(None, None,
+            endname = repo.get_commit_info()[Repo.ID]
+        message = io.edit(None, None,
                     'pyt-header-' + firstcommit + '-' + endname + '.txt')
         message = message.lstrip()
         idx = message.find(os.linesep)
@@ -116,17 +116,17 @@ def _run_patch_export(args, flags):
         mode = 'w'
         if force: mode = '+w'
         fd = open(filename, mode)
-        from_field = 'From: ' + pyrite.settings.get_user() + '\n'
+        from_field = 'From: ' + settings.get_user() + '\n'
         date_field = 'Date: ' + strftime("%a, %d %b %Y %H:%M:%S +0000",
                                             gmtime()) + '\n'
         message = from_field + date_field + subject + message
         
         fd.write(message)
 
-    pyrite.utils.io.info(pyrite.repo.export_patch(firstcommit, lastcommit, outdir,
+    io.info(repo.export_patch(firstcommit, lastcommit, outdir,
                                             force=force, numbered=numbered))
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     bundle = flags.get('bundle', None)
     verify = flags.get('verify', None)
     archive = flags.get('archive', None)
@@ -144,13 +144,13 @@ def run(cmd, args, flags):
     if bundle:
         last = flags.get('revision-end', 'HEAD')
         first = flags.get('revision-start', last + '^') + '^'
-        pyrite.utils.io.info(pyrite.repo.export_bundle(bundle, first, last))
+        io.info(repo.export_bundle(bundle, first, last))
     elif verify:
-        success, reason = pyrite.repo.verify_bundle(verify)
+        success, reason = repo.verify_bundle(verify)
         if success:
-            pyrite.utils.io.info(_('Its good!'))
+            io.info(_('Its good!'))
         else:
-            pyrite.utils.io.error_out(reason)
+            io.error_out(reason)
     elif archive:
         commit = None
         if not args:
@@ -158,6 +158,6 @@ def run(cmd, args, flags):
         else:
             commit = args.pop(0)
 
-        pyrite.repo.export_archive(archive, commit, paths=args, format=format)
+        repo.export_archive(archive, commit, paths=args, format=format)
     else:
         _run_patch_export(args, flags)

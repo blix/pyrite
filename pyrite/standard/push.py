@@ -39,7 +39,7 @@ out branch.  If you do not specify localsource or targetbranch, then all
 heads that exist in both repositories will be update.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_all = flags.has_key('all')
     all_tags = flags.has_key('all-tags')
     is_force = flags.has_key('force')
@@ -59,8 +59,8 @@ def run(cmd, args, flags):
         source = target = refspec[0]
         if len(refspec) > 1:
             target = refspec[1]
-    output = pyrite.repo.push(repo, source, target, force=is_force,
+    output = repo.push(repo, source, target, force=is_force,
                                 all_branches=is_all, all_tags=all_tags,
                                 verbose=is_verbose)
     for line in output:
-        pyrite.utils.io.info(line)
+        io.info(line)

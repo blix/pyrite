@@ -35,7 +35,7 @@ If the targetdir is not supplied, pyt will try and use the name of the source
 repository.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_bare = flags.has_key('bare')
     depth = flags.get('depth', -1)
     checkout = not flags.has_key('no-checkout')
@@ -47,7 +47,7 @@ def run(cmd, args, flags):
     if len(args) > 1:
         target = args[1]
 
-    output = pyrite.repo.clone(source, directory=target, bare=is_bare,
+    output = repo.clone(source, directory=target, bare=is_bare,
                                 depth=depth, checkout=checkout)
     for line in output:
-        pyrite.utils.io.info(line)
+        io.info(line)

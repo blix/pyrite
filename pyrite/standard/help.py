@@ -25,7 +25,7 @@ pyt help <command>
 Shows list of commands or help for a command.
 """
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     if 'verbose' in flags:
         raise HelpError(verbose=True)
     if args:

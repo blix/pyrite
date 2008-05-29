@@ -36,7 +36,7 @@ information based on a different revision of the file.
 a "+" or "-" infront of it, it will be used as a range from start-line.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     use_long = 'long' in flags
     commit = flags.get('commit', None)
     start = flags.get('start-line', None)
@@ -57,9 +57,9 @@ def run(cmd, args, flags):
 
     template = Template(style)
     template.compile()
-    gen = pyrite.repo.blame(args[0], commit=commit, startline=start,
+    gen = repo.blame(args[0], commit=commit, startline=start,
                             endline=end)
     for lineno, c, line, orig_lineno in gen:
         c['LINE'] = line
         c['LINENO'] = lineno
-        pyrite.utils.io.info(template.get_complete(c))
+        io.info(template.get_complete(c))

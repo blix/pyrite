@@ -28,10 +28,10 @@ repository working directory.  Tracking files can be controlled with
 pyt config ignore <pattern>, -f can be used to override the ignored setting.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_force = flags.has_key('force')
     is_verbose = flags.has_key('verbose')
 
-    for line in pyrite.repo.add_files(is_force, is_verbose, args):
-        pyrite.utils.io.info(line)
+    for line in repo.add_files(is_force, is_verbose, args):
+        io.info(line)
 

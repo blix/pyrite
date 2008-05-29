@@ -49,50 +49,50 @@ The branch command will not switch to the new branch, use checkout.
 'pyt help checkout' for more.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_verbose = 'verbose' in flags
     is_force = 'force' in flags
     show_remote = 'remote' in flags
     show_all = 'all' in flags
-    is_tracking = pyrite.settings.get_option('branch.track', False)
+    is_tracking = settings.get_option('branch.track', False)
     delete = flags.get('delete', None)
     switch = flags.get('switch', None)
     is_move = 'move' in flags
 
     try:
         if delete:
-            pyrite.repo.del_branch(args, is_force)
+            repo.del_branch(args, is_force)
         elif is_move:
             if len(args) != 2:
                 raise HelpError(cmd, _('Need oldbranch and newbranch'))
-            pyrite.repo.rename_branch(args[0], args[1], force=is_force)
+            repo.rename_branch(args[0], args[1], force=is_force)
         elif switch:
             start = 'HEAD'
             if len(args) > 1:
                 raise HelpError(cmd, _('Cannot create branch with paths'))
-            elif args and pyrite.repo.get_commit_info(args[0]):
+            elif args and repo.get_commit_info(args[0]):
                 start = args[0]
-            pyrite.repo.create_branch(switch, start=start, force=is_force)
-            output = pyrite.repo.checkout(switch, force=is_force, is_merge=True)
+            repo.create_branch(switch, start=start, force=is_force)
+            output = repo.checkout(switch, force=is_force, is_merge=True)
             for x in output:
                 pass #throw away output
         else:
             if len(args) < 1:
-                current = pyrite.repo.branch()
+                current = repo.branch()
                 if show_all or not show_remote:
-                    for b in pyrite.repo.branches():
+                    for b in repo.branches():
                         if b == current:
-                            pyrite.utils.io.info('* ' + b)
+                            io.info('* ' + b)
                         else:
-                            pyrite.utils.io.info('  ' + b)
+                            io.info('  ' + b)
                 if show_all or show_remote:
-                    for r in pyrite.repo.remotes():
+                    for r in repo.remotes():
                         if r == current:
-                            pyrite.utils.io.info('* ' + r)
+                            io.info('* ' + r)
                         else:
-                            pyrite.utils.io.info('  ' + r)
+                            io.info('  ' + r)
             else:
-                pyrite.repo.create_branch(args[0], force=is_force,
+                repo.create_branch(args[0], force=is_force,
                                             track=is_tracking)
     except pyrite.repository.RepoError, inst:
-        pyrite.utils.io.error_out(inst)
+        io.error_out(inst)

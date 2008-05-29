@@ -37,7 +37,7 @@ for updating local branches from one another.  If no destination branch is
 given, then the current branch is assumed.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     force = 'force' in flags
     notags = 'no-tags' in flags
     depth = flags.get('depth', -1)
@@ -45,7 +45,7 @@ def run(cmd, args, flags):
     branchspecs = []
     
     if not args:
-        pyrite.utils.io.error_out('Defaults not supported yet, '
+        io.error_out('Defaults not supported yet, '
                             'specify at least a branch')
     def split_branches(s):
         parts = s.split(':')
@@ -59,6 +59,6 @@ def run(cmd, args, flags):
         repo = args.pop(0)
         branchspecs = [ split_branches(s) for s in args ]
 
-    output = pyrite.repo.fetch(repo, branchspecs, force=force, depth=depth,
+    output = repo.fetch(repo, branchspecs, force=force, depth=depth,
                                 notags=notags)
-    pyrite.utils.io.info(output)
+    io.info(output)

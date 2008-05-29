@@ -31,30 +31,30 @@ patch series, since it minimizes the work that needs to be done.
 """)
 
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
 
     buf = [
-        _('From: ') + pyrite.settings.get_option('user.name') + ' <' +
-                    pyrite.settings.get_option('user.email') + '>\n',
-        _('SMTP-Server: ') +  pyrite.settings.get_option('sendemail.smtpserver')
+        _('From: ') + settings.get_option('user.name') + ' <' +
+                    settings.get_option('user.email') + '>\n',
+        _('SMTP-Server: ') +  settings.get_option('sendemail.smtpserver')
                             + '\n',
-        _('SMTP-User: ') + pyrite.settings.get_option('sendemail.smtpuser')
+        _('SMTP-User: ') + settings.get_option('sendemail.smtpuser')
                             + '\n',
-        _('SMTP-Password: ') + pyrite.settings.get_option('sendemail.smtppass')
+        _('SMTP-Password: ') + settings.get_option('sendemail.smtppass')
                             + '\n',
-        _('SMTP-Port: ') + pyrite.settings.get_option('sendemail.smtpport')
+        _('SMTP-Port: ') + settings.get_option('sendemail.smtpport')
                             + '\n',
-        _('SSL: ') + pyrite.settings.get_option('sendemail.smtpssl') + '\n',
-        _('To: ') + pyrite.settings.get_option('sendemail.to') + '\n',
-        _('CC: ') + pyrite.settings.get_option('sendemail.cc') + '\n',
-        _('BCC: ') + pyrite.settings.get_option('sendemail.bcc') + '\n'
+        _('SSL: ') + settings.get_option('sendemail.smtpssl') + '\n',
+        _('To: ') + settings.get_option('sendemail.to') + '\n',
+        _('CC: ') + settings.get_option('sendemail.cc') + '\n',
+        _('BCC: ') + settings.get_option('sendemail.bcc') + '\n'
         ]
 
     extra = [_('The above information will be used for all'
                ' patches to be sent')]
-    buf = pyrite.utils.io.edit(buf, extra, 'pyt-email').splitlines()
+    buf = io.edit(buf, extra, 'pyt-email').splitlines()
     if len(buf) != 9:
-        raise pyrite.utils.io.error_out(_('invalid email options'))
+        raise io.error_out(_('invalid email options'))
     fromaddr = buf[0].split(':')[1].strip()
     server = buf[1].split(':')[1].strip()
     user = buf[2].split(':')[1].strip()
@@ -66,17 +66,17 @@ def run(cmd, args, flags):
     bcc = [ e.strip() for e in buf[8].split(':')[1].split(',') ]
 
     if not to:
-        pyrite.utils.io.error_out(_('Must specify a "to" address.'))
+        io.error_out(_('Must specify a "to" address.'))
     if not fromaddr:
-        pyrite.utils.io.error_out(_('Must specify a "from" address.'))
+        io.error_out(_('Must specify a "from" address.'))
     if not server:
-        pyrite.utils.io.error_out(_('Must specify a mail server.'))
+        io.error_out(_('Must specify a mail server.'))
     if not port:
-        pyrite.utils.io.error_out(_('Must specify a mail server port.'))
+        io.error_out(_('Must specify a mail server port.'))
     if not passwd:
-        pyrite.utils.io.error_out(_('Must specify a mail server password.'))
+        io.error_out(_('Must specify a mail server password.'))
     if not user:
-        pyrite.utils.io.error_out(_('Must specify a mail server user.'))
+        io.error_out(_('Must specify a mail server user.'))
 
     emai_args = ['git', 'send-email', '--from', fromaddr,
             '--smtp-server', server, '--smtp-server-port', port,
@@ -95,4 +95,4 @@ def run(cmd, args, flags):
     emai_args.extend(args)
     import subprocess
     for line in subprocess.Popen(emai_args).stdout.readlines():
-        pyrite.utils.io.info(line)
+        io.info(line)

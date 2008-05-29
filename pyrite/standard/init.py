@@ -27,6 +27,6 @@ Running pyt init in an existing repository is safe. It will not
 overwrite things that are already there.
 """
             
-def run(cmd, args, flags):
-    pyrite.repo.init()
+def run(cmd, args, flags, io, settings, repo):
+    repo.init()
 

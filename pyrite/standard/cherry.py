@@ -47,10 +47,10 @@ the fact that it was cherry picked and from whence it came.  You can use
 """)
 
 def _run_cherry_pick(commit, edit, record, dryrun):
-    c = pyrite.repo.get_commit_info(commit, [Repo.ID, Repo.SUBJECT, Repo.BODY])
-    head = pyrite.repo.get_commit_info('HEAD')
+    c = repo.get_commit_info(commit, [Repo.ID, Repo.SUBJECT, Repo.BODY])
+    head = repo.get_commit_info('HEAD')
     try:
-        pyrite.repo.cherry_pick(c[Repo.ID], dryrun=dryrun)
+        repo.cherry_pick(c[Repo.ID], dryrun=dryrun)
     except RepoError, inst:
         return False, inst.args[0].splitlines()[0], c[Repo.ID]
 
@@ -61,27 +61,27 @@ def _run_cherry_pick(commit, edit, record, dryrun):
             message.append(_('\n(Cherry Picked From: %s)\n') % orig_id)
         if edit:
             extra = []
-            message = pyrite.utils.io.edit(message, extra, 'cherry-' + orig_id)
+            message = io.edit(message, extra, 'cherry-' + orig_id)
 
             if not message:
-                pyrite.repo.move_head_to(head[Repo.ID])
+                repo.move_head_to(head[Repo.ID])
                 return False, _('No commit message, aborting'), orig_id
 
         try:
-            pyrite.repo.move_head_to('HEAD^')
-            pyrite.repo.update_index()
+            repo.move_head_to('HEAD^')
+            repo.update_index()
             del c[Repo.ID]
             del c[Repo.BODY]
             c[Repo.SUBJECT] = ''.join(message)
-            pyrite.repo.commit(c)
+            repo.commit(c)
         except RepoError, inst:
-            pyrite.repo.move_head_to(head[Repo.ID])
+            repo.move_head_to(head[Repo.ID])
             return False, inst.args[0].splitlines()[0]
     if dryrun:
-        pyrite.repo.move_head_to('HEAD^')
+        repo.move_head_to('HEAD^')
     return True, None, orig_id
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     edit = 'edit' in flags
     dryrun = 'no-commit' in flags
     record = 'record-origin' in flags
@@ -99,22 +99,22 @@ def run(cmd, args, flags):
 
     output = None
     if downstream:
-        commits = pyrite.repo.get_history('HEAD', downstream, -1,
+        commits = repo.get_history('HEAD', downstream, -1,
                                          data=[Repo.ID, Repo.SUBJECT])
         for c in commits:
             id = c[Repo.ID]
             if not verbose:
                 id = id[:8]
-            pyrite.utils.io.info(id + ' ' + c[Repo.SUBJECT])
+            io.info(id + ' ' + c[Repo.SUBJECT])
     else:
         for commit in args:
             succ, err, id = _run_cherry_pick(commit, edit, record, dryrun)
             if not succ:
-                pyrite.utils.io.info([
+                io.info([
                     _('Failed to cherry pick %s') % id, 'Reason: ' + err,
                     _('Please resolve any problem and commit using '
                                'pyt commit -c %s\n\n  ') % id[:10]
                 ])
             else:
-                pyrite.utils.io.info(_('Cherry picked: %s') % id)
+                io.info(_('Cherry picked: %s') % id)
 

@@ -59,7 +59,7 @@ option=value
 
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_user = True
     is_all = False
     if flags.has_key('repo-only'):
@@ -81,36 +81,36 @@ def run(cmd, args, flags):
             raise Exception("Sorry, multiple config lines with the same name not"
                                 "implemented yet.")
             if is_user:
-                pyrite.settings.add_user_option(args[0], ' '.join(args[1:]))
+                settings.add_user_option(args[0], ' '.join(args[1:]))
             else:
-                pyrite.settings.add_repo_option(args[0], ' '.join(args[1:]))
+                settings.add_repo_option(args[0], ' '.join(args[1:]))
         elif flags.has_key('delete'):
             if is_user:
-                pyrite.settings.del_user_option(args[0], is_all)
+                settings.del_user_option(args[0], is_all)
             else:
-                pyrite.settings.del_repo_option(args[0], is_all)
+                settings.del_repo_option(args[0], is_all)
         elif flags.has_key('set'):
             if is_user:
-                pyrite.settings.set_user_option(args[0], ' '.join(args[1:]),
+                settings.set_user_option(args[0], ' '.join(args[1:]),
                                                 is_all)
             else:
-                pyrite.settings.set_repo_option(args[0], ' '.join(args[1:]),
+                settings.set_repo_option(args[0], ' '.join(args[1:]),
                                                 is_all)
         else:
             if not args:
-                pyrite.utils.io.info(_('Global config values...\n\n'))
-                for k,v in pyrite.settings.all_user():
-                    pyrite.utils.io.info(_(' %s %s') % (k.ljust(30), v))
-                pyrite.utils.io.info(_('\nThis repository\'s config values...\n\n'))
-                for k,v in pyrite.settings.all_repo():
-                    pyrite.utils.io.info(_(' %s %s') % (k.ljust(30), v))
+                io.info(_('Global config values...\n\n'))
+                for k,v in settings.all_user():
+                    io.info(_(' %s %s') % (k.ljust(30), v))
+                io.info(_('\nThis repository\'s config values...\n\n'))
+                for k,v in settings.all_repo():
+                    io.info(_(' %s %s') % (k.ljust(30), v))
             else:
                 for option in args:
-                    value = pyrite.settings.get_option(option, is_all)
+                    value = settings.get_option(option, is_all)
                     if not value:
                         value = ''
-                    pyrite.utils.io.info(_('%s = %s') % (option, value))
+                    io.info(_('%s = %s') % (option, value))
     except ConfigError, inst:
-        pyrite.utils.io.error_out(inst)
+        io.error_out(inst)
 
 

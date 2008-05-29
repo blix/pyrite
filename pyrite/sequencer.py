@@ -105,14 +105,14 @@ class Sequencer(object):
                 _('Lines beginning with "#" will be removed'),
                 _('To abort checkin, remove the contents of the file '
                   'before checking in.'),
-                _('  On branch %s') % pyrite.repo.branch(),
+                _('  On branch %s') % repo.branch(),
                 _('  '),
                 _('Changed Files...'),
                 _('  ')
             ]
-            for x in pyrite.repo.changed_files():
+            for x in repo.changed_files():
                 extra.append('  ' + ' '.join(x))
-            self._message = pyrite.utils.io.edit(self._message, extra,
+            self._message = io.edit(self._message, extra,
                                             'pyt-message')
         if not self._message:
             raise SequencerError(_('Empty commit message, aborting commit.'))
@@ -239,7 +239,7 @@ class Sequencer(object):
 
         message, extra = self._squash_message()
 
-        message = pyrite.utils.io.edit(message, extra, 'pyt-message')
+        message = io.edit(message, extra, 'pyt-message')
         if not message:
             return False, None, None
         commit = {Repo.SUBJECT: message}

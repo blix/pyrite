@@ -29,12 +29,6 @@ from pyrite.utils.options import OptionParser
 from pyrite.utils.help import HelpError, on_help_error
 import sys, imp
 
-settings = None
-
-repo = None
-
-io = IO()
-
 # commands with the second element as 0 are shown only in extended help
 # commands with the second element as 1 are shown in normal help
 
@@ -144,20 +138,22 @@ def dyn_import(module, is_extension=False, path=None):
                        (module, inst.message))
         return None
 
-def exec_command(module, cmd, args, flags):
-    extensions.on_before_command(module, cmd, args, flags)
-    module.run(cmd, args, flags)
-    extensions.on_after_command(module, cmd, args, flags)
+def exec_command(module, cmd, args, flags, io, settings, repo):
+    extensions.on_before_command(module, cmd, args, flags, io,
+                                 settings, repo)
+    module.run(cmd, args, flags, io, settings, repo)
+    extensions.on_after_command(module, cmd, args, flags, io,
+                                settings, repo)
 
 def run():
     show_trace = False
     dummy_out = None
+    io = IO()
     try:
-        global repo
         repo = repository.Repo()
-        global settings
-        settings = Settings()
-        extensions.on_load(commands)
+        settings = Settings(repo)
+        extensions.on_load(commands, settings)
+        io.initialize(settings, repo)
 
         if len(sys.argv) < 2:
             raise HelpError()
@@ -185,7 +181,8 @@ def run():
         if 'debug-profile' in flags:
             import cProfile
             import pstats
-            cProfile.runctx('exec_command(module, cmd, args, flags)',
+            cProfile.runctx('exec_command(module, cmd, args, flags, '
+                            'io, settings, repo)',
                             globals(), locals(), 'pyt-profile')
             p = pstats.Stats('pyt-profile')
             p.sort_stats(flags.get('debug-profile-sort', 'cumulative'))
@@ -194,10 +191,10 @@ def run():
             if 'debug-profile-extra' in flags:
                 p.print_callers()
         else:
-            exec_command(module, cmd, args, flags)
+            exec_command(module, cmd, args, flags, io, settings, repo)
 
     except HelpError, inst:
-        on_help_error(inst)
+        on_help_error(inst, io)
         if show_trace:
             raise
     except repository.RepoError, inst:

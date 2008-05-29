@@ -20,8 +20,8 @@ _extensions = {}
 def extensions():
     return _extensions
 
-def on_load(commands):
-    for name, path in pyrite.settings.items('pyrite.addons'):
+def on_load(commands, settings):
+    for name, path in settings.items('pyrite.addons'):
         module = pyrite.dyn_import(name, True, None)
         if not module:
             continue
@@ -32,12 +32,14 @@ def on_load(commands):
         else:
             _extensions[name] = module
 
-def on_before_command(module, cmd, args, flags):
+def on_before_command(module, cmd, args, flags, io, settings, repo):
     for e in _extensions.values():
         if hasattr(e, 'on_before_command'):
-            e.on_before_command(module, cmd, args, flags)
+            e.on_before_command(module, cmd, args, flags, io,
+                                settings, repo)
 
-def on_after_command(module, cmd, args, flags):
+def on_after_command(module, cmd, args, flags, io, settings, repo):
     for e in _extensions.values():
         if hasattr(e, 'on_after_command'):
-            e.on_after_command(module, cmd, args, flags)
+            e.on_after_command(module, cmd, args, flags, io,
+                               settings, repo)

@@ -39,7 +39,7 @@ The form using -u will apply a reverse-commit that undoes the patch of an
 existing commit.  -e, -m and -n can only be used with this form.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     commit = flags.get('undo', None)
     files = 'files' in flags
     edit = 'edit' in flags
@@ -53,29 +53,29 @@ def run(cmd, args, flags):
         raise HelpError(cmd, _('missing -u/--undo <commit>'))
 
     if files:
-        changed = pyrite.repo.changed_files()
+        changed = repo.changed_files()
         if not changed:
-            pyrite.utils.io.info(_('No files can be reverted, working directory '
+            io.info(_('No files can be reverted, working directory '
                              'is clean.\n\n'))
             return
         if args:
-            for l in pyrite.repo.checkout('HEAD', paths=args):
+            for l in repo.checkout('HEAD', paths=args):
                 pass
         else:
-            pyrite.repo.move_head_to('HEAD', True)
+            repo.move_head_to('HEAD', True)
 
-        changed = changed - pyrite.repo.changed_files()
+        changed = changed - repo.changed_files()
         if changed:
-            pyrite.utils.io.info(_('Reverted the following files:'))
+            io.info(_('Reverted the following files:'))
             for status, filename in changed:
-                pyrite.utils.io.info(filename)
+                io.info(filename)
         else:
-            pyrite.utils.io.info(_('No files reverted.'))
+            io.info(_('No files reverted.'))
     else:
         if not commit:
             raise HelpError(cmd, _('No action chosen! You must use either '
                                    '-f or -c'))
-        c = pyrite.repo.get_commit_info(commit, [Repo.ID, Repo.SUBJECT])
+        c = repo.get_commit_info(commit, [Repo.ID, Repo.SUBJECT])
         message = [
             _('Revert: '), c[Repo.SUBJECT],
             '\n\n This reverts commit', c[Repo.ID], '\n\n'
@@ -89,10 +89,10 @@ def run(cmd, args, flags):
                 _('  ')
             ]
 
-            message = pyrite.utils.io.edit(message, extra, 'revert-' + c[Repo.ID])
+            message = io.edit(message, extra, 'revert-' + c[Repo.ID])
             if not message:
-                pyrite.utils.io.error_out(_('No commit message, aborting.'))
+                io.error_out(_('No commit message, aborting.'))
 
-        output = pyrite.repo.revert(commit, dryrun=dryrun, mainline=mainline)
+        output = repo.revert(commit, dryrun=dryrun, mainline=mainline)
         for line in output:
-            pyrite.utils.io.info(line)
+            io.info(line)

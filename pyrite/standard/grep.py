@@ -37,7 +37,7 @@ You can also choose to search previous revisions without having to check
 them out.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     ignore = 'ignore-case' in flags
     whole = 'whole-word' in flags
     no_bin = 'no-binary' in flags
@@ -63,11 +63,11 @@ def run(cmd, args, flags):
     pattern = args.pop(0)
 
     found_matches = False
-    for line in pyrite.repo.grep(pattern, args, commit=commit, ignore=ignore,
+    for line in repo.grep(pattern, args, commit=commit, ignore=ignore,
                                  whole=whole, ignore_binary=no_bin,
                                  invert=invert, path=path, not_regex=basic,
                                  count=count):
-        pyrite.utils.io.info(line)
+        io.info(line)
         found_matches = True
     if not found_matches:
         sys.exit(128)

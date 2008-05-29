@@ -44,7 +44,7 @@ The commit option allows you to re-use the commit message, author and timestamp
 of a previous commit as the default messages for the current commit.
 """
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     use_commit = flags.get('commit', None)
     use_author = flags.get('author', None)
     use_message = flags.get('message', None)
@@ -61,7 +61,7 @@ def run(cmd, args, flags):
     if use_commit and use_message:
         raise HelpError(cmd, _('Cannot specify commit and message'))
     elif use_commit:
-        commitdata = pyrite.repo.get_commit_info(use_commit, data)
+        commitdata = repo.get_commit_info(use_commit, data)
         use_message = commitdata[Repo.SUBJECT] + '\n' + \
                             ''.join(commitdata[Repo.BODY])
 
@@ -69,57 +69,57 @@ def run(cmd, args, flags):
             _('Lines beginning with "#" will be removed'),
             _('To abort checkin, remove the contents of the file '
               'before saving.'),
-            _('  On branch %s') % pyrite.repo.branch(),
+            _('  On branch %s') % repo.branch(),
             _('  '),
             _('Changed Files...'),
             _('  ')]
 
     try:
         if amend:
-            commitdata = pyrite.repo.get_commit_info('HEAD', data)
+            commitdata = repo.get_commit_info('HEAD', data)
             if not use_message:
                 use_message = commitdata[Repo.SUBJECT] + '\n' + \
                                 ''.join(commitdata[Repo.BODY])
             amend = commitdata[Repo.ID]
             del commitdata[Repo.ID]
             if args:
-                for f in pyrite.repo.changed_files('HEAD'):
+                for f in repo.changed_files('HEAD'):
                     args.append(f[1])
-            diff = [l for l in pyrite.repo.diff('HEAD^', 'HEAD',
+            diff = [l for l in repo.diff('HEAD^', 'HEAD',
                                                 None, binary=True)]
-            pyrite.repo.move_head_to('HEAD^')
-            pyrite.repo.apply(diff, toindex=True)
+            repo.move_head_to('HEAD^')
+            repo.apply(diff, toindex=True)
         elif args:
-            pyrite.repo.move_head_to('HEAD')
-        pyrite.repo.update_index(args)
+            repo.move_head_to('HEAD')
+        repo.update_index(args)
 
         if sign:
             if not use_message: use_message = ''
             use_message += _('\n\nSigned-off-by: %s\n\n') % \
-                                    pyrite.settings.get_user()
+                                    settings.get_user()
 
         if edit:
-            for x in pyrite.repo.changed_files():
+            for x in repo.changed_files():
                 if not args or x[1] in args:
                     extra.append('  ' + ' '.join(x))
 
             if not use_message:
                 use_message = '\n'
 
-            new_msg = pyrite.utils.io.edit(use_message, extra,
-                                     pyrite.repo.get_commit_info()[Repo.ID])
+            new_msg = io.edit(use_message, extra,
+                                     repo.get_commit_info()[Repo.ID])
             use_message = new_msg
 
         if not use_message.strip():
             if amend:
-                pyrite.repo.move_head_to(amend)
-            pyrite.utils.io.error_out(_('No commit message, aborting'))
+                repo.move_head_to(amend)
+            io.error_out(_('No commit message, aborting'))
 
         commitdata[Repo.SUBJECT] = use_message
         if Repo.BODY in commitdata:
             del commitdata[Repo.BODY]
-        pyrite.repo.commit(commit=commitdata, verify=verify)
+        repo.commit(commit=commitdata, verify=verify)
         amend = False
     finally:
         if amend and amend != True:
-            pyrite.repo.move_head_to(amend)
+            repo.move_head_to(amend)

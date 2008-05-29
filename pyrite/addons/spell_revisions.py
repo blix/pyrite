@@ -97,7 +97,7 @@ _orig_get_template = None
 def _update_cache(id):
     if id in _id_cache:
         return
-    commits = pyrite.repo.get_history(None, id, -1, [Repo.ID], ordered=True,
+    commits = repo.get_history(None, id, -1, [Repo.ID], ordered=True,
                                       reverse=True)
     done = False
     for num, c in enumerate(commits):
@@ -167,7 +167,7 @@ def __revnum(num, parts, result):
     relto = 'HEAD'
     if parts:
         relto = parts.pop(0)
-    relto = pyrite.repo.get_commit_info(relto, [Repo.ID])[Repo.ID]
+    relto = repo.get_commit_info(relto, [Repo.ID])[Repo.ID]
     max = _get_num(relto)
     if num > max:
         raise HelpError('spell_revisions', _('Revision number %d goes '
@@ -269,9 +269,9 @@ def __branch(parts, result):
                         _('Invalid branch query, no branch name given'))
     return result + 'refs/heads/' + parts.pop(0)
 
-def _show_commit(commit, formatter, stream):
+def _show_commit(commit, formatter, stream, repo):
     commit['REVNUM'] = str(_get_num(commit[Repo.ID]))
-    _orig_show_commit(commit, formatter, stream)
+    _orig_show_commit(commit, formatter, stream, repo)
 
 def _get_template(style, template, color):
     data, tmpl = _orig_get_template(style, template, color)
@@ -285,11 +285,10 @@ def _get_template(style, template, color):
             break
     return data, tmpl
 
-def on_before_command(module, cmd, args, flags):
+def on_before_command(module, cmd, args, flags, io, settings, repo):
     if cmd in ('log', 'hist', 'history'):
-        if pyrite.utils.io.affirmative(
-                                pyrite.settings.get_option(
-                                'pyrite.spell_rev.modify_logs')):
+        if io.affirmative(
+                settings.get_option('pyrite.spell_rev.modify_logs')):
             global _orig_show_commit
             _orig_show_commit = module.show_commit
             global _orig_get_template

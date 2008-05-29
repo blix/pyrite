@@ -37,11 +37,11 @@ be between the working set and the commit.  You can specify a set of paths
 to narrow down the result of the patch.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     stat = 'stat' in flags
     patch_stat = 'patch-stat' in flags
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
+            io.affirmative(settings.get_option('pyrite.color'))
     detect = 'detect' in flags
     startcommit = flags.get('revision-start', 'HEAD')
     endcommit = flags.get('revision-end', None)
@@ -57,11 +57,11 @@ def run(cmd, args, flags):
         show_patch = False
     if patch_stat:
         stat = True
-    output = pyrite.repo.diff(startcommit, endcommit, args, stat=stat,
+    output = repo.diff(startcommit, endcommit, args, stat=stat,
                                 detect=detect, ignorewhite=ignorewhite,
                                 patch=show_patch)
 
     if color:
-        pyrite.utils.io.color_diff(output, pyrite.utils.io.info_stream())
+        io.color_diff(output, io.info_stream())
     else:
-        pyrite.utils.io.info(output)
+        io.info(output)

@@ -31,7 +31,7 @@ command can also be used to mark a file deleted in the repository but not
 actually remove it from the disk.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     force = 'force' in flags
     recurse = 'recursive' in flags
     noop = 'no-remove' in flags
@@ -40,7 +40,7 @@ def run(cmd, args, flags):
     if not args:
         raise HelpError(cmd, _('Need at least a source and a destination'))
 
-    output = pyrite.repo.delete(args, force=force, recursive=recurse,
+    output = repo.delete(args, force=force, recursive=recurse,
                                 noop=noop, cached=untrack)
 
-    pyrite.utils.io.info(output)
+    io.info(output)

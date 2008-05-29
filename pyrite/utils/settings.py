@@ -14,7 +14,6 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import pyrite
 from pyrite.utils.ini import IniParser, IniParseError
 
 class SettingsError(Exception):
@@ -23,15 +22,16 @@ class SettingsError(Exception):
 class Settings(object):
     _not_under_repo_error = _("Not under a repository")
     _missing_config_arg = _("Category and Name must be supplied")
-    def __init__(self):
+    def __init__(self, repo):
+        self.repo = repo
         self.user = None
         self.user_config_path = os.path.expanduser('~/.gitconfig')
         self.user_config = IniParser(self.user_config_path)
         try:
             self.user_config.read()
 
-            if pyrite.repo.is_repo():
-                self.repo_config_path = os.path.join(pyrite.repo.get_repo_dir(),
+            if repo.is_repo():
+                self.repo_config_path = os.path.join(repo.get_repo_dir(),
                                                      'config')
                 self.repo_config = IniParser(self.repo_config_path)
                 self.repo_config.read()
@@ -39,7 +39,7 @@ class Settings(object):
             raise SettingsError(inst)
 
     def set_repo_option(self, item, value, is_all):
-        if not pyrite.repo.is_repo():
+        if not self.repo.is_repo():
             raise SettingsError(self._not_under_repo_error)
         self._set_option(self.repo_config, self.repo_config_path, item, value,
                             is_all)
@@ -49,7 +49,7 @@ class Settings(object):
                             is_all)
 
     def del_repo_option(self, item, is_all):
-        if not pyrite.repo.is_repo():
+        if not self.repo.is_repo():
             raise SettingsError(self._not_under_repo_error)
         self._del_option(self.repo_config, self.repo_config_path, item, is_all)
 
@@ -61,7 +61,7 @@ class Settings(object):
         if category == None or name == None:
             raise SettingsError(_missing_config_arg)
         value = None
-        if pyrite.repo.is_repo():
+        if self.repo.is_repo():
             value = self.repo_config.get(category, name)
         if not value:
             value = self.user_config.get(category, name)
@@ -81,18 +81,19 @@ class Settings(object):
         for k, v in self._items(category, self.user_config):
             items[k] = v
 
-        for k, v in self._items(category, self.repo_config):
-            items[k] = v
+        if self.repo.is_repo():
+            for k, v in self._items(category, self.repo_config):
+                items[k] = v
 
         for k, v in items.items():
             yield k, v
 
     def update_ignore(self, item, remove):
-        if not pyrite.repo.is_repo():
+        if not self.repo.is_repo():
             raise SettingsError(self._not_under_repo_error)
         lines = []
         try:
-            f = open(pyrite.repo.get_ignore_file(), 'r+')
+            f = open(repo.get_ignore_file(), 'r+')
             lines = f.readlines()
         finally: f.close()
         item = item + '\n'
@@ -101,7 +102,7 @@ class Settings(object):
         elif not remove:
             lines.append(item)
         try:
-            f = open(pyrite.repo.get_ignore_file(), 'w+')
+            f = open(repo.get_ignore_file(), 'w+')
             f.writelines(lines)
         finally: f.close()
 

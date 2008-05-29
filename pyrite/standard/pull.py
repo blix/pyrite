@@ -32,7 +32,7 @@ pyt pull [options] <sourcerepo> [sourcebranch[:targetbranch]]
 The pull commands fetches history from the sourcerepo and merges it.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     is_force = flags.has_key('force')
     tags = not flags.has_key('no-tags')
     extra_tags = flags.has_key('extra-tags')
@@ -63,7 +63,7 @@ def run(cmd, args, flags):
         if len(refspec) > 1:
             target = refspec[1]
             
-    output = pyrite.repo.pull(repo, source, target, force=is_force, tags=tags,
+    output = repo.pull(repo, source, target, force=is_force, tags=tags,
                                 depth=depth, commit=commit, rebase=is_rebase)
     for line in output:
-        pyrite.utils.io.info(line)
+        io.info(line)

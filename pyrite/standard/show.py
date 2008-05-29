@@ -32,7 +32,7 @@ a commit.  It will display the contents of a file or files for the first form.
 If you only supply files, then the default to show is from the current HEAD.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     style = flags.get('style', None)
     template = flags.get('template', None)
     commit = None
@@ -44,13 +44,13 @@ def run(cmd, args, flags):
 
     if not args:
         raise HelpError(cmd, _('Need something to show'))
-    if args[0] in pyrite.repo.list_tags():
+    if args[0] in repo.list_tags():
         tag = args.pop(0)
-    elif pyrite.repo.get_commit_info(args[0]):
+    elif repo.get_commit_info(args[0]):
         commit = args.pop(0)
     else:
         commit = 'HEAD'
 
-    output = pyrite.repo.show(args, commit=commit, tag=tag)
+    output = repo.show(args, commit=commit, tag=tag)
 
-    pyrite.utils.io.info(output)
+    io.info(output)

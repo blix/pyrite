@@ -48,7 +48,7 @@ the repository.  This does not happen for several weeks to allow the user
 time to recover those commits if they need to.
 """)
     
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     force = 'force' in flags
     commit = flags.get('commit')
     show_reflog = 'show-reflog' in flags
@@ -57,12 +57,12 @@ def run(cmd, args, flags):
         raise HelpError(cmd, _('No action specified.\nUse "--show-reflog" '
                                'or "--commit <commit>" to take an action.'))
 
-    c = pyrite.repo.get_commit_info(commit, [Repo.ID])
+    c = repo.get_commit_info(commit, [Repo.ID])
     if not c:
         raise HelpError(_('%s does not appear to be a commit.') % commit)
 
     if not force:
-        dirty = pyrite.repo.changed_files()
+        dirty = repo.changed_files()
         if dirty:
             raise HelpError(_('Your working directory has changes, if you'
                               'want to lose them, use "--force"'))
@@ -72,17 +72,17 @@ def run(cmd, args, flags):
         template = Template('{ID|short} {AUTHOR_DATE|humandate} '
                             '{SUBJECT|short:length=50}\n', False)
         data = template.compile()
-        output = pyrite.repo.get_history(None, None, -1, data, reflog=True)
+        output = repo.get_history(None, None, -1, data, reflog=True)
         for c in output:
-            template.write_to_stream(c, pyrite.utils.io.info_stream())
+            template.write_to_stream(c, io.info_stream())
         return
 
-    branch = pyrite.repo.branch()
-    id = pyrite.repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID][:8]
-    pyrite.repo.move_head_to(c[Repo.ID], True)
-    pyrite.utils.io.info(_('You are on branch "%s", its tip was "%s".') %
+    branch = repo.branch()
+    id = repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID][:8]
+    repo.move_head_to(c[Repo.ID], True)
+    io.info(_('You are on branch "%s", its tip was "%s".') %
                    (branch, id))
-    pyrite.utils.io.info(_('Run "pyt recover -c %s" to undo.') % id)
-    c = pyrite.repo.get_commit_info(commit, [Repo.ID])
-    pyrite.utils.io.info(_('Tip now points to "%s"') % c[Repo.ID])
-    pyrite.utils.io.info('')
+    io.info(_('Run "pyt recover -c %s" to undo.') % id)
+    c = repo.get_commit_info(commit, [Repo.ID])
+    io.info(_('Tip now points to "%s"') % c[Repo.ID])
+    io.info('')

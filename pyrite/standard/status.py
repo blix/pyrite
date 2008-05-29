@@ -30,54 +30,54 @@ you to see what would happen if you did a checkin with the --amend flag.  Also
 like checkin, you can use paths to limit what is reported by status.
 """)
 
-def print_header(color):
-    branch = pyrite.repo.branch()
-    tag, distance, id = pyrite.repo.describe()
+def print_header(color, io, repo):
+    branch = repo.branch()
+    tag, distance, id = repo.describe()
 
-    pyrite.io.info(_('Currently on branch "%s%s%s"') %
+    io.info(_('Currently on branch "%s%s%s"') %
                    ((color and pyrite.utils.io.bold_color or ''),
                     branch, pyrite.utils.io.reset_color))
 
-    pyrite.io.info(_('tip points to %s%s%s') %
+    io.info(_('tip points to %s%s%s') %
                    ((color and pyrite.utils.io.commit_color or ''), id[:8],
                     pyrite.utils.io.reset_color))
     if tag:
-        pyrite.io.info(_('You are %d commits ahead of %s') % (distance, tag))
-    pyrite.io.info('')
+        io.info(_('You are %d commits ahead of %s') % (distance, tag))
+    io.info('')
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     amend = 'amend' in flags
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(settings.get_option('pyrite.color'))
 
     commit = 'HEAD'
     if amend:
         commit = 'HEAD^'
 
-    print_header(color)
-    output = pyrite.repo.diff(commit, None, args, detect=True, stat=True,
+    print_header(color, io, repo)
+    output = repo.diff(commit, None, args, detect=True, stat=True,
                                 patch=False)
 
     if color:
-        output = pyrite.utils.io.color_diffstat(output)
-    if pyrite.io.info(''.join(output)):
-        pyrite.io.info('')
+        output = io.color_diffstat(output)
+    if io.info(''.join(output)):
+        io.info('')
 
-    changed = pyrite.repo.list(tracked=False, untracked=True)
+    changed = repo.list(tracked=False, untracked=True)
     if changed:
-        pyrite.io.info(_('## The following files are neither tracked '
+        io.info(_('## The following files are neither tracked '
                              'nor ignored'))
-        pyrite.io.info('')
+        io.info('')
 
         for f in changed:
-            pyrite.io.info(' ' + f)
-        pyrite.io.info('')
+            io.info(' ' + f)
+        io.info('')
 
-    unresolved = pyrite.repo.get_unresolved()
+    unresolved = repo.get_unresolved()
     if unresolved:
-        pyrite.io.info(_('## The following files need conflict resolution.'))
-        pyrite.io.info('')
+        io.info(_('## The following files need conflict resolution.'))
+        io.info('')
         for f in unresolved:
-            pyrite.io.info(' ' + f)
+            io.info(' ' + f)
 
-        pyrite.io.info('')
+        io.info('')

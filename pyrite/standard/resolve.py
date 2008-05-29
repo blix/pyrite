@@ -46,20 +46,20 @@ pyt resolve -t "meld {mine} {result} {theirs}" -f foo
 which will cause Pyrite to launch meld to do the merge.
 """)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     f = flags.get('file', None)
-    toolspec = flags.get('tool', pyrite.settings.get_option('pyrite.mergetool'))
+    toolspec = flags.get('tool', settings.get_option('pyrite.mergetool'))
 
-    files_to_resolve = pyrite.repo.get_unresolved()
+    files_to_resolve = repo.get_unresolved()
 
     if f and not f in files_to_resolve:
-        pyrite.utils.io.error_out(_('%s does not need to be resolved') % f)
+        io.error_out(_('%s does not need to be resolved') % f)
 
     if f:
         files_to_resolve = {f:'M'}
 
     if not files_to_resolve:
-        pyrite.utils.io.info(_('No files to resolve.'))
+        io.info(_('No files to resolve.'))
         import sys
         sys.exit(0)
 
@@ -72,20 +72,20 @@ def run(cmd, args, flags):
         theirs = None
         try:
             dummy, tail = os.path.split(f)
-            base = os.path.join(pyrite.repo.get_repo_dir(), 'base-' + tail)
-            if not pyrite.repo.cat_file(f, cat_to=base, commit=':1'):
+            base = os.path.join(repo.get_repo_dir(), 'base-' + tail)
+            if not repo.cat_file(f, cat_to=base, commit=':1'):
                 base = None
 
-            mine = os.path.join(pyrite.repo.get_repo_dir(), 'mine-' + tail)
-            if not pyrite.repo.cat_file(f, cat_to=mine, commit=':2'):
+            mine = os.path.join(repo.get_repo_dir(), 'mine-' + tail)
+            if not repo.cat_file(f, cat_to=mine, commit=':2'):
                 mine = None
 
-            theirs = os.path.join(pyrite.repo.get_repo_dir(), 'theirs-' + tail)
-            if not pyrite.repo.cat_file(f, cat_to=theirs, commit=':3'):
+            theirs = os.path.join(repo.get_repo_dir(), 'theirs-' + tail)
+            if not repo.cat_file(f, cat_to=theirs, commit=':3'):
                 theirs = None
 
             if not mine or not theirs:
-                pyrite.utils.io.error_out(_('Could not get all versions of file %s')
+                io.error_out(_('Could not get all versions of file %s')
                                     % f)
             if not base:
                 base = ''
@@ -93,13 +93,13 @@ def run(cmd, args, flags):
             cmd = cmd.replace('{mine}', '"' + mine + '"')
             cmd = cmd.replace('{theirs}', '"' + theirs + '"')
             cmd = cmd.replace('{result}', '"' +
-                              os.path.join(pyrite.repo.get_work_dir(), f)
+                              os.path.join(repo.get_work_dir(), f)
                               + '"')
             os.system(cmd)
 
-            answer = pyrite.utils.io.ask(_('Accept Merge'), ['y', 'n'], 'y')
+            answer = io.ask(_('Accept Merge'), ['y', 'n'], 'y')
             if answer == 'y':
-                for l in pyrite.repo.add_files(False, False, [f]):
+                for l in repo.add_files(False, False, [f]):
                     pass
         finally:
             if base:

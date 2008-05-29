@@ -102,6 +102,10 @@ class IO(object):
         self.stderr = stderr
         self.stdin = stdin
 
+    def initialize(self, settings, repo):
+        self._settings = settings
+        self._repo = repo
+
     def ask(self, question, responses, default):
         while True:
             self.stdout.write(question + ' [')
@@ -184,11 +188,11 @@ class IO(object):
                 if line[-1] != '\n':
                     msg.append('\n')
 
-        editor = pyrite.settings.get_option('ui.editor')
+        editor = self._settings.get_option('ui.editor')
         if not editor:
             editor = self.get_platform_editor()
 
-        path = os.path.join(pyrite.repo.get_repo_dir(), 'pyt-edit-' + tmpfile)
+        path = os.path.join(self._repo.get_repo_dir(), 'pyt-edit-' + tmpfile)
         f = open(path, 'w+')
         try:
             f.write(''.join(msg))

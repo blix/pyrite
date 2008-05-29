@@ -52,10 +52,10 @@ def get_template(style, template, color):
     data = tmpl.compile()
     return data, tmpl
 
-def show_commit(commit, template, stream):
-    template.write_to_stream(commit, stream, pyrite.repo)
+def show_commit(commit, template, stream, repo):
+    template.write_to_stream(commit, stream, repo)
 
-def run(cmd, args, flags):
+def run(cmd, args, flags, io, settings, repo):
     style = flags.get('style', None)
     template = flags.get('template', 'medium')
     limit = flags.get('limit', 10)
@@ -78,14 +78,14 @@ def run(cmd, args, flags):
         first += '^'
 
     color = 'color' in flags or \
-            pyrite.utils.io.affirmative(pyrite.settings.get_option('pyrite.color'))
+            pyrite.utils.io.affirmative(settings.get_option('pyrite.color'))
     data, template = get_template(style, template, color)
 
     if not show_patch and Repo.PATCH in data:
         data.remove(Repo.PATCH)
-    output = pyrite.repo.get_history(first, last, limit, data=data,
+    output = repo.get_history(first, last, limit, data=data,
                                        follow=follow, paths=args)
 
-    stream = pyrite.io.info_stream()
+    stream = io.info_stream()
     for commit_data in output:
-        show_commit(commit_data, template, stream)
+        show_commit(commit_data, template, stream, repo)
