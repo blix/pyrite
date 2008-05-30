@@ -13,13 +13,10 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, os
+from gitobject import *
 from pyrite.utils.smartstream import SmartStream
 
-class RepoError(Exception):
-    """Thrown when repo fails"""
-
-class Repo(object):
+class Repo(GitObject):
     _status = {
         '?': 'untracked',
         'H': 'uptodate',
@@ -46,78 +43,22 @@ class Repo(object):
     AUTHOR_DATE_OFFSET = 14
     COMMITER_DATE_OFFSET = 15
 
-    def __init__(self, location=None):
-        if location:
-            self._location = os.path.expanduser(location)
-        else:
-            self._location = os.getcwd()
-        self.refresh()
-        self._debug_commands = False
-
-    def _popen(self, args, cwd=None, stdin=False,
-               stdout=subprocess.PIPE,
-               stderr=subprocess.PIPE):
-        if not cwd:
-            cwd = self._location
-        if stdin:
-            stdin = subprocess.PIPE
-        else:
-            stdin = None
-        if self._debug_commands:
-            import pyrite
-            io.error(str(args))
-        return subprocess.Popen(args, cwd=cwd,
-                                    stdout=stdout,
-                                    stderr=stderr,
-                                    stdin=stdin)
+    def __init__(self, settings=None, io=None, location=None):
+        GitObject.__init__(self, settings, io, location)
+        self._branches = None
+        self._remotes = None
+        self._tags = None
 
     def refresh(self):
         self._branches = None
         self._remotes = None
-        self._repo_dir = None
-        self._is_repo = not not self.get_repo_dir()
         self._tags = None
-
-    def _is_git_dir(self, d):
-        if os.path.isdir(d) and os.path.isdir(os.path.join(d, 'objects')) and \
-                os.path.isdir(os.path.join(d, 'refs')):
-            headref = os.path.join(d, 'HEAD')
-            return os.path.isfile(headref) or \
-                    (os.path.islink(headref) and
-                    os.readlink(headref).startswith('refs'))
-
-    def get_work_dir(self):
-        return self._location
-
-    def get_repo_dir(self):
-        if not self._repo_dir:
-            self._repo_dir = os.getenv('GIT_DIR')
-            if self._repo_dir and self._is_git_dir(self._repo_dir):
-                return self._repo_dir
-            curpath = self._location
-            while curpath:
-                if self._is_git_dir(curpath):
-                    self._repo_dir = curpath
-                    break
-                elif self._is_git_dir(os.path.join(curpath, '.git')):
-                    self._repo_dir = os.path.join(curpath, '.git')
-                    break
-                curpath, dummy = os.path.split(curpath)
-                if not dummy:
-                    break
-        return self._repo_dir
-
-    def is_repo(self):
-        return self._is_repo
-        
-    def validate(self):
-        if not self._is_repo:
-            raise RepoError(_('Not under a repo')) 
+        GitObject.refresh(self)
 
     def init(self):
         proc = self._popen(('git', 'init'), cwd=self._location)
         if proc.wait():
-            raise RepoError(_('Failed to init repo: %s') % proc.stderr.read())
+            raise GitError(_('Failed to init repo: %s') % proc.stderr.read())
         self.refresh()
 
     def del_branch(self, names, force):
@@ -131,7 +72,7 @@ class Repo(object):
         for n in names: args.append(n)
         proc = self._popen(args)
         if proc.wait():
-            raise RepoError(_('Failed to delete branch %s: %s') %
+            raise GitError(_('Failed to delete branch %s: %s') %
                          (names, proc.stderr.read()))
 
     def rename_branch(self, oldname, newname, force):
@@ -143,7 +84,7 @@ class Repo(object):
         else:
             proc = self._popen(('git', 'branch', '-m', oldname, newname))
         if proc.wait():
-            raise RepoError(_('Failed to rename branch %s to %s: %s') %
+            raise GitError(_('Failed to rename branch %s to %s: %s') %
                                 (oldname, newname, proc.stderr.read()))
 
     def create_branch(self, name, start='HEAD', force=False, track=True):
@@ -160,9 +101,9 @@ class Repo(object):
         proc = self._popen(args)
         if proc.wait():
             if not force and name in self.branches():
-                 raise RepoError(_('Could not create branch, branch exists'))
+                 raise GitError(_('Could not create branch, branch exists'))
             else:
-                raise RepoError(_('Could not create branch: %s') %
+                raise GitError(_('Could not create branch: %s') %
                                     proc.stderr.read())
 
     def checkout(self, commit, is_merge=False, force=False, paths=None):
@@ -180,13 +121,11 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-             raise RepoError(_('Failed to switch to %s: %s') % (commit,
+             raise GitError(_('Failed to switch to %s: %s') % (commit,
                                 proc.stderr.read()))
 
     def _read_remotes(self):
         self._remotes = []
-        if not self.is_repo:
-            return
         proc = self._popen(('git', 'branch', '-r'))
         for b in proc.stdout.readlines():
             status = b[0]
@@ -195,14 +134,12 @@ class Repo(object):
                 self._current_branch = branch
             self._remotes.append(branch)
         if proc.wait():
-            raise RepoError('Could not get remotes list: %s' %
+            raise GitError('Could not get remotes list: %s' %
                             proc.stderr.read())
 
     def _read_branches(self):
         self._branches = []
         self._current_branch = None
-        if not self.is_repo:
-            return
         proc = self._popen(('git', 'branch'))
         for b in proc.stdout.readlines():
             status = b[0]
@@ -211,7 +148,7 @@ class Repo(object):
                 self._current_branch = branch
             self._branches.append(branch)
         if proc.wait():
-            raise RepoError(_('Could not get branch list: %s') %
+            raise GitError(_('Could not get branch list: %s') %
                                 proc.stderr.read())
 
     def branches(self):
@@ -380,7 +317,7 @@ class Repo(object):
             args.append('-u')
         proc = self._popen(args)
         if proc.wait():
-            raise RepoError(_('Failed to update index: %s') %
+            raise GitError(_('Failed to update index: %s') %
                                 proc.stderr.read())
 
     def changed_files(self, commit=None):
@@ -394,7 +331,7 @@ class Repo(object):
                                 '--name-status', 'HEAD'))
         retval = set((line[0], line[2:-1]) for line in proc.stdout.readlines())
         if proc.wait():
-            raise RepoError(_('Failed to get changed files: %s') %
+            raise GitError(_('Failed to get changed files: %s') %
                                 proc.stderr.read())
         return retval
 
@@ -423,7 +360,7 @@ class Repo(object):
                 proc.stdin.writelines(commit[Repo.BODY])
             proc.stdin.close()
         if proc.wait():
-            raise RepoError(_('Failed to commit change: %s') %
+            raise GitError(_('Failed to commit change: %s') %
                             proc.stdout.read() + proc.stderr.read())
 
     def gc(self, prune, aggressive):
@@ -435,7 +372,7 @@ class Repo(object):
             args.append('--aggressive')
         proc = self._popen(args)
         if proc.wait():
-            raise RepoError(_('Failed to gc: %s') % proc.stderr.read())
+            raise GitError(_('Failed to gc: %s') % proc.stderr.read())
 
     def verify(self, verbose):
         self.validate()
@@ -446,7 +383,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Verify failed: %s') % proc.stderr.read())
+            raise GitError(_('Verify failed: %s') % proc.stderr.read())
 
     def add_files(self, is_force, is_verbose, files):
         self.validate()
@@ -466,8 +403,8 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Could not add files: %s') % proc.stderr.read())
-            
+            raise GitError(_('Could not add files: %s') % proc.stderr.read())
+
     def list_tags(self, pattern=None):
         if self._tags:
             return self._tags
@@ -479,7 +416,7 @@ class Repo(object):
             proc = self._popen(('git', 'tag', '-l'))
         self._tags = [ line.strip() for line in proc.stdout.readlines()]
         if proc.wait():
-            raise RepoError(_('Failed to list tags: %s') % proc.stderr.read())
+            raise GitError(_('Failed to list tags: %s') % proc.stderr.read())
         return self._tags
 
     def verify_tag(self, tag):
@@ -488,7 +425,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to verify tag: %s') % proc.stderr.read())
+            raise GitError(_('Failed to verify tag: %s') % proc.stderr.read())
 
     def delete_tags(self, tags):
         self.validate()
@@ -498,7 +435,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to delete tag(s): %s') %
+            raise GitError(_('Failed to delete tag(s): %s') %
                             proc.stderr.read())
 
     def create_tag(self, name, message, commit='HEAD', key=None, sign=False):
@@ -517,7 +454,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to create tag: %s') % proc.stderr.read())
+            raise GitError(_('Failed to create tag: %s') % proc.stderr.read())
 
     def push(self, repo, source, target, force=False, all_branches=False,
                 all_tags=False, verbose=False):
@@ -540,7 +477,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to push: %s') % proc.stderr.read())
+            raise GitError(_('Failed to push: %s') % proc.stderr.read())
             
     def pull(self, repo, source, target, force=False, tags="normal",
                 commit=True, depth=-1, rebase=False):
@@ -568,7 +505,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to pull: %s') % proc.stderr.read())
+            raise GitError(_('Failed to pull: %s') % proc.stderr.read())
 
     def clone(self, repo, directory, bare=False, checkout=True, depth=-1):
         args = ['git', 'clone']
@@ -586,7 +523,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to clone: %s') % proc.stderr.read())
+            raise GitError(_('Failed to clone: %s') % proc.stderr.read())
 
     def num_stat(self, start, end):
         self.validate()
@@ -603,7 +540,7 @@ class Repo(object):
             if added != '-':
                 yield int(added), int(lost), name
         if proc.wait():
-            raise RepoError(_('Failed to get numstat: %s') %
+            raise GitError(_('Failed to get numstat: %s') %
                             proc.stderr.read())
 
     def diff(self, start, end, paths=None, stat=False, patch=True,
@@ -637,7 +574,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to diff: %s') % proc.stderr.read())
+            raise GitError(_('Failed to diff: %s') % proc.stderr.read())
 
     def get_unresolved(self):
         self.validate()
@@ -723,7 +660,7 @@ class Repo(object):
                     continue
             yield commit
         if proc.wait():
-            raise RepoError(_('Failed to get log: %s') % proc.stderr.read())
+            raise GitError(_('Failed to get log: %s') % proc.stderr.read())
 
     def merge(self, branch, show_summary=False, merge_strategy=None,
                 message=None):
@@ -742,7 +679,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to merge: %s') % proc.stderr.read())
+            raise GitError(_('Failed to merge: %s') % proc.stderr.read())
 
     def export_patch(self, first, last, outdir, force=False, numbered=False):
         self.validate()
@@ -763,7 +700,7 @@ class Repo(object):
         for l in proc.stdout.readlines():
             yield l
         if proc.wait():
-            raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+            raise GitError(_('Failed to export: %s') % proc.stderr.read())
 
     def import_patch(self, filename, sign=False):
         self.validate()
@@ -788,7 +725,7 @@ class Repo(object):
             args.extend(refs)
         proc = self._popen(args)
         if proc.wait():
-            raise RepoError(_('Failed to import %s: %s') % (filename,
+            raise GitError(_('Failed to import %s: %s') % (filename,
                             proc.stderr.read()))
 
     def export_bundle(self, filename, first, last):
@@ -796,10 +733,10 @@ class Repo(object):
         self.validate()
         dummy_tagname = None
         if (last != 'HEAD' and not os.path.exists(os.path.join(
-            self.get_repo_dir(), 'refs', 'tags', last)) and
-            not os.path.exists(os.path.join(self.get_repo_dir(), 'refs',
+            self.get_git_dir(), 'refs', 'tags', last)) and
+            not os.path.exists(os.path.join(self.get_git_dir(), 'refs',
                                             'heads', last)) and
-            not os.path.exists(os.path.join(self.get_repo_dir(), 'refs',
+            not os.path.exists(os.path.join(self.get_git_dir(), 'refs',
                                             'remotes', last))):
 
             dummy_tagname = 'pyrite-temp-tag-' + str(time.time())
@@ -812,7 +749,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+            raise GitError(_('Failed to export: %s') % proc.stderr.read())
         if dummy_tagname:
             for l in self.delete_tags([dummy_tagname]):
                 pass
@@ -852,7 +789,7 @@ class Repo(object):
             f.close()
         if proc.wait():
             os.remove(filename)
-            raise RepoError(_('Failed to export: %s') % proc.stderr.read())
+            raise GitError(_('Failed to export: %s') % proc.stderr.read())
 
     def fetch(self, repo, branchspecs, force=False, depth=-1, notags=False):
         self.validate()
@@ -875,7 +812,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to fetch: %s') % proc.stderr.read())
+            raise GitError(_('Failed to fetch: %s') % proc.stderr.read())
 
     def move(self, sources, dest, force=False, ignore=False, noop=False):
         self.validate()
@@ -892,7 +829,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to move: %s') % proc.stderr.read())
+            raise GitError(_('Failed to move: %s') % proc.stderr.read())
 
     def delete(self, paths, force=False, recursive=False, noop=False,
                 cached=False):
@@ -911,7 +848,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to remove: %s') % proc.stderr.read())
+            raise GitError(_('Failed to remove: %s') % proc.stderr.read())
 
     def show(self, files, commit='HEAD', tag=None):
         self.validate()
@@ -931,7 +868,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to show: %s') % proc.stderr.read())
+            raise GitError(_('Failed to show: %s') % proc.stderr.read())
 
     def move_head_to(self, commit='HEAD', workdir=False):
         self.validate()
@@ -941,7 +878,7 @@ class Repo(object):
         args.append(commit)
         proc = self._popen(args, stdout=None)
         if proc.wait():
-            raise RepoError(_('Failed to move head: %s') % proc.stderr.read())
+            raise GitError(_('Failed to move head: %s') % proc.stderr.read())
 
     def describe(self, branch=None):
         self.validate()
@@ -971,7 +908,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             yield line
         if proc.wait():
-            raise RepoError(_('Failed to revert: %s') % proc.stderr.read())
+            raise GitError(_('Failed to revert: %s') % proc.stderr.read())
 
     def cherry_pick(self, commit, dryrun=False):
         self.validate()
@@ -983,7 +920,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             pass
         if proc.wait():
-            raise RepoError(proc.stderr.read())
+            raise GitError(proc.stderr.read())
 
     def grep(self, pattern, files, commit=None, ignore=False, whole=False,
                 ignore_binary=False, invert=False, path=False,
@@ -1020,7 +957,7 @@ class Repo(object):
         if proc.wait():
             err_str = proc.stderr.read()
             if err_str:
-                raise RepoError(_('Failed to grep: %s') % err_str)
+                raise GitError(_('Failed to grep: %s') % err_str)
 
     def apply(self, diff, toindex=False, getstat=False):
         self.validate()
@@ -1036,7 +973,7 @@ class Repo(object):
         for line in proc.stdout.readlines():
             pass
         if proc.wait():
-            raise RepoError(_('Failed to apply %s') % proc.stderr.read())
+            raise GitError(_('Failed to apply %s') % proc.stderr.read())
 
     def _parse_blame(self, stream):
         commits = {}
@@ -1094,7 +1031,7 @@ class Repo(object):
         for data in self._parse_blame(proc.stdout):
             yield data
         if proc.wait():
-            raise RepoError(_('Failed to get blame info: %s') %
+            raise GitError(_('Failed to get blame info: %s') %
                             proc.stderr.read())
 
     def cat_file(self, filename, cat_to=None, commit='HEAD'):
@@ -1105,7 +1042,7 @@ class Repo(object):
             else:
                 stream = cat_to
             stream.writelines(self.show([filename], commit))
-        except RepoError:
+        except GitError:
             return False
         finally:
             if cat_to.__class__ == ''.__class__:

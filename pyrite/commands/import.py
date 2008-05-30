@@ -72,7 +72,7 @@ def run(cmd, args, flags, io, settings, repo):
     else:
         files = args
 
-    import_file = os.path.join(repo.get_repo_dir(), 'import_status')
+    import_file = os.path.join(repo.get_git_dir(), 'import_status')
     import_file_exists = os.path.exists(import_file)
     if import_file_exists and not skip and not resolved:
         io.error_out(_('Import in progress, run with --skip or'

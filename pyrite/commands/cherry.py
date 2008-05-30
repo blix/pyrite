@@ -51,7 +51,7 @@ def _run_cherry_pick(commit, edit, record, dryrun):
     head = repo.get_commit_info('HEAD')
     try:
         repo.cherry_pick(c[Repo.ID], dryrun=dryrun)
-    except RepoError, inst:
+    except GitError, inst:
         return False, inst.args[0].splitlines()[0], c[Repo.ID]
 
     orig_id = c[Repo.ID]
@@ -74,7 +74,7 @@ def _run_cherry_pick(commit, edit, record, dryrun):
             del c[Repo.BODY]
             c[Repo.SUBJECT] = ''.join(message)
             repo.commit(c)
-        except RepoError, inst:
+        except GitError, inst:
             repo.move_head_to(head[Repo.ID])
             return False, inst.args[0].splitlines()[0]
     if dryrun:

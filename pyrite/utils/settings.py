@@ -30,8 +30,8 @@ class Settings(object):
         try:
             self.user_config.read()
 
-            if repo.is_repo():
-                self.repo_config_path = os.path.join(repo.get_repo_dir(),
+            if repo.is_in_repo():
+                self.repo_config_path = os.path.join(repo.get_git_dir(),
                                                      'config')
                 self.repo_config = IniParser(self.repo_config_path)
                 self.repo_config.read()
@@ -39,7 +39,7 @@ class Settings(object):
             raise SettingsError(inst)
 
     def set_repo_option(self, item, value, is_all):
-        if not self.repo.is_repo():
+        if not self.repo.is_in_repo():
             raise SettingsError(self._not_under_repo_error)
         self._set_option(self.repo_config, self.repo_config_path, item, value,
                             is_all)
@@ -49,7 +49,7 @@ class Settings(object):
                             is_all)
 
     def del_repo_option(self, item, is_all):
-        if not self.repo.is_repo():
+        if not self.repo.is_in_repo():
             raise SettingsError(self._not_under_repo_error)
         self._del_option(self.repo_config, self.repo_config_path, item, is_all)
 
@@ -61,7 +61,7 @@ class Settings(object):
         if category == None or name == None:
             raise SettingsError(_missing_config_arg)
         value = None
-        if self.repo.is_repo():
+        if self.repo.is_in_repo():
             value = self.repo_config.get(category, name)
         if not value:
             value = self.user_config.get(category, name)
@@ -81,7 +81,7 @@ class Settings(object):
         for k, v in self._items(category, self.user_config):
             items[k] = v
 
-        if self.repo.is_repo():
+        if self.repo.is_in_repo():
             for k, v in self._items(category, self.repo_config):
                 items[k] = v
 
@@ -89,7 +89,7 @@ class Settings(object):
             yield k, v
 
     def update_ignore(self, item, remove):
-        if not self.repo.is_repo():
+        if not self.repo.is_in_repo():
             raise SettingsError(self._not_under_repo_error)
         lines = []
         try:

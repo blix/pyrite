@@ -72,15 +72,15 @@ def run(cmd, args, flags, io, settings, repo):
         theirs = None
         try:
             dummy, tail = os.path.split(f)
-            base = os.path.join(repo.get_repo_dir(), 'base-' + tail)
+            base = os.path.join(repo.get_git_dir(), 'base-' + tail)
             if not repo.cat_file(f, cat_to=base, commit=':1'):
                 base = None
 
-            mine = os.path.join(repo.get_repo_dir(), 'mine-' + tail)
+            mine = os.path.join(repo.get_git_dir(), 'mine-' + tail)
             if not repo.cat_file(f, cat_to=mine, commit=':2'):
                 mine = None
 
-            theirs = os.path.join(repo.get_repo_dir(), 'theirs-' + tail)
+            theirs = os.path.join(repo.get_git_dir(), 'theirs-' + tail)
             if not repo.cat_file(f, cat_to=theirs, commit=':3'):
                 theirs = None
 
@@ -93,7 +93,7 @@ def run(cmd, args, flags, io, settings, repo):
             cmd = cmd.replace('{mine}', '"' + mine + '"')
             cmd = cmd.replace('{theirs}', '"' + theirs + '"')
             cmd = cmd.replace('{result}', '"' +
-                              os.path.join(repo.get_work_dir(), f)
+                              os.path.join(repo.get_work_tree(), f)
                               + '"')
             os.system(cmd)
 

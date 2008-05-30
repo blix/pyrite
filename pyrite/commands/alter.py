@@ -135,7 +135,7 @@ def run(cmd, args, flags, io, settings, repo):
     onto = flags.get('onto', None)
 
     done = False
-    sequencer_file = os.path.join(repo.get_repo_dir(), 'pyrite-seq')
+    sequencer_file = os.path.join(repo.get_git_dir(), 'pyrite-seq')
     in_progress = os.path.isfile(sequencer_file)
     sequencer = None
     try:

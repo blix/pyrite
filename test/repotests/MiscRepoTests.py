@@ -23,15 +23,15 @@ TESTDIR = PyriteTestCase.TESTDIR
 class InitTest(PyriteTestCase):
     def testInit(self):
         self.reset_test_dir()
-        repo = Repo(TESTDIR)
+        repo = Repo(location=TESTDIR)
         repo.init()
-        self.assertTrue(repo.is_repo())
-        self.assertEquals(repo.get_repo_dir(), os.path.join(TESTDIR, '.git'))
+        self.assertTrue(repo.is_in_repo())
+        self.assertEquals(repo.get_git_dir(), os.path.join(TESTDIR, '.git'))
 
 class CommitTest(PyriteTestCase):
     def setUp(self):
         self.reset_test_dir()
-        self.repo = Repo(TESTDIR)
+        self.repo = Repo(location=TESTDIR)
         self.repo.init()
 
     def doSimpleCommit(self, filename):
@@ -73,7 +73,7 @@ class CommitTest(PyriteTestCase):
 class AddTest(PyriteTestCase):
     def setUp(self):
         self.reset_test_dir()
-        self.repo = Repo(TESTDIR)
+        self.repo = Repo(location=TESTDIR)
         self.repo.init()
 
     def testSimpleAdd(self):
@@ -107,7 +107,7 @@ class AddTest(PyriteTestCase):
 class LogTest(PyriteTestCase):
     def setUp(self):
         self.reset_test_dir()
-        self.repo = Repo(TESTDIR)
+        self.repo = Repo(location=TESTDIR)
         self.repo.init()
 
     def testLog(self):

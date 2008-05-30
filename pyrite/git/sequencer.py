@@ -170,7 +170,7 @@ class Sequencer(object):
         try:
             cid, subject = self._get_commit_id(rest)
             self._repo.cherry_pick(cid, nocommit)
-        except RepoError, inst:
+        except GitError, inst:
             raise SequencerMergeNeeded(inst.message)
         return True, cid, subject
 
@@ -178,7 +178,7 @@ class Sequencer(object):
         try:
             cid, subject = self._get_commit_id(rest)
             self._repo.cherry_pick(cid, True)
-        except RepoError, inst:
+        except GitError, inst:
             raise SequencerMergeNeeded(inst.message)
         return False, cid, subject
 
@@ -204,7 +204,7 @@ class Sequencer(object):
             self._squashed.append(commit)
             self._repo.cherry_pick(cid, True)
             return True, cid, subject
-        except RepoError, inst:
+        except GitError, inst:
             raise SequencerMergeNeeded()
 
     def _squash_message(self):
@@ -257,7 +257,7 @@ class Sequencer(object):
         try:
             cid = self._get_commit_id(rest)
             self._repo.move_head_to(cid, True)
-        except RepoError, inst:
+        except GitError, inst:
             raise SequencerError(inst.message)
         return True, None, None
 
@@ -265,7 +265,7 @@ class Sequencer(object):
         try:
             id = self._repo.get_commit_info('HEAD', [Repo.ID])[Repo.ID]
             self._marks[rest] = id
-        except RepoError, inst:
+        except GitError, inst:
             raise SequencerError(inst.message)
         return True, None, None
 
