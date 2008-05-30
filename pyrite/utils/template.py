@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite
-from pyrite.repository import Repo
+from pyrite.git.repository import Repo
 from datetime import datetime
 import time
 import os.path

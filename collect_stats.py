@@ -59,7 +59,7 @@ for f in py_files:
 
 print 'Total number of python code lines: %s\n' % num_lines
 
-from pyrite.repository import Repo
+from pyrite.git.repository import Repo
 
 def print_branch_stats(repo, branch, others):
     hist = repo.get_history(None, branch, -1, [Repo.AUTHOR,

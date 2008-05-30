@@ -20,7 +20,7 @@ import os, sys
 #module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
 
 if sys.argv[1] == 'version':
-    from pyrite.repository import Repo, RepoError
+    from pyrite.git.repository import Repo, RepoError
     repo = Repo()
 
     version=''

@@ -14,8 +14,8 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite
-from pyrite.sequencer import *
-from pyrite.repository import Repo
+from pyrite.git.sequencer import *
+from pyrite.git.repository import Repo
 import os, cPickle
 from pyrite.utils.help import HelpError
 

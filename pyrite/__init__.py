@@ -22,7 +22,8 @@ def noop(message):return message #Don't know if I really want to localize the
 import __builtin__
 __builtin__.__dict__['_'] = noop
 
-import extensions, repository
+import extensions
+from pyrite.git.repository import Repo, RepoError
 from pyrite.utils.io import IO
 from pyrite.utils.settings import Settings
 from pyrite.utils.options import OptionParser
@@ -150,7 +151,7 @@ def run():
     dummy_out = None
     io = IO()
     try:
-        repo = repository.Repo()
+        repo = Repo()
         settings = Settings(repo)
         extensions.on_load(_commands, settings)
         io.initialize(settings, repo)
@@ -197,7 +198,7 @@ def run():
         on_help_error(inst, io)
         if show_trace:
             raise
-    except repository.RepoError, inst:
+    except RepoError, inst:
         if show_trace:
             raise
         io.error_out(inst)

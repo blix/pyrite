@@ -15,7 +15,7 @@
 
 import pyrite
 from pyrite.utils.help import HelpError
-from pyrite.repository import Repo
+from pyrite.git.repository import Repo
 
 options = [
 ('s', 'show-reflog', _('Show what can be recovered from the reflog.'), 0),

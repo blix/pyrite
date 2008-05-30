@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from pyrite.repository import Repo, RepoError
+from pyrite.git.repository import Repo, RepoError
 import os
 from TestSuite import PyriteTestCase
 
