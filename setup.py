@@ -51,9 +51,16 @@ elif sys.argv[1] == 'fix-home-path':
             if f:
                 f.close()
 else:
+    pkgs = [
+        'pyrite',
+        'pyrite.commands',
+        'pyrite.utils',
+        'pyrite.addons',
+        'pyrite.git'
+    ]
     setup(name='pyrite', version='0', description='Pyrite git porcelain',
           license='GNU GPL', scripts=['pyt'],
-          packages=['pyrite', 'pyrite.standard'], #ext_modules=[module1],
+          packages=pkgs, #ext_modules=[module1],
           package_data={'pyrite' : [os.path.join('templates', '*.tmpl')]}
         )
 
