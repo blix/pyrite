@@ -33,7 +33,7 @@ def show_help(prefix, template, threshold, suffix, io):
 
     io.info(prefix)
     commands = {}
-    for c, options in pyrite._commands.items():
+    for c, options in pyrite.commands._commands.items():
         if 2 > options[1] >= threshold:
             commands[c[0]] = template % (c[0].ljust(10), options[2])
     for c in sorted(commands.keys()):
@@ -46,11 +46,11 @@ def show_full_help(io):
                 'pyt help -v', io)
 
 def show_command_help(cmd, message, io):
-    cmd_info = pyrite.get_command_info(cmd)
+    cmd_info = pyrite.commands.get_command_info(cmd)
     if not cmd_info:
         raise HelpError(cmd)
 
-    pyrite.dyn_import(cmd_info[0])
+    pyrite.dyn_import(cmd_info[0], io)
     mod = pyrite.modules[cmd_info[0]]
 
     io.info(cmd_info[2])
@@ -107,7 +107,7 @@ def on_help_error(err, io):
                         'pyt help'), io)
         return
 
-    info = pyrite.get_command_info(err.cmd)
+    info = pyrite.commands.get_command_info(err.cmd)
     if not info:
         if err.cmd == 'addons':
             show_extensions(io)
