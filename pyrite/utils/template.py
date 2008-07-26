@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrite
-from pyrite.git.repository import Repo
+from pyrite.git.commit import Commit
 from datetime import datetime
 import time
 import os.path
@@ -72,7 +72,7 @@ class Template(object):
                             formatters.append((fn, empty_dict))
                     # we are parsing out what this wants to show
                     # so we can return it to caller
-                    repo_props.add(self._get_repo_prop(parts[0]))
+                    repo_props.add(self._get_commit_prop(parts[0]))
                     buffer.append((parts[0], formatters))
                     # move on
                     start_pos = self._style.find('{', end_pos + 1)
@@ -140,8 +140,8 @@ class Template(object):
     def get(self, item, index=0):
         return item[int(index)]
 
-    def _get_repo_prop(self, what):
-        return getattr(Repo, what, 0)
+    def _get_commit_prop(self, what):
+        return getattr(Commit, what, 0)
 
     def join(self, item, joinstr=' '):
         return joinstr.join(item)
@@ -165,9 +165,6 @@ class Template(object):
     def _get_data(self, data, repo, what):
         if what in data:
             return data[what]
-        repo_item = getattr(Repo, what, None)
-        if repo_item in data:
-            return data[repo_item]
         if repo:
             if what == 'branch':
                 return repo.branch()

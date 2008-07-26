@@ -13,38 +13,50 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import subprocess, os
+from subprocess import Popen, PIPE
+import os
 
 class GitError(Exception):
     """Thrown when git command fails"""
 
 class GitObject(object):
-    def __init__(self, settings=None, io=None, location=None):
-        if location:
-            self._location = os.path.expanduser(location)
+    def __init__(self, settings=None, io=None, location=None, obj=None):
+        if obj:
+            self._location = obj._location
+            self._settings = obj._settings
+            self._io = obj._io
+            self._git_dir = obj._git_dir
+            self._is_in_repo = not not self._git_dir
+            self._work_tree = obj._work_tree
         else:
-            self._location = os.getcwd()
-        self._debug_commands = os.getenv('PYT_DBG_CMD')
-        self.refresh()
+            if location:
+                self._location = os.path.expanduser(location)
+            else:
+                self._location = os.getcwd()
+            self._io = io
+            self._settings = settings
+            self.refresh()
+        self._debug_commands = os.environ.get('PYT_DBG_CMD', None)
 
     def refresh(self):
         self._git_dir = None
         self._is_in_repo = not not self.get_git_dir()
         self._work_tree = None
 
-    def _popen(self, args, cwd=None, stdin=False,
-               stdout=subprocess.PIPE,
-               stderr=subprocess.PIPE):
+    def _popen(self, args, cwd=None, stdin=False, stdout=PIPE, stderr=PIPE):
         if not cwd:
             cwd = self._location
         if stdin:
-            stdin = subprocess.PIPE
+            stdin = PIPE
         else:
             stdin = None
         if self._debug_commands and self._io:
-            self._io.info(str(args))
-        return subprocess.Popen(args, cwd=cwd, stdout=stdout, stderr=stderr,
-                                stdin=stdin)
+            if self._io == True:
+                print args
+            else:
+                self._io.info(str(args))
+        return Popen(args, cwd=cwd, stdout=stdout, stderr=stderr,
+                     stdin=stdin)
 
     def _is_git_dir(self, d):
         """ This is taken from the git setup.c:is_git_directory

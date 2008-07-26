@@ -14,7 +14,8 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import extensions, pyrite
-from pyrite.git.repository import Repo, RepoError
+from pyrite.git.repository import Repo
+from pyrite.git.gitobject import GitError
 from pyrite.utils.io import IO
 from pyrite.utils.settings import Settings
 from pyrite.utils.options import OptionParser
@@ -91,7 +92,7 @@ def run():
         on_help_error(inst, io)
         if show_trace:
             raise
-    except RepoError, inst:
+    except GitError, inst:
         if show_trace:
             raise
         io.error_out(inst)

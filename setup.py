@@ -20,11 +20,11 @@ import os, sys
 #module1 = Extension('pyrite.writer', sources=['pyrite/writer.c'])
 
 if sys.argv[1] == 'version':
-    from pyrite.git.repository import Repo, GitError
+    from pyrite.git.repository import Repo
     repo = Repo()
 
     version=''
-    tag, distance, id = repo.describe()
+    tag, distance, id = repo['HEAD'].describe()
     if tag and distance:
         version = '%s-%d-%s' % (tag, distance, id[:8])
     elif tag:

@@ -16,6 +16,7 @@
 import pyrite
 from pyrite.utils.help import HelpError
 from pyrite.git.repository import Repo
+from pyrite.git.commit import Commit
 from pyrite.utils.template import FileTemplate, Template
 
 options = [
@@ -81,10 +82,10 @@ def run(cmd, args, flags, io, settings, repo):
             pyrite.utils.io.affirmative(settings.get_option('pyrite.color'))
     data, template = get_template(style, template, color)
 
-    if not show_patch and Repo.PATCH in data:
-        data.remove(Repo.PATCH)
-    output = repo.get_history(first, last, limit, data=data,
-                                       follow=follow, paths=args)
+    if not show_patch and Commit.PATCH in data:
+        data.remove(Commit.PATCH)
+    output = Commit.get_raw_commits(repo, first, last, limit=limit,
+                                    data=data, follow=follow, paths=args)
 
     stream = io.info_stream()
     for commit_data in output:

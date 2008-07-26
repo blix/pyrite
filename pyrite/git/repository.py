@@ -14,7 +14,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from gitobject import *
-from pyrite.utils.smartstream import SmartStream
+from commit import Commit
 
 class Repo(GitObject):
     _status = {
@@ -26,28 +26,30 @@ class Repo(GitObject):
         'A': 'added'
     }
 
-    AUTHOR = 0
-    AUTHOR_EMAIL = 1
-    AUTHOR_DATE = 2
-    COMMITER = 3
-    COMMITER_EMAIL = 4
-    COMMIT_DATE = 5
-    SUBJECT = 6
-    ID = 7
-    PARENTS = 8
-    BODY = 9
-    DIFFSTAT = 10
-    PATCH = 11
-    FILES = 12
-    REFS = 13
-    AUTHOR_DATE_OFFSET = 14
-    COMMITER_DATE_OFFSET = 15
-
-    def __init__(self, settings=None, io=None, location=None):
-        GitObject.__init__(self, settings, io, location)
+    def __init__(self, settings=None, io=None, location=None, obj=None):
+        GitObject.__init__(self, settings, io, location, obj)
         self._branches = None
         self._remotes = None
         self._tags = None
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            li = []
+            step = key.step
+            if step:
+                for idx, c in enumerate(Commit.get_raw_commits(self,
+                                                          key.start,
+                                                          key.stop)):
+                    if not (idx % step):
+                        li.append(Commit(raw_commit=c, obj=self))
+            else:
+                for c in Commit.get_raw_commits(self, key.start, key.stop):
+                    li.append(Commit(raw_commit=c, obj=self))
+            return li
+        elif isinstance(key, str):
+            return Commit(key, obj=self)
+        else:
+            raise TypeError()
 
     def refresh(self):
         self._branches = None
@@ -172,138 +174,6 @@ class Repo(GitObject):
         for r in self._remotes:
             yield r
 
-    def _get_format_args(self, data):
-        options = ['--pretty=raw']
-        if Repo.PATCH in data:
-            options.append('-p')
-        if Repo.DIFFSTAT in data:
-            options.append('--stat')
-        if Repo.REFS in data:
-            options.append('--decorate')
-        return options
-
-    def _parse_git_log(self, commit, firstline, stream):
-        commit[Repo.SUBJECT] = stream.readline().strip()
-        buf = []
-        append = buf.append
-        readline = stream.readline
-        type = Repo.BODY
-        while True:
-            line = readline()
-            if not line or line[0] != ' ':
-                commit[type] = buf
-                return line
-            append(line[4:])
-
-    def _parse_git_stat(self, commit, firstline, stream):
-        if firstline.startswith('commit'):
-            return firstline
-        buf = []
-        append = buf.append
-        readline = stream.readline
-        type = Repo.DIFFSTAT
-        while True:
-            line = readline()
-            if not line or line[0] != ' ':
-                commit[type] = buf
-                return line
-            append(line)
-
-    def _parse_git_patch(self, commit, firstline, stream):
-        if firstline.startswith('commit'):
-            return firstline
-        buf = [firstline]
-        append = buf.append
-        readline = stream.readline
-        type = Repo.PATCH
-        while True:
-            line = readline()
-            if not line or line[0] == 'c':
-                commit[type] = buf
-                return line
-            append(line)
-
-    def _parse_raw_header(Self, commit, firstline, stream):
-        parents = commit[Repo.PARENTS] = []
-
-        def parse_id(line):
-            parts = line.split()
-            commit[Repo.ID] = parts[0]
-            refs = commit[Repo.REFS] = []
-            for part in parts[1:]:
-                part = part.strip('()')
-                if not part.startswith('refs'):
-                    continue
-                refs.append(part)
-
-        def skip(line):
-            pass
-
-        def parse_parent(line):
-            parents.append(line)
-
-        def parse_author(line):
-            idx = line.find('<')
-            commit[Repo.AUTHOR] = line[:idx - 1]
-            idx2 = line.rfind('>') + 1
-            commit[Repo.AUTHOR_EMAIL] = line[idx + 1:idx2 - 1]
-            commit[Repo.AUTHOR_DATE] = line[idx2 + 1:-6]
-            commit[Repo.AUTHOR_DATE_OFFSET] = line[-6:-1]
-
-        def parse_commiter(line):
-            idx = line.find('<')
-            commit[Repo.COMMITER] = line[:idx - 1]
-            idx2 = line.rfind('>') + 1
-            commit[Repo.COMMITER_EMAIL] = line[idx + 1:idx2 - 1]
-            commit[Repo.COMMIT_DATE] = line[idx2 + 1:-6]
-            commit[Repo.COMMITER_DATE_OFFSET] = line[-6:-1]
-
-        types = {
-            'commit': parse_id,
-            'tree': skip,
-            'Reflog': skip,
-            'Reflog:': skip,
-            'parent': parse_parent,
-            'author': parse_author,
-            'committer': parse_commiter
-        }
-
-        type, rest = firstline.strip().split(None, 1)
-        types[type](rest)
-        while True:
-            line = stream.readline()
-            stripped = line.strip()
-            if not stripped:
-                break
-            type, rest = stripped.split(None, 1)
-            types[type](rest)
-
-        return line
-
-    def _parse_git_data(self, prop_types, stream):
-        commit = {}
-
-        sstream = SmartStream(stream)
-        line = sstream.readline()
-        while line:
-            line = self._parse_raw_header(commit, line, sstream)
-            line = self._parse_git_log(commit, line, sstream)
-            if Repo.DIFFSTAT in prop_types:
-                line = self._parse_git_stat(commit, line, sstream)
-            if Repo.PATCH in prop_types:
-                line = self._parse_git_patch(commit, line, sstream)
-            while line == '\n':
-                line = sstream.readline()
-            yield commit
-            commit = {}
-
-    def get_commit_info(self, commit='HEAD', data=None):
-        gen = self.get_history(None, commit, 1, data)
-        try:
-            return gen.next()
-        except StopIteration:
-            return None
-
     def update_index(self, paths=None):
         self.validate()
         if paths:
@@ -337,27 +207,27 @@ class Repo(GitObject):
 
     def commit(self, commit=None, verify=True):
         self.validate()
-        have_msg = Repo.SUBJECT in commit
+        have_msg = Commit.SUBJECT in commit
         args = ['git', 'commit']
         if not verify:
             args.append('--no-verify')
         if commit:
-            if Repo.AUTHOR in commit:
+            if Commit.AUTHOR in commit:
                 args.append('--author')
-                args.append(commit[Repo.AUTHOR] + ' <' +
-                            commit[Repo.AUTHOR_EMAIL] + '>')
-            if Repo.ID in commit:
+                args.append(commit[Commit.AUTHOR] + ' <' +
+                            commit[Commit.AUTHOR_EMAIL] + '>')
+            if Commit.ID in commit:
                 args.append('-C')
-                args.append(commit[Repo.ID])
+                args.append(commit[Commit.ID])
                 have_msg = False
             elif have_msg:
                 args.append('-F')
                 args.append('-')
         proc = self._popen(args, stdin=have_msg)
         if have_msg:
-            proc.stdin.writelines(commit[Repo.SUBJECT])
-            if Repo.BODY in commit:
-                proc.stdin.writelines(commit[Repo.BODY])
+            proc.stdin.writelines(commit[Commit.SUBJECT])
+            if Commit.BODY in commit:
+                proc.stdin.writelines(commit[Commit.BODY])
             proc.stdin.close()
         if proc.wait():
             raise GitError(_('Failed to commit change: %s') %
@@ -599,13 +469,13 @@ class Repo(GitObject):
         for item in proc.stdout.readlines():
             status = item[0]
             f = item[2:].strip()
-            files[f] = Repo._status[status]
+            files[f] = Commit._status[status]
         if tracked:
             proc.wait()
             proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
             for line in proc.stdout.readlines():
                 status, filename = line.split()
-                files[filename.strip()] = Repo._status[status[0]]
+                files[filename.strip()] = Commit._status[status[0]]
 
         proc.wait()
         return files
@@ -617,50 +487,6 @@ class Repo(GitObject):
             first = 'HEAD'
         first = first + '^..' + last
         return first
-
-    def get_history(self, first, last, limit, data=None, follow=False,
-                    paths=None, skip=0, incoming=False, reverse=False,
-                    reflog=False, ordered=False):
-        self.validate()
-        args = ['git', 'log']
-        if not data:
-            data = [Repo.ID]
-        args.extend(self._get_format_args(data))
-        if limit > -1:
-            args.append('-' + str(limit))
-        if follow:
-            args.append('--follow')
-        if skip:
-            args.append('--skip=' + str(skip))
-        if incoming:
-            args.append('--cherry-pick')
-            args.append('--left-right')
-        if incoming or reverse:
-            args.append('--reverse')
-        if reflog:
-            args.append('-g')
-        if ordered:
-            args.append('--topo-order')
-        if not last:
-            last = 'HEAD'
-        if first:
-            args.append(first + (incoming and '...' or '..') + last)
-        else:
-            args.append(last)
-        if paths:
-            args.append('--')
-            args.extend(paths)
-        proc = self._popen(args)
-        for commit in self._parse_git_data(data, proc.stdout):
-            if incoming:
-                id = commit[Repo.ID]
-                if id[0] == '>':
-                    commit[Repo.ID] = id[1:]
-                else:
-                    continue
-            yield commit
-        if proc.wait():
-            raise GitError(_('Failed to get log: %s') % proc.stderr.read())
 
     def merge(self, branch, show_summary=False, merge_strategy=None,
                 message=None):
@@ -880,21 +706,6 @@ class Repo(GitObject):
         if proc.wait():
             raise GitError(_('Failed to move head: %s') % proc.stderr.read())
 
-    def describe(self, branch=None):
-        self.validate()
-        if not branch:
-            branch = 'HEAD'
-        proc = self._popen(('git', 'describe', '--abbrev=40', branch))
-        parts = proc.stdout.read().split('-')
-        if proc.wait():
-            id = self.get_commit_info(branch, [Repo.ID])[Repo.ID]
-            return None, 0, id
-        if len(parts) == 3:
-            return parts[0], int(parts[1]), parts[2].strip()[1:]
-        tag = parts[0].strip()
-        id = self.get_commit_info(branch, [Repo.ID])[Repo.ID]
-        return tag, 0, id
-
     def revert(self, commit, dryrun=False, mainline=None):
         self.validate()
         args = ['git', 'revert', '--no-edit']
@@ -986,7 +797,7 @@ class Repo(GitObject):
             cur_lineno = rest.split()[0]
             c = None
             if not id in commits:
-                c = {Repo.ID: id}
+                c = {Commit.ID: id}
                 commits[id] = c
             else:
                 c = commits[id]
@@ -999,19 +810,19 @@ class Repo(GitObject):
                     break
                 key, value = line.split(None, 1)
                 if key == 'author':
-                    c[Repo.AUTHOR] = value.strip()
+                    c[Commit.AUTHOR] = value.strip()
                 elif key == 'author-email':
-                    c[Repo.AUTHOR_EMAIL] = value.strip()
+                    c[Commit.AUTHOR_EMAIL] = value.strip()
                 elif key == 'author-time':
-                    c[Repo.AUTHOR_DATE] = value.strip()
+                    c[Commit.AUTHOR_DATE] = value.strip()
                 elif key == 'commiter':
-                    c[Repo.COMMITER] = value.strip()
+                    c[Commit.COMMITER] = value.strip()
                 elif key == 'commiter-mail':
-                    c[Repo.COMMITER_EMAIL] = value.strip()
+                    c[Commit.COMMITER_EMAIL] = value.strip()
                 elif key == 'commiter-time':
-                    c[Repo.COMMIT_DATE] = value.strip()
+                    c[Commit.COMMIT_DATE] = value.strip()
                 elif key == 'summary':
-                    c[Repo.SUBJECT] = value.strip()
+                    c[Commit.SUBJECT] = value.strip()
                 line = stream.readline()
 
     def blame(self, file, commit=None, startline=None, endline=None):

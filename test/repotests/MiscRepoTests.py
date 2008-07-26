@@ -14,7 +14,9 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from pyrite.git.repository import Repo, RepoError
+from pyrite.git.repository import Repo
+from pyrite.git.gitobject import GitError
+from pyrite.git.commit import Commit
 import os
 from TestSuite import PyriteTestCase
 
@@ -36,39 +38,41 @@ class CommitTest(PyriteTestCase):
 
     def doSimpleCommit(self, filename):
         self.createAndAdd(filename)
-        c = {Repo.SUBJECT: filename}
+        c = {Commit.SUBJECT: filename}
         self.repo.commit(c)
 
     def testNormalCommit(self):
         fn_name = self.whoami()
 
         self.doSimpleCommit(fn_name)
-        c = self.repo.get_commit_info('HEAD', [Repo.SUBJECT])
+        c = Commit('HEAD', data=[Commit.SUBJECT], obj=self.repo)
         self.assertTrue(c)
-        self.assertEquals(c[Repo.SUBJECT], fn_name)
+        self.assertEquals(c.subject, fn_name)
 
     def testCommitCommit(self):
         fn_name = self.whoami()
 
         self.doSimpleCommit(fn_name)
-        c = self.repo.get_commit_info('HEAD', [Repo.SUBJECT, Repo.ID,
-                                               Repo.AUTHOR, Repo.AUTHOR_DATE])
+        c = Commit.get_raw_commits(self.repo, None, 'HEAD', 1,
+                                   [Commit.SUBJECT, Commit.ID,
+                                    Commit.AUTHOR, Commit.AUTHOR_DATE]).next()
         self.assertTrue(c)
-        auth = c[Repo.AUTHOR]
-        del c[Repo.AUTHOR]
-        auth_date = c[Repo.AUTHOR_DATE]
-        del c[Repo.AUTHOR_DATE]
-        subj = c[Repo.SUBJECT]
-        c[Repo.SUBJECT] = 'should not be used'
+        auth = c[Commit.AUTHOR]
+        del c[Commit.AUTHOR]
+        auth_date = c[Commit.AUTHOR_DATE]
+        del c[Commit.AUTHOR_DATE]
+        subj = c[Commit.SUBJECT]
+        c[Commit.SUBJECT] = 'should not be used'
 
         self.createAndAdd(fn_name + '2')
         self.repo.commit(c)
-        c2 = self.repo.get_commit_info('HEAD', [Repo.SUBJECT, Repo.ID,
-                                               Repo.AUTHOR, Repo.AUTHOR_DATE])
-        self.assertEqual(auth, c2[Repo.AUTHOR])
-        self.assertEqual(auth_date, c2[Repo.AUTHOR_DATE])
-        self.assertEqual(subj, c2[Repo.SUBJECT])
-        self.assertNotEqual(c[Repo.ID], c2[Repo.ID])
+        c2 = Commit.get_raw_commits(self.repo, None, 'HEAD', 1,
+                                    [Commit.SUBJECT, Commit.ID,
+                                     Commit.AUTHOR, Commit.AUTHOR_DATE]).next()
+        self.assertEqual(auth, c2[Commit.AUTHOR])
+        self.assertEqual(auth_date, c2[Commit.AUTHOR_DATE])
+        self.assertEqual(subj, c2[Commit.SUBJECT])
+        self.assertNotEqual(c[Commit.ID], c2[Commit.ID])
 
 class AddTest(PyriteTestCase):
     def setUp(self):
@@ -114,8 +118,8 @@ class LogTest(PyriteTestCase):
         fn_name = self.whoami()
 
         self.createAndAdd(fn_name)
-        self.repo.commit({Repo.SUBJECT: 'test'})
+        self.repo.commit({Commit.SUBJECT: 'test'})
         count = 0
-        for commit in self.repo.get_history(None, None, -1):
+        for commit in Commit.get_commits(self.repo, None, None):
             count += 1
         self.assertEqual(count, 1)
