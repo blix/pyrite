@@ -192,7 +192,7 @@ class IO(object):
         if not editor:
             editor = self.get_platform_editor()
 
-        path = os.path.join(self._repo.get_repo_dir(), 'pyt-edit-' + tmpfile)
+        path = os.path.join(self._repo.get_git_dir(), 'pyt-edit-' + tmpfile)
         f = open(path, 'w+')
         try:
             f.write(''.join(msg))
