@@ -32,7 +32,7 @@ like checkin, you can use paths to limit what is reported by status.
 
 def print_header(color, io, repo):
     branch = repo.branch()
-    tag, distance, id = repo.describe()
+    tag, distance, id = repo['HEAD'].describe()
 
     io.info(_('Currently on branch "%s%s%s"') %
                    ((color and pyrite.utils.io.bold_color or ''),
