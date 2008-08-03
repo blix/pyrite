@@ -469,7 +469,7 @@ class Repo(GitObject):
         for item in proc.stdout.readlines():
             status = item[0]
             f = item[2:].strip()
-            files[f] = Commit._status[status]
+            files[f] = Repo._status[status]
         if tracked:
             proc.wait()
             proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
