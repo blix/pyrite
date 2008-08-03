@@ -45,7 +45,7 @@ def run():
     dummy_out = None
     io = IO()
     try:
-        repo = Repo()
+        repo = Repo(io=io)
         settings = Settings(repo)
         extensions.on_load(io, _commands, settings)
         io.initialize(settings, repo)

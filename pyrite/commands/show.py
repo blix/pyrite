@@ -15,6 +15,7 @@
 
 import pyrite
 from pyrite.utils.help import HelpError
+from pyrite.git.commit import Commit
 
 options = [
 ('s', 'style', _('use a predefined style'), 0),
@@ -46,11 +47,11 @@ def run(cmd, args, flags, io, settings, repo):
         raise HelpError(cmd, _('Need something to show'))
     if args[0] in repo.list_tags():
         tag = args.pop(0)
-    elif repo.get_commit_info(args[0]):
+    elif Commit.is_commit(repo, args[0]):
         commit = args.pop(0)
     else:
         commit = 'HEAD'
 
-    output = repo.show(args, commit=commit, tag=tag)
+    output = repo.show(commit=commit, tag=tag, files=args)
 
     io.info(output)

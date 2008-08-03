@@ -676,7 +676,7 @@ class Repo(GitObject):
         if proc.wait():
             raise GitError(_('Failed to remove: %s') % proc.stderr.read())
 
-    def show(self, files, commit='HEAD', tag=None):
+    def show(self, commit='HEAD', tag=None, files=None):
         self.validate()
         args = ['git', 'show']
         treeish = None
@@ -852,7 +852,7 @@ class Repo(GitObject):
                 stream = open(cat_to, 'w')
             else:
                 stream = cat_to
-            stream.writelines(self.show([filename], commit))
+            stream.writelines(self.show(commit, [filename]))
         except GitError:
             return False
         finally:

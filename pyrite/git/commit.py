@@ -141,6 +141,12 @@ class Commit(GitObject):
         return tag, 0, id
 
     @classmethod
+    def is_commit(cls, gitobj, name):
+        gitobj.validate()
+        proc = gitobj._popen(('git', 'rev-list', name))
+        return not proc.wait()
+
+    @classmethod
     def get_commits(cls, gitobj, first, last, limit=-1, data=None,
                     follow=False, paths=None, skip=0, incoming=False,
                     reverse=False, reflog=False, ordered=False):
