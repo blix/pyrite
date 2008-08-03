@@ -15,7 +15,7 @@
 
 import pyrite
 from pyrite.utils.help import HelpError
-from pyrite.git.repository import Repo
+from pyrite.git.commit import Commit
 import os
 
 options = [
@@ -48,22 +48,18 @@ def run(cmd, args, flags, io, settings, repo):
     use_commit = flags.get('commit', None)
     use_author = flags.get('author', None)
     use_message = flags.get('message', None)
-    #need to decide if ament or use_commit mean that editor should not
-    #be invoked by default
     edit = flags.has_key('edit') or (not use_message and not use_commit)
     amend = flags.has_key('amend')
     sign = flags.has_key('signoff')
     verify = not flags.has_key('no-verify')
 
-    data = [Repo.SUBJECT, Repo.AUTHOR, Repo.AUTHOR_EMAIL, Repo.BODY, Repo.ID]
-    commitdata = {}
+    commitdata = None
 
     if use_commit and use_message:
         raise HelpError(cmd, _('Cannot specify commit and message'))
     elif use_commit:
-        commitdata = repo.get_commit_info(use_commit, data)
-        use_message = commitdata[Repo.SUBJECT] + '\n' + \
-                            ''.join(commitdata[Repo.BODY])
+        commit = repo[use_commit]
+        use_message = commit.subject + '\n' + ''.join(commit.body)
 
     extra = [_('This is a commit message.'),
             _('Lines beginning with "#" will be removed'),
@@ -76,12 +72,11 @@ def run(cmd, args, flags, io, settings, repo):
 
     try:
         if amend:
-            commitdata = repo.get_commit_info('HEAD', data)
+            commit = repo['HEAD']
             if not use_message:
-                use_message = commitdata[Repo.SUBJECT] + '\n' + \
-                                ''.join(commitdata[Repo.BODY])
-            amend = commitdata[Repo.ID]
-            del commitdata[Repo.ID]
+                use_message = commit.subject + '\n' + \
+                                ''.join(commit.body)
+            amend = commit.id
             if args:
                 for f in repo.changed_files('HEAD'):
                     args.append(f[1])
@@ -107,7 +102,7 @@ def run(cmd, args, flags, io, settings, repo):
                 use_message = '\n'
 
             new_msg = io.edit(use_message, extra,
-                                     repo.get_commit_info()[Repo.ID])
+                                     repo['HEAD'].id)
             use_message = new_msg
 
         if not use_message.strip():
@@ -115,10 +110,8 @@ def run(cmd, args, flags, io, settings, repo):
                 repo.move_head_to(amend)
             io.error_out(_('No commit message, aborting'))
 
-        commitdata[Repo.SUBJECT] = use_message
-        if Repo.BODY in commitdata:
-            del commitdata[Repo.BODY]
-        repo.commit(commit=commitdata, verify=verify)
+        newcommit = {Commit.SUBJECT: use_message}
+        repo.commit(commit=newcommit, verify=verify)
         amend = False
     finally:
         if amend and amend != True:
