@@ -40,7 +40,7 @@ create tags.  You will need to specify a message for the tag, you can use
 --message or the editor will be launched to allow you to edit the message.
 """
 
-def _get_message(message, name):
+def _get_message(message, name, io):
 
     if message: return message
     
@@ -50,7 +50,7 @@ def _get_message(message, name):
 
     message = io.edit('', extra, 'pyt-edit-' + name)
     if not message:
-        raise HelpError(cmd, _('No commit message'))
+        raise HelpError('tag', _('No tag message'))
     return message
 
 def run(cmd, args, flags, io, settings, repo):
@@ -64,7 +64,7 @@ def run(cmd, args, flags, io, settings, repo):
         io.info(lines)
         return
 
-    if args:
+    if not args:
             raise HelpError(cmd, _('No tag name specified'))
 
     if flags.has_key('verify'):
@@ -77,15 +77,15 @@ def run(cmd, args, flags, io, settings, repo):
         commit = flags.get('revision', 'HEAD')
 
         if key:
-            message = _get_message(message, args[0])
+            message = _get_message(message, args[0], io)
             io.info(repo.create_tag(args[0], message,
                                                   commit=commit, key=key))
         elif flags.has_key('sign'):
-            message = _get_message(message, args[0])
+            message = _get_message(message, args[0], io)
             io.info(repo.create_tag(args[0], message,
                                                   commit=commit, sign=True))
         elif flags.has_key('annotated'):
-            message = _get_message(message, args[0])
+            message = _get_message(message, args[0], io)
             io.info(repo.create_tag(args[0], message,
                                                   commit=commit))
         else:
