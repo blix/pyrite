@@ -38,6 +38,9 @@ class GitObject(object):
             self.refresh()
         self._debug_commands = os.environ.get('PYT_DBG_CMD', None)
 
+    def set_settings(self, settings):
+        self._settings = settings
+
     def refresh(self):
         self._git_dir = None
         self._is_in_repo = not not self.get_git_dir()
@@ -88,15 +91,20 @@ class GitObject(object):
             while curpath:
                 if self._is_git_dir(curpath):
                     self._git_dir = curpath
+                    self._is_bare = True
                     break
                 gitpath = os.path.join(curpath, '.git')
                 if self._is_git_dir(gitpath):
                     self._git_dir = gitpath
+                    self._is_bare = False
                     break
                 curpath, dummy = os.path.split(curpath)
                 if not dummy:
                     break
         return self._git_dir
+
+    def is_bare(self):
+        return self._is_bare
 
     def validate(self):
         if not self._is_in_repo:

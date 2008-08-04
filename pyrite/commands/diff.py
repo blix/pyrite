@@ -52,6 +52,10 @@ def run(cmd, args, flags, io, settings, repo):
     if 'ignore_whitespace' in flags:
         ignorewhite = 'all'
 
+    if repo.is_bare():
+        io.error_out(_('You are operating in a bare repo.  '
+                       'No diff available.'))
+
     show_patch = True
     if stat and not patch_stat:
         show_patch = False

@@ -50,6 +50,9 @@ def run(cmd, args, flags, io, settings, repo):
     color = 'color' in flags or \
             pyrite.utils.io.affirmative(settings.get_option('pyrite.color'))
 
+    if repo.is_bare():
+        io.error_out(_('You are operating in a bare repo.  '
+                       'No status available.'))
     commit = 'HEAD'
     if amend:
         commit = 'HEAD^'
