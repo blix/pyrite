@@ -53,8 +53,8 @@ class GitObject(object):
             stdin = PIPE
         else:
             stdin = None
-        if self._debug_commands and self._io:
-            if self._io == True:
+        if os.environ.get('PYTDBG'):
+            if not self._io or self._io == True:
                 print args
             else:
                 self._io.info(str(args))

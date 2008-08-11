@@ -21,7 +21,7 @@ from pyrite.utils.settings import Settings
 from pyrite.utils.options import OptionParser
 from pyrite.utils.help import HelpError, on_help_error
 from pyrite.commands import _commands, get_command_info
-import sys
+import sys, os
 
 global_options = [
 ('h', 'help', _(''), 0),
@@ -67,7 +67,7 @@ def run():
         if 'help' in flags:
             raise HelpError(cmd)
         if 'debug-subcommands' in flags:
-            repo._debug_commands = True
+            os.environ['PYTDBG'] = '1'
         if 'debug-exceptions' in flags:
             show_trace = True
         if 'debug-suppress-output' in flags:
