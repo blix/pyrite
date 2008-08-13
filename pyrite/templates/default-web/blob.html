@@ -23,6 +23,7 @@
     except:
         lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
 %>
+<%namespace name="utils" file="utils.html" />
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -58,22 +59,7 @@
 <table>
     <tr>
         <td class="left_side">
-            <div class="commit_info">
-                <div class="heading indent">Commit</div>
-                <div class="indent">
-                    <a href="$ {'/%s/commit/%s' % (project, commit_id) }">
-                        Subject: ${ c.subject }
-                    </a>
-                </div>
-                <br>
-                <div class="indent">
-                    ${ c.author | h}
-                    ${ humandate(c.raw[Commit.AUTHOR_DATE]) }<br>
-                </div>
-                <pre>
-                    ${ ''.join(indent(c.body)) | h }
-                </pre>
-            </div>
+            ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
             <div class="heading indent">${ path }</div>
             <hr>
             ${ highlight(''.join(repo.blob(blob_id)), lexer, formatter) }

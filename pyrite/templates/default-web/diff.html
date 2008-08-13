@@ -22,31 +22,15 @@
     <title>${ repo.description } -
             Pyrite web interface.</title>
     <style type="text/css">
-    .commit_info
-    {
-        margin-top: 20px;
-    }
-    .base, .update, .divide
+    .base, .update
     {
         display: inline-block;
         vertical-align: top;
-        height: 100%;
+        width: 50%;
     }
-    .indent
-    {
-        padding-left: 5px;
-    }
-    .heading
-    {
-        margin-bottom: 10px;
-        width: 100%;
-        background-color: #66CDAA;
-        border: solid 1px black;
-    }
-    .left_side
-    {
-        padding-left: 10px;
-    }
+    .update { float: right; }
+    .base { float: left; }
+    .main { clear: both; }
     ${ formatter.get_style_defs('.highlight') }
     </style>
 </head>
@@ -57,44 +41,21 @@
 <table>
     <tr>
         <td class="left_side">
-            <div class="commit_info">
-                <div class="base">
-                    <div class="heading indent">Parent</div>
-                    <div class="indent">
-                        <a href="$ {'/%s/commit/%s' % (project,v1) }">
-                            Subject: ${ c1.subject }
-                        </a>
-                    </div>
-                    <br><br>
-                    <div class="indent">
-                        ${ c1.author | h}
-                        ${ humandate(c1.raw[Commit.AUTHOR_DATE]) }<br>
-                    </div>
-                    <pre>
-                        ${ ''.join(indent(c1.body)) | h }
-                    </pre>
-                </div>
-                <div class="divide"></div>
-                <div class="update">
-                    <div class="heading indent">Current</div>
-                    <div class="indent">
-                        <a href="$ {'/%s/commit/%s' % (project,v2) }">
-                            Subject: ${ c2.subject }
-                        </a>
-                    </div>
-                    <br><br>
-                    <div class="indent">
-                        ${ c2.author | h}
-                        ${ humandate(c2.raw[Commit.AUTHOR_DATE]) }<br>
-                    </div>
-                    <pre>
-                        ${ ''.join(indent(c2.body)) | h }
-                    </pre>
-                </div>
+            <div>
+            <div class="base">
+                ${ utils.commit_info(project, c1.raw,
+                                    'Parent: ' + c1.short) }
             </div>
-            <hr>
+            <div class="update">
+                ${ utils.commit_info(project, c2.raw,
+                                    'Current: ' + c2.short) }
+            </div>
+            <div class="main indent">
+                <hr>
             ${ highlight(''.join(repo.diff(v1, v2, paths=[f])),
                         lexer, formatter) }
+            </div>
+            </div>
         </td>
         <td class="right_side">
             <%include file="right_panel.html"

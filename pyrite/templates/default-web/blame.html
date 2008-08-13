@@ -82,14 +82,13 @@
         }
     </style>
 </head>
-${ utils.dummy() }
 <body>
     <%include file="header.html" args="project=project, repo=repo" />
 
 <table>
     <tr>
         <td class="left_side indent">
-            ${ utils.commit_info(project, c.raw, 'As of commit: ', c.short) }
+            ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
             <div class="heading indent">${ path }</div>
             <hr>
             <%
