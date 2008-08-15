@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import humandate, indent
+    from pygments import highlight
+    from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
+    from pygments.formatters import HtmlFormatter
+    __repos = {'default': Repo()}
+    import os
+%>
+<%
+    repo = __repos.get(project, __repos['default'])
+    c1 = Commit(v1, obj=repo)
+    c2 = Commit(v2, obj=repo)
+    try:
+        
+        lexer = get_lexer_for_filename(os.path.basename(path),
+                                        encoding='utf-8')
+    except:
+        lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
+
+
+    class CustomHtmlFormatter(HtmlFormatter):
+        def parse_file_diff(self, diff):
+            left = []
+            right = {}
+            hunks = []
+            l_cur = 0
+            r_cur = 0
+            starthunk = False
+            for line in diff:
+                if line.startswith('@@'):
+                    idx = line.find('@@', 3) - 1
+                    print line[3:idx]
+                    l, r = line[2:idx].split()
+                    l_start, l_count = l.split(',')
+                    r_start, r_count = r.split(',')
+                    l_cur = int(l_start[1:])
+                    r_cur = int(r_start[1:])
+                    hunks.append(l_cur)
+                    starthunk = True
+                    continue
+                if not starthunk:
+                    continue
+                if line.startswith('+'):
+                    right[r_cur] = line[1:]
+                    l_cur -= 1
+                if line.startswith('-'):
+                    left.append(l_cur)
+                    r_cur -= 1
+                l_cur += 1
+                r_cur += 1
+            self.left, self.right, self.hunks = left, right, hunks
+
+        def prefix(self, diff, lexer):
+            self.parse_file_diff(diff)
+            yield '<div class="diff_links indent">\n'
+            for i, hunk in enumerate(self.hunks):
+                yield '<a href="#diff_%d">hunk %d</a>\n' % (hunk, i)
+            yield '</div>\n'
+            yield '<div class="main">\n'
+            yield '<table class="highlighttable standard_table strip">'
+            self.parity = 'even'
+            self.l_lineno = 1
+            self.r_lineno = 1
+            self.lexer = lexer
+
+        def suffix(self):
+            yield '</table></div>'
+
+        def get_line(self, l_lineno, l_cls, l_line, r_lineno,
+                                            r_cls, r_line):
+            return '<tr class="data_row %s">' \
+                '<td class="cell linenos %s">' \
+                    '<pre>%s</pre>' \
+                '</td>' \
+                '<td class="cell code expand %s">' \
+                    '<div class="highlight">' \
+                        '<pre>%s</pre>' \
+                    '</div>' \
+                '</td>' \
+                '<td class="cell linenos %s">' \
+                    '<pre>%s</pre>' \
+                '</td>' \
+                '<td class="cell code expand %s">' \
+                    '<div class="highlight">' \
+                        '<pre>%s</pre>' \
+                    '</div>' \
+                '</td>' \
+                '</tr>' % \
+                (self.parity, l_cls, l_lineno, l_cls, l_line,
+                              r_cls, r_lineno, r_cls, r_line)
+
+        def strip_lineno(self, tokens):
+            for lineno, type, text in tokens:
+                yield type, text
+
+        def lex_line(self, line):
+            it = self.lexer.get_tokens_unprocessed(line)
+            gen = self.strip_lineno(it)
+            return self._format_lines(gen).next()[1]
+
+        def wrap(self, source, outfile):
+            self.parity = self.parity == 'odd' and 'even' or 'odd'
+
+            l_link = l_lineno = self.l_lineno
+            r_lineno = self.r_lineno
+            if l_link in self.hunks:
+                l_link = '<a name="diff_%d">%d</a>' % (l_lineno, l_lineno)
+
+            type, l_line = iter(source).next()
+            r_line = l_line
+            if l_lineno in self.left:
+                if r_lineno in self.right:
+                    r_line = self.lex_line(self.right[r_lineno])
+                    yield 0, self.get_line(l_link, 'changed', l_line, r_lineno, 'changed', r_line)
+                    self.l_lineno = l_lineno + 1
+                    self.r_lineno = r_lineno + 1
+                else:
+                    while l_lineno in self.left:
+                        yield 0, self.get_line(l_link, 'removed', l_line, '', '', '')
+                        l_lineno += 1
+                        l_link = l_lineno
+                    self.l_lineno = l_lineno
+            elif r_lineno in self.right:
+                while r_lineno in self.right:
+                    r_line = self.lex_line(self.right[r_lineno])
+                    yield 0, self.get_line('', '', '', r_lineno, 'added', r_line)
+                    r_lineno += 1
+                self.r_lineno = r_lineno
+            else:
+                yield 0, self.get_line(l_link, '', l_line, r_lineno, '', l_line)
+                self.l_lineno = l_lineno + 1
+                self.r_lineno = r_lineno + 1
+
+    formatter = CustomHtmlFormatter(encoding='utf-8', nobackground=True)
+%>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
+    <link rel="stylesheet" type="text/css" href="/static/common.css" />
+    <title>${ repo.description } -
+            Pyrite web interface.</title>
+    <style type="text/css">
+    .base, .update
+    {
+        display: inline-block;
+        vertical-align: top;
+        width: 50%;
+    }
+    .removed { background-color: #FF6347; }
+    .added { background-color: #98FB98; }
+    .changed { background-color: #EEE8AA; }
+    .update { float: right; }
+    .base { float: left; }
+    .main { clear: both; overflow: scroll; height: 50ex; }
+    .diff_links { clear: both; }
+    .highlighttable pre
+    {
+        padding: 0;
+        margin: 0;
+        font-size: small;
+    }
+    .before, .after { display: inline-block; width: 50%; }
+    .before { float: left; }
+    .after { float: right; }
+    ${ formatter.get_style_defs('.highlight') }
+    </style>
+</head>
+<%namespace name="utils" file="utils.html" />
+<body>
+    <%include file="header.html" args="project=project, repo=repo" />
+
+<table>
+    <tr>
+        <td class="left_side">
+            <div class="base">
+                ${ utils.commit_info(project, c1.raw,
+                                    'Parent: ' + c1.short) }
+            </div>
+            <div class="update">
+                ${ utils.commit_info(project, c2.raw,
+                                    'Current: ' + c2.short) }
+            </div>
+            <hr>
+            <%
+                diff = repo.diff(c1.id, c2.id, paths=[path[1:]])
+                context.write(''.join(formatter.prefix(diff, lexer)))
+                for line in repo.show(c1.id, files=[path[1:]]):
+                    context.write( highlight( line, lexer, formatter) )
+
+                context.write(''.join(formatter.suffix()))
+            %>
+        </td>
+        <td class="right_side">
+            <%include file="right_panel.html"
+                        args="project=project, repo=repo, ref=None" />
+        </td>
+    </tr>
+</table>
+<%include file="footer.html" />
+</body>
+</html>

@@ -11,7 +11,7 @@ url_map = (
                                                         'ref.html'),
     (r'^(?P<project>.*)/diff/(?P<v1>[a-z0-9]*)/(?P<v2>[a-z0-9]*)'
         '/?(?P<f>.*)$', 'diff.html'),
-    (r'^(?P<project>.*)/ssdiff/(?P<v1>.*)/(?P<v2>.*)/(?P<f>.*)$',
+    (r'^(?P<project>.*)/ssdiff/(?P<v1>[a-z0-9]*)/(?P<v2>[a-z0-9]*)(?P<path>/.*)$',
                                                         'ssdiff.html'),
     (r'^(?P<project>.*)/reflist/(?P<type>.*)$', 'all_type_refs.html'),
     (r'^(?P<project>.*)/blame/(?P<commit_id>[a-z0-9]*)'
