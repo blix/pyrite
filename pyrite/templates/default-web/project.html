@@ -14,7 +14,20 @@
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
     <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ repo.description } -- Pyrite web.</title>
+    <title>${ repo.name } -- Pyrite web.</title>
+    <style type="text/css">
+        .heading
+        {
+            margin: 20px 15px 10px 10px;
+            padding: 2px 1em 2px 1em;
+        }
+        .info
+        {
+            margin-left: 25px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <%namespace name="tbl" file="commit_table.html" />
 <%namespace name="utils" file="utils.html" />
@@ -23,6 +36,43 @@
 <table>
     <tr>
         <td class="left_side">
+            <div class="heading">
+                ${ repo.description | h }
+            </div>
+            % if repo.homepage:
+            <div class="info">
+                Homepage:
+                <a href="${ repo.homepage }">${ repo.homepage | h} </a>
+            </div>
+            % endif
+            <div class="info">
+                Owner: ${ repo.owner | h }
+            </div class="indent">
+            <div  class="info" style="text-decoration: line-through;">
+                Clone URL:
+                <script language="javascript">
+                    {
+                        document.write(location.protocol + "//" +
+                                       location.hostname)
+                        if (location.port != 80 ||
+                            (location.protocol == "https" &&
+                             location.port != 443))
+                        {
+                            document.write(':' + location.port)
+                        }
+                        document.write("/")
+                        % if project != 'default':
+                        document.write(${ project })
+                        % endif
+                    }
+                </script>
+            </div>
+            <% blurb = repo.blurb %>
+            % if blurb:
+            <div class="info">
+                ${ blurb }
+            </div>
+            % endif
             <%include file="commit_table.html"
                 args="project=project, repo=repo, ref=ref_id, page=p" />
         </td>
