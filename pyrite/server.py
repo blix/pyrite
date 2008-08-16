@@ -13,6 +13,8 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from pyrite.git.repository import Repo
+from pyrite.utils.settings import Settings
 from twisted.internet import reactor
 from twisted.web import server, resource, http
 from twisted.web.static import File as StaticFile
@@ -75,12 +77,20 @@ class Root(resource.Resource, FilePath):
             self._mappings.append((re.compile(exp), f))
         if 'static_path' not in self._config:
             self._config['static_path'] = 'static'
+        self.load_repos()
 
         fullpath = self._file_access.child(self._config['static_path'])
         self._config['static_path_full'] = fullpath.path
 
     def getChild(self, name, request):
         return self
+
+    def load_repos(self):
+        # if there is a config file, load the repos from there
+        # else...
+        repo = Repo()
+        s = Settings(repo)
+        self._repos = {'default': repo }
 
     def render_GET(self, request):
         path = request.path[1:]
@@ -102,6 +112,7 @@ class Root(resource.Resource, FilePath):
                 t = Template(filename=f.path, default_filters=[],
                              input_encoding='utf-8', lookup=lookup)
                 try:
+                    vars['__repos'] = self._repos
                     return t.render(**vars)
                 except BaseException, e:
                     for num, line in enumerate(t.code.splitlines()):

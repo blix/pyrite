@@ -2,7 +2,6 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%!
     from pyrite.git.repository import Repo
-    __repos = {'default': Repo()}
 %>
 <%
     repo = __repos.get(project, __repos['default'])

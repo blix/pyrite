@@ -3,8 +3,6 @@
 <%!
     from pyrite.git.repository import Repo
     from pyrite.git.commit import Commit
-
-    __repos = {'default': Repo()}
 %>
 <%
     repo = __repos.get(project, __repos['default'])

@@ -4,7 +4,6 @@
     from pyrite.git.repository import Repo
     from pyrite.utils.stringopts import relative_date
     from time import mktime
-    __repos = {'default': Repo()}
 %>
 <%
     repo = __repos.get(project, __repos['default'])
