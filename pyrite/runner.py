@@ -33,7 +33,12 @@ global_options = [
 ('', 'debug-exceptions', _(''), 0)
 ]
 
-def exec_command(module, cmd, args, flags, io, settings, repo):
+def exec_command(module, cmd, args, flags, io):
+    repo = Repo(io=io)
+    settings = Settings(repo)
+    extensions.on_load(io, _commands, settings)
+    io.initialize(settings, repo)
+
     extensions.on_before_command(module, cmd, args, flags, io,
                                  settings, repo)
     module.run(cmd, args, flags, io, settings, repo)
@@ -45,11 +50,6 @@ def run():
     dummy_out = None
     io = IO()
     try:
-        repo = Repo(io=io)
-        settings = Settings(repo)
-        extensions.on_load(io, _commands, settings)
-        io.initialize(settings, repo)
-
         if len(sys.argv) < 2:
             raise HelpError()
         cmd = sys.argv[1]
@@ -77,7 +77,7 @@ def run():
             import cProfile
             import pstats
             cProfile.runctx('exec_command(module, cmd, args, flags, '
-                            'io, settings, repo)',
+                            'io)',
                             globals(), locals(), 'pyt-profile')
             p = pstats.Stats('pyt-profile')
             p.sort_stats(flags.get('debug-profile-sort', 'cumulative'))
@@ -86,7 +86,7 @@ def run():
             if 'debug-profile-extra' in flags:
                 p.print_callers()
         else:
-            exec_command(module, cmd, args, flags, io, settings, repo)
+            exec_command(module, cmd, args, flags, io)
 
     except HelpError, inst:
         on_help_error(inst, io)
