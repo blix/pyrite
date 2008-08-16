@@ -61,16 +61,62 @@ class Repo(GitObject):
             raise TypeError(str(type(key)) + " " + str(key))
 
     @property
-    def description(self):
-        if self._settings:
-            desc = self._settings.get_option('gitweb.description')
-            if desc:
-                return desc
+    def name(self):
+        name = self._settings.get_repo_option('pyrite.web.name')
+        if not name:
+            if self.is_bare():
+                return os.path.split(self.get_git_dir())[1]
+            return os.path.split(os.path.abspath(self.get_work_tree()))[1]
+        return name
 
-        if self.is_bare():
-            return os.path.split(self.get_git_dir())[1]
-        return os.path.split(os.path.abspath(os.path.join(self.get_git_dir(),
-                            '..')))[1]
+    @property
+    def description(self):
+        desc = self._settings.get_repo_option('pyrite.web.description')
+        if desc:
+            return desc
+        f = None
+        try:
+            f = file(os.path.join(self.get_git_dir(), 'description'))
+            return f.read()
+        finally:
+            if f:
+                f.close()
+
+    @property
+    def homepage(self):
+        home = self._settings.get_repo_option('pyrite.web.home')
+        if home:
+            return home
+        return ''
+
+    @property
+    def owner(self):
+        owner = self._settings.get_repo_option('pyrite.web.owner')
+        if owner:
+            return owner
+        return self._settings.get_user()
+
+    @property
+    def blurb(self):
+        fname = self._settings.get_repo_option('pyrite.web.blurbfile')
+        print fname
+        if not fname:
+            return ''
+        orig = fname
+        f = None
+        try:
+            if not os.path.exists(fname):
+                print 'trying relative'
+                fname = os.path.join(self.get_git_dir(), fname)
+            if not os.path.exists(fname):
+                print 'failed'
+                return _('File %s doesn\'t exist') % orig
+            f = file(fname)
+            return f.read()
+        finally:
+            if f:
+                f.close()
+        return ''
 
     def refresh(self):
         self._branches = None
