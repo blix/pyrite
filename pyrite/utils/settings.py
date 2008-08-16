@@ -37,6 +37,7 @@ class Settings(object):
                 self.repo_config.read()
         except IniParseError, inst:
             raise SettingsError(inst)
+        repo.set_settings(self)
 
     def set_repo_option(self, item, value, is_all):
         if not self.repo.is_in_repo():
@@ -66,6 +67,14 @@ class Settings(object):
         if not value:
             value = self.user_config.get(category, name)
         return value
+
+    def get_repo_option(self, item, is_all=False):
+        category, name = self._split_option(item)
+        if category == None or name == None:
+            raise SettingsError(_missing_config_arg)
+        if self.repo.is_in_repo():
+            return self.repo_config.get(category, name)
+        raise SettingsError(_not_under_repo_error)
 
     def _items(self, category, config):
         parts = category.split('.')
@@ -110,7 +119,7 @@ class Settings(object):
         parts = option.split('.')
         l = len(parts)
         if 2 > l or l > 3:
-            raise HelpError('config', _('Malformed option string: %s') %
+            raise SettingsError(_('Malformed option string: %s') %
                             option)
         if l == 2:
             return parts[0], parts[1]

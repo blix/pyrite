@@ -15,7 +15,7 @@
 
 
 import pyrite
-from pyrite.utils.settings import Settings
+from pyrite.utils.settings import Settings, SettingsError
 from pyrite.utils.help import HelpError
 
 options = [
@@ -110,7 +110,7 @@ def run(cmd, args, flags, io, settings, repo):
                     if not value:
                         value = ''
                     io.info(_('%s = %s') % (option, value))
-    except ConfigError, inst:
+    except SettingsError, inst:
         io.error_out(inst)
 
 

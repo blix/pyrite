@@ -21,14 +21,27 @@ class IniParser(object):
         self.filename = filename
         self._options = {}
 
+    def unescape(self, line):
+        idx = line.find('#')
+        if idx > -1:
+            line = line[:idx]
+        idx = line.find(';')
+        if idx > -1:
+            line = line[:idx]
+        line = line.replace('[!]', '!')
+        return line.strip()
+
     def read(self):
         f = None
         try:
             f = open(self.filename, 'r')
             current_section = None
             for line in f.readlines():
-                line = line.strip()
-                if not line or line[0] == '#' or line[0] == ';':
+                # need to preserve the original line so we can
+                # not strip out qcomments etc
+                orig = line
+                line = self.unescape(line)
+                if not line:
                      continue
                 if len(line) < 3:
                      raise IniParseError(_('Bad config line!'))
@@ -39,7 +52,8 @@ class IniParser(object):
                     if section_name in self._options:
                         current_section = self._options[section_name]
                     else:
-                        current_section = self._options[section_name] = {}
+                        current_section = {}, orig
+                        self._options[section_name] = current_section
                 else:
                     parts = line.split('=', 1)
                     if len(parts) != 2:
@@ -49,8 +63,8 @@ class IniParser(object):
                     name = parts[0].strip()
                     value = parts[1].strip()
                     if name in current_section:
-                        current_section[name].append(value)
-                    current_section[name] = [value]
+                        current_section[name].append((value, orig))
+                    current_section[0][name] = [(value, orig)]
         except (IOError, OSError):
             pass
         finally:
@@ -59,43 +73,57 @@ class IniParser(object):
 
     def get(self, section, name, default=None, num=0):
         if section in self._options:
-            sec = self._options[section]
+            sec = self._options[section][0]
             if name in sec:
-                return sec[name][num]
+                return sec[name][num][0]
         return default
 
     def items(self, section):
         if section in self._options.keys():
-           for name, values in self._options[section].items():
+           for name, values in self._options[section][0].items():
                for v in values:
-                   yield name, v
+                   yield name, v[0]
 
     def write(self, filename):
+        import shutil
+        import os
         f = None
         try:
-            f = open(filename, 'w+')
+            f = open(filename + '.tmp', 'w+')
             for section, names in self._options.items():
-                 f.write('\n[%s]\n' % section)
-                 for name, values in names.items():
-                     for v in values:
-                         f.write('%s=%s\n' % (name, v))
+                if names[1]:
+                    f.write('\n')
+                    f.write(names[1])
+                else:
+                    f.write('\n[%s]\n' % section)
+                for name, values in names[0].items():
+                    for v in values:
+                       if v[1]:
+                           f.write(v[1])
+                       else:
+                           f.write('%s=%s\n' % (name, v[0]))
+            f.close()
+            f = None
+            shutil.copyfile(filename + '.tmp', filename)
         finally:
             if f:
                 f.close()
+            os.remove(filename + '.tmp')
 
     def set(self, section, name, value, num=0):
         if section in self._options:
-            sec = self._options[section]
+            sec = self._options[section][0]
         else:
-            sec = self._options[section] = {}
+            sec = {}, None
+            self._options[section] = sec
         if name in sec:
-            sec[name][num] = value
+            sec[0][name][num] = (value, None)
         else:
-            sec[name] = [value]
+            sec[0][name] = [(value, None)]
 
     def remove_option(self, section, name, num=0):
         if section in self._options:
-           sec = self._options[section]
+           sec = self._options[section][0]
            if name in sec:
                del sec[name][num]
                if not sec[name]:
