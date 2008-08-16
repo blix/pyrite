@@ -35,4 +35,4 @@ data = [Commit.ID, Commit.REFS]
     % endfor
 </table>
 </div>
-${ utils.table_pager(page, '/%s/%%d' % project, i == 99) }
+${ utils.table_pager(page // 100, '/%s/%%d' % project, i == 99) }
