@@ -38,7 +38,7 @@ class FileWithoutDir(StaticFile):
 class Root(resource.Resource, FilePath):
     def __init__(self, port, path, io):
         resource.Resource.__init__(self)
-        self._port = port
+        self._port = int(port)
         self._io = io
         if not path:
             filedir = os.path.dirname(__file__)
