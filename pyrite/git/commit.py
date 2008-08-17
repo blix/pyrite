@@ -272,7 +272,7 @@ class Commit(GitObject):
         commit[Commit.ID] = parts[1]
         refs = commit[Commit.REFS] = []
         for part in parts[2:]:
-            part = part.strip('()')
+            part = part.strip('(),')
             if not part.startswith('refs'):
                 continue
             refs.append(part)
