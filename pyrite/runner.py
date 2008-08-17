@@ -72,7 +72,7 @@ def run():
             show_trace = True
         if 'debug-suppress-output' in flags:
             dummy_out = open('/dev/null', 'w')
-            ui.stdout = dummy_out
+            io.stdout = dummy_out
         if 'debug-profile' in flags:
             import cProfile
             import pstats
