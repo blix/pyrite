@@ -1,88 +1,65 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<%!
-    from pyrite.git.repository import Repo
-    project = 'default'
-    branch = ''
-%>
-<%
-    repo = __repos.get(path, __repos['default'])
-    p = page and int(page) or 0
-%>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+<%inherit file="layout.html" />
+
+<%def name="css()" >
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ repo.name } -- Pyrite web.</title>
-    <style type="text/css">
-        .heading
-        {
-            margin: 20px 15px 10px 10px;
-            padding: 2px 1em 2px 1em;
-        }
-        .info
-        {
-            margin-left: 25px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-    </style>
-</head>
-<%namespace name="tbl" file="commit_table.html" />
-<%namespace name="utils" file="utils.html" />
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
-<table>
-    <tr>
-        <td class="left_side">
-            <div class="heading">
-                ${ repo.description | h }
-            </div>
-            % if repo.homepage:
-            <div class="info">
-                Homepage:
-                <a href="${ repo.homepage }">${ repo.homepage | h} </a>
-            </div>
-            % endif
-            <div class="info">
-                Owner: ${ repo.owner | h }
-            </div class="indent">
-            <div  class="info" style="text-decoration: line-through;">
-                Clone URL:
-                <script language="javascript">
-                    {
-                        document.write(location.protocol + "//" +
-                                       location.hostname)
-                        if (location.port != 80 ||
-                            (location.protocol == "https" &&
-                             location.port != 443))
-                        {
-                            document.write(':' + location.port)
-                        }
-                        document.write("/")
-                        % if project != 'default':
-                        document.write(${ project })
-                        % endif
-                    }
-                </script>
-            </div>
-            <% blurb = repo.blurb %>
-            % if blurb:
-            <div class="info">
-                ${ blurb }
-            </div>
-            % endif
-            <%include file="commit_table.html"
-                args="project=project, repo=repo, ref=ref_id, page=p" />
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+    <link rel="stylesheet" type="text/css" href="/static/project.css" />
+</%def>
+<%def name="title()" >
+    ${ ' %s -- Pyrite web.' % self.repo.name }
+</%def>
 
+<%def name="init()">
+<%
+    self.p = page and int(page) or 0
+    self.ref = ref_id
+%>
+</%def>
+
+<div class="heading">${ self.repo.description | h }</div>
+% if self.repo.homepage:
+<div class="info">Homepage:
+    <a href="${ self.repo.homepage }">${ self.repo.homepage | h} </a>
+</div>
+% endif
+<div class="info">Owner: ${ self.repo.owner | h }</div>
+<div  class="info" style="text-decoration: line-through;">
+    Clone URL:
+    <script language="javascript">
+        {
+            document.write(location.protocol + "//" +
+                           location.hostname)
+            if (location.port != 80 ||
+                (location.protocol == "https" &&
+                 location.port != 443))
+            {
+                document.write(':' + location.port)
+            }
+            document.write("/")
+            % if project != 'default':
+            document.write(${ self.project })
+            % endif
+        }
+    </script>
+</div>
+<% blurb = self.repo.blurb %>
+% if blurb:
+<div class="info">
+    ${ blurb }
+</div>
+% endif
+
+<%namespace name="utils" file="utils.html" />
+
+<%
+    params = {
+        'project': self.project,
+        'repo': self.repo,
+        'ref': self.ref,
+        'page': self.p
+    }
+%>
+
+<%include file="commit_table.html" args="params=params" />
+
+${ utils.table_pager(self.p, '/%s/%%d' % project, params['i'] == 99) }

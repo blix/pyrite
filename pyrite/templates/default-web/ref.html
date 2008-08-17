@@ -1,37 +1,35 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<%!
-    from pyrite.git.repository import Repo
-%>
+<%inherit file="layout.html" />
+
+<%def name="init()" >
 <%
-    repo = __repos.get(project, __repos['default'])
-    p = page and int(page) or 0
+    self.ref = ref_id
+    self.p = page and int(page) or 0
 %>
-<%namespace name="utils" file="utils.html" />
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+</%def>
+
+<%def name="css()" >
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ '%s -- %s -- Pyrite web.' % (repo.name,
-                                            ref_id) }</title>
-</head>
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
+</%def>
 
-<table>
-    <tr>
-        <td class="left_side">
-            <%include file="commit_table.html"
-                args="project=project, repo=repo, ref=ref_id, page=p" />
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=ref_id" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+<%def name="title()" >
+    '%s -- %s -- Pyrite web.' % (self.repo.name, ref_id)
+</%def>
+
+<%namespace name="utils" file="utils.html" />
+
+<%
+    params = {
+        'project': self.project,
+        'repo': self.repo,
+        'ref': ref_id,
+        'page': self.p
+    }
+%>
+<%include file="commit_table.html" args="params=params" />
+
+${ utils.table_pager(self.p, '/%s/ref/%s?%%d' % (project,
+                    ref_id), params['i'] == 99) }
 

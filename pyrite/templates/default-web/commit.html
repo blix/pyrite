@@ -1,7 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%inherit file="layout.html" />
 <%!
-    from pyrite.git.repository import Repo
     from pyrite.git.commit import Commit
     from pyrite.utils.stringopts import humandate, indent
     from pygments import highlight
@@ -10,139 +8,128 @@
     lexer = get_lexer_by_name('diff', encoding='utf-8')
     formatter = HtmlFormatter(encoding='utf-8', nobackground=True)
 %>
+
+<%def name="init()">
 <%
-    repo = __repos.get(project, __repos['default'])
-    commit = Commit(commit_id, data=[Commit.ID, Commit.REFS,
+    self.ref = ''
+    self.commit = Commit(commit_id, data=[Commit.ID, Commit.REFS,
                                     Commit.PATCH], obj=repo)
 %>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+</%def>
+
+<%def name="css()" >
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ repo.name } - ${ commit.subject }
-            Pyrite web interface.</title>
     <style type="text/css">
-    .commit_props
-    {
-        margin-top: 20px;
-        margin-left: 10px;
-    }
-    .main { margin-left: 10px; }
-    .pad { padding: 2px 1ex 2px 1ex; }
-    .commit_props li
-    {
-        list-style-type: none;
-    }
-    .commit_props .parents, .commit_props ul
-    {
-        vertical-align: top;
-    }
-    .commit_props ul
-    {
-        margin-top: 0px;
-        margin-bottom: 0px;
-        padding-left: 0px;
-    }
-    ${ formatter.get_style_defs('.highlight') }
+        .commit_props
+        {
+            margin-top: 20px;
+            margin-left: 10px;
+        }
+        .main { margin-left: 10px; }
+        .pad { padding: 2px 1ex 2px 1ex; }
+        .commit_props li
+        {
+            list-style-type: none;
+        }
+        .commit_props .parents, .commit_props ul
+        {
+            vertical-align: top;
+        }
+        .commit_props ul
+        {
+            margin-top: 0px;
+            margin-bottom: 0px;
+            padding-left: 0px;
+        }
+        ${ formatter.get_style_defs('.highlight') }
     </style>
-</head>
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
+</%def>
 
-<table>
+<%def name="title()" >
+    ${ ' %s -- %s -- Pyrite web.' % (self.repo.name, self.commit.subject) }
+</%def>
+
+<table class="commit_props">
     <tr>
-        <td class="left_side">
-            <table class="commit_props">
-                <tr>
-                    <td>Commit:</td>
-                    <td>${ commit.id }</td>
-                </tr>
-                <tr>
-                    <td>Author:</td>
-                    <td>${ commit.author | h}
-                </tr>
-                <tr>
-                    <td>Date:</td>
-                    <td>${ humandate(commit.raw[Commit.AUTHOR_DATE]) }
-                </tr>
-                <tr>
-                    <td class="parents">Parents:</td>
-                    <td><ul>
-                        <% count = len(commit.parent_ids) %>
-                        % for p in commit.parent_ids:
-                        <li class="parent_li">
-                            <a href="${'/%s/commit/%s' % (project,
-                                        p) }">${ p }</a>
-                            % if count > 1:
-                            <a href="${'/%s/diff/%s/%s' % (project,
-                                        p, commit.id) }">diff</a>
-                            % endif
-                        </li>
-                        % endfor
-                    </ul></td>
-                </tr>
-                <tr>
-                    <td>Files:</td>
-                    <td>
-                        <a href="${ '/%s/tree/%s/%s?path=' % (project,
-                                    commit.id, commit.tree) }">files</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Subject:</td>
-                    <td>${ commit.subject }</td>
-                </tr>
-            </table>
-            <pre>
-            % if commit.body:
-            ${ ''.join(indent(commit.body)) }
-            % endif
-            </pre>
-            <table class="standard_table">
-                <tr class="col_header">
-                    <td class="cell expand">File</td>
-                    <td class="cell expand">View</td>
-                    % for p in commit.parent_ids:
-                    <td class="cell">
-                        Diff vs ${ commit.short }
-                    </td>
-                    % endfor
-                </tr>
-                % for i, f in enumerate(repo.changed_files(commit.id)):
-                <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
-                    <td class="cell expand">
-                        <a href="${ '/%s/blob/%s/%s' % (project,
-                                commit.id, f[1]) }">${ f[1] }</a>
-                    </td>
-                    <td class="cell">
-                        <a href="${ '/%s/blame/%s?path=%s' % (project,
-                                    commit_id, '/' + f[1])}">blame</a>
-                    </td>
-                    % for p in commit.parent_ids:
-                    <td class="cell">
-                        <a class="pad" href="${ '/%s/diff/%s/%s/%s' % \
-                                            (project, p, commit.id,
-                                            f[1]) }">diff</a> /
-                        <a class="pad" href="${ '/%s/ssdiff/%s/%s/%s' % \
-                                            (project, commit.parent_ids[0],
-                                            commit.id, f[1]) }">SxS diff</a>
-                    </td>
-                    % endfor
-                </tr>
-                % endfor
-            </table>
-            <hr>
-            <div class="main">
-                ${ highlight(''.join(commit.patch), lexer, formatter) }
-            </div>
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
+        <td>Commit:</td>
+        <td>${ self.commit.id }</td>
+    </tr>
+    <tr>
+        <td>Author:</td>
+        <td>${ self.commit.author | h}
+    </tr>
+    <tr>
+        <td>Date:</td>
+        <td>${ humandate(self.commit.raw[Commit.AUTHOR_DATE]) }
+    </tr>
+    <tr>
+        <td class="parents">Parents:</td>
+        <td><ul>
+            <% count = len(self.commit.parent_ids) %>
+            % for p in self.commit.parent_ids:
+            <li class="parent_li">
+                <a href="${'/%s/commit/%s' % (project,
+                            p) }">${ p }</a>
+                % if count > 1:
+                <a href="${'/%s/diff/%s/%s' % (project,
+                            p, self.commit.id) }">diff</a>
+                % endif
+            </li>
+            % endfor
+        </ul></td>
+    </tr>
+    <tr>
+        <td>Files:</td>
+        <td>
+            <a href="${ '/%s/tree/%s/%s?path=' % (project,
+                        self.commit.id, self.commit.tree) }">files</a>
         </td>
     </tr>
+    <tr>
+        <td>Subject:</td>
+        <td>${ self.commit.subject }</td>
+    </tr>
 </table>
-<%include file="footer.html" />
-</body>
-</html>
+<pre>
+% if self.commit.body:
+${ ''.join(indent(self.commit.body)) }
+% endif
+</pre>
+<table class="standard_table">
+    <tr class="col_header">
+        <td class="cell expand">File</td>
+        <td class="cell expand">View</td>
+        % for p in self.commit.parent_ids:
+        <td class="cell">
+            Diff vs ${ self.commit.short }
+        </td>
+        % endfor
+    </tr>
+    % for i, f in enumerate(self.repo.changed_files(self.commit.id)):
+    <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
+        <td class="cell expand">
+            <a href="${ '/%s/blob/%s/%s' % (project,
+                    self.commit.id, f[1]) }">${ f[1] }</a>
+        </td>
+        <td class="cell">
+            <a href="${ '/%s/blame/%s?path=%s' % (project,
+                        commit_id, '/' + f[1])}">blame</a>
+        </td>
+        % for p in self.commit.parent_ids:
+        <td class="cell">
+            <a class="pad" href="${ '/%s/diff/%s/%s/%s' % \
+                                (project, p, self.commit.id,
+                                f[1]) }">diff</a> /
+            <a class="pad" href="${ '/%s/ssdiff/%s/%s/%s' % \
+                                (project, self.commit.parent_ids[0],
+                                self.commit.id, f[1]) }">SxS diff</a>
+        </td>
+        % endfor
+    </tr>
+    % endfor
+</table>
+<hr>
+<div class="main">
+    ${ highlight(''.join(self.commit.patch), lexer, formatter) }
+</div>

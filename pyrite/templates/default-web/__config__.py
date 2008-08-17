@@ -7,7 +7,7 @@ url_map = (
         '\?path=(?P<path>.*)$', 'tree.html'),
     (r'^(?P<project>.*)/blob/(?P<commit_id>[a-z0-9]*)/(?P<path>.*)$',
                                                         'blob.html'),
-    (r'^(?P<project>.*)/ref/(?P<ref_id>[^/]*)/?(?P<page>[0-9]*)$',
+    (r'^(?P<project>.*)/ref/(?P<ref_id>[^/?]*)\??(?P<page>[0-9]*)$',
                                                         'ref.html'),
     (r'^(?P<project>.*)/diff/(?P<v1>[a-z0-9]*)/(?P<v2>[a-z0-9]*)'
         '/?(?P<f>.*)$', 'diff.html'),

@@ -1,66 +1,52 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%inherit file="layout.html" />
 <%!
-    from pyrite.git.repository import Repo
     from pyrite.utils.stringopts import relative_date
     from time import mktime
 %>
-<%
-    repo = __repos.get(project, __repos['default'])
-%>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+
+<%def name="init()" >
+</%def>
+
+<%def name="css()" >
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ repo.name } - Pyrite web interface.</title>
-</head>
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
+</%def>
 
-<table>
-    <tr>
-        <td class="left_side">
-            <div class="table_wrapper">
-            <table class="standard_table">
-                <tr class="data_row">
-                    <td class="col_header">Date</td>
-                    <td class="col_header">Name</td>
-                    <td class="col_header">Subject</td>
-                    <td class="col_header">View</td>
-                </tr>
-                % for i, ref in enumerate(repo.refs(type, extended=True)):
-                <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
-                    <td class="cell">
-                        ${ relative_date(str(int(mktime(ref[1])))) }
-                    </td>
-                    <td class="cell">
-                         <a href="${'/%s/ref/%s' % (project,
-                                        ref[0])}">${ ref[0] }</a>
-                    </td>
-                    <td class="cell expand">
-                        <span>${ ref[3] | h }</span>
-                    </td>
-                    <td class="cell">
-                        % if type == 'tags':
-                        <a href="${'/%s/commit/%s' % (project,
-                        ref[0])}">tag</a>
-                        % endif
-                        <a href="${'/%s/commit/%s' % (project,
-                        ref[4])}">commit</a>
-                        <a href="${'/%s/ref/%s' % (project,
-                                        ref[0])}">history</a>
-                    </td>
-                </tr>
-                % endfor
-            </table>
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+<%def name="title()" >
+    ${ ' %s -- Pyrite web.' % self.repo.name }
+</%def>
+
+<div class="table_wrapper">
+    <table class="standard_table">
+        <tr class="data_row">
+            <td class="col_header">Date</td>
+            <td class="col_header">Name</td>
+            <td class="col_header">Subject</td>
+            <td class="col_header">View</td>
+        </tr>
+        % for i, ref in enumerate(self.repo.refs(type, extended=True)):
+        <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
+            <td class="cell">
+                ${ relative_date(str(int(mktime(ref[1])))) }
+            </td>
+            <td class="cell">
+                 <a href="${'/%s/ref/%s' % (project,
+                                ref[0])}">${ ref[0] }</a>
+            </td>
+            <td class="cell expand">
+                <span>${ ref[3] | h }</span>
+            </td>
+            <td class="cell">
+                % if type == 'tags':
+                <a href="${'/%s/commit/%s' % (project,
+                ref[0])}">tag</a>
+                % endif
+                <a href="${'/%s/commit/%s' % (project,
+                ref[4])}">commit</a>
+                <a href="${'/%s/ref/%s' % (project,
+                                ref[0])}">history</a>
+            </td>
+        </tr>
+        % endfor
+    </table>
+</div>

@@ -1,20 +1,29 @@
 
+html { height: 100%; }
+
 body
 {
     margin: 0px;
     background-color: #D1EEEE;
+    height: 100%;
 }
 
-body > table
+body > table, body > table > tbody
 {
-    padding:0;
     margin: 0;
+    padding: 0;
     border-spacing: 0px;
+    width: 100%;
+    height: 100%;
 }
 
-#header
+body > table > tbody > tr { width: 100%; }
+
+body > table > tbody > tr > td { padding: 0px; }
+
+.header
 {
-    height: 6em;
+    height: 90px;
     background-color: #528B8B;
     width: 100%;
     border-bottom: solid 2px black;
@@ -22,28 +31,41 @@ body > table
     margin: 0px;
 }
 
-#name
+.footer
 {
-    margin-left: 20px;
-    line-height: 4em;
-    font-size: x-large;
-    font-weight: bold;
+    width: 100%;
+    background-color: #528B8B;
+    border-top: solid 1px black;
+    padding: 0px;
+    margin: 0px;
+    vertical-align: bottom;
 }
 
 .left_side
 {
-    width: 100%;
-    vertical-align: top;
-    padding: 0;
+    border-right: solid 1px black;
     padding-bottom: 10px;
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
 }
 
 .right_side
 {
     min-width:160px;
-    vertical-align: top;
+    max-width: 160px;
     border-left: solid 1px black;
+    vertical-align: top;
     padding-bottom: 10px;
+    height: 100%;
+}
+
+.name
+{
+    margin-left: 20px;
+    line-height: 4em;
+    font-size: x-large;
+    font-weight: bold;
 }
 
 .refs
@@ -64,13 +86,13 @@ a:link, a:visited
     text-decoration: none;
 }
 
-#header a:link, #header a:visited, .footer a:link, .footer a:visited
+.header a:link, .header a:visited, .footer a:link, .footer a:visited
 {
     color: #D1EEEE;
     text-decoration: none;
 }
 
-a:hover, #header a:hover, .footer a:hover
+a:hover, .header a:hover, .footer a:hover
 {
     color: #A2CD5A;
     text-decoration: underline;
@@ -92,13 +114,6 @@ a:hover, #header a:hover, .footer a:hover
 {
     color: #330099;
     font-weight: bold;
-}
-
-.footer
-{
-    width: 100%;
-    background-color: #528B8B;
-    border-top: solid 1px black;
 }
 
 .about_pyrite

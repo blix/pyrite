@@ -1,61 +1,49 @@
-## -*- coding: utf-8 -*-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%inherit file="layout.html" />
 <%!
     from pygments import highlight
     from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
     from pygments.formatters import HtmlFormatter
-    from pyrite.git.repository import Repo
     from pyrite.git.commit import Commit
     from pyrite.utils.stringopts import humandate, indent
     import os
-
-    formatter = HtmlFormatter(linenos='table', encoding='utf-8',
-    nobackground=True)
 %>
+
+<%def name="init()" >
 <%
-    repo = __repos.get(project, __repos['default'])
-    c = Commit(commit_id, obj=repo)
+    self.path = path
+    self.formatter = HtmlFormatter(linenos='table', encoding='utf-8',
+    nobackground=True)
+    self.c = Commit(commit_id, obj=repo)
     try:
-        lexer = get_lexer_for_filename(os.path.basename(path),
+        self.lexer = get_lexer_for_filename(os.path.basename(path),
                                         encoding='utf-8')
     except:
-        lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
+        self.lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
 %>
-<%namespace name="utils" file="utils.html" />
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${repo.name} - ${path}
-            Pyrite web interface.</title>
+</%def>
+
+<%def name="css()" >
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
     <style type="text/css">
-    ${ formatter.get_style_defs('.highlight') }
+    ${ self.formatter.get_style_defs('.highlight') }
         .left_side > .heading
         {
             margin-right: 15px;
             margin-left: 10px;
         }
     </style>
-</head>
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
+</%def>
 
-<table>
-    <tr>
-        <td class="left_side">
-            ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
-            <div class="heading indent">${ path }</div>
-            <hr>
-            ${ highlight(''.join(repo.show(c.id, files=[path])),
-                                lexer, formatter) }
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+<%def name="title()" >
+    ${ ' %s -- %s -- Pyrite web.' % (self.repo.name, self.path) }
+</%def>
+
+<%namespace name="utils" file="utils.html" />
+
+${ utils.commit_info(self.project, self.c.raw,
+                        'As of commit: ' + self.c.short) }
+<div class="heading indent">${ path }</div>
+<hr>
+${ highlight(''.join(self.repo.show(self.c.id, files=[path])),
+                    self.lexer, self.formatter) }

@@ -1,7 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%inherit file="layout.html" />
 <%!
-    from pyrite.git.repository import Repo
     from pyrite.git.commit import Commit
     from pyrite.utils.stringopts import humandate, indent
     from pygments import highlight
@@ -10,58 +8,49 @@
     lexer = get_lexer_by_name('diff', encoding='utf-8')
     formatter = HtmlFormatter(encoding='utf-8', nobackground=True)
 %>
-<%
-    repo = __repos.get(project, __repos['default'])
-    c1 = Commit(v1, obj=repo)
-    c2 = Commit(v2, obj=repo)
-%>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${ repo.name } -
-            Pyrite web interface.</title>
-    <style type="text/css">
-    .base, .update
-    {
-        display: inline-block;
-        vertical-align: top;
-        width: 50%;
-    }
-    .update { float: right; }
-    .base { float: left; }
-    .main { clear: both; }
-    ${ formatter.get_style_defs('.highlight') }
-    </style>
-</head>
-<%namespace name="utils" file="utils.html" />
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
 
-<table>
-    <tr>
-        <td class="left_side">
-            <div>
-            <div class="base">
-                ${ utils.commit_info(project, c1.raw,
-                                    'Parent: ' + c1.short) }
-            </div>
-            <div class="update">
-                ${ utils.commit_info(project, c2.raw,
-                                    'Current: ' + c2.short) }
-            </div>
-            <div class="main indent">
-                <hr>
-            ${ highlight(''.join(repo.diff(v1, v2, paths=[f])),
-                        lexer, formatter) }
-            </div>
-            </div>
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+<%def name="init()" >
+<%
+    self.c1 = Commit(v1, obj=repo)
+    self.c2 = Commit(v2, obj=repo)
+    self.path = f
+%>
+</%def>
+
+<%def name="css()" >
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
+    <style type="text/css">
+        .base, .update
+        {
+            display: inline-block;
+            vertical-align: top;
+            width: 50%;
+        }
+        .update { float: right; }
+        .base { float: left; }
+        .main { clear: both; }
+        ${ formatter.get_style_defs('.highlight') }
+    </style>
+</%def>
+
+<%def name="title()" >
+    ${ ' %s -- %s -- Pyrite web.' % (self.repo.name, self.path) }
+</%def>
+
+<%namespace name="utils" file="utils.html" />
+<div>
+    <div class="base">
+        ${ utils.commit_info(self.project, self.c1.raw,
+                            'Parent: ' + self.c1.short) }
+    </div>
+    <div class="update">
+        ${ utils.commit_info(self.project, self.c2.raw,
+                            'Current: ' + self.c2.short) }
+    </div>
+    <div class="main indent">
+        <hr>
+    ${ highlight(''.join(self.repo.diff(v1, v2, paths=[f])),
+                lexer, formatter) }
+    </div>
+</div>

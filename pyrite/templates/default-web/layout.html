@@ -1,0 +1,39 @@
+<%!
+    from pyrite.git.repository import Repo
+%>
+<%
+    self.repo = __repos.get(project, __repos['default'])
+    self.project = project and project or 'default'
+    self.ref = ''
+    self.init()
+%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    ${ self.css() }
+    <link rel="stylesheet" type="text/css" href="/static/common.css" />
+    <title>${ self.title() }</title>
+</head>
+<body>
+<table>
+    <tr>
+        <td colspan="2">
+            <%include file="header.html"
+                args="project=self.project, repo=self.repo" />
+        </td>
+    </tr>
+    <tr>
+        <td class="left_side">${ self.body() }</td>
+        <td class="right_side">
+            <%include file="right_panel.html"
+                args="project=self.project, repo=self.repo, ref=self.ref" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"><%include file="footer.html" /></td>
+    </tr>
+</table>
+</body>
+</html>

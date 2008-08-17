@@ -1,16 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%inherit file="layout.html" />
 <%!
     from pygments import highlight
     from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
     from pygments.formatters import HtmlFormatter
-    from pyrite.git.repository import Repo
     from pyrite.git.commit import Commit
     from pyrite.utils.stringopts import ctimedate, humandate, indent
     import os
 %>
+
 <%namespace name="utils" file="utils.html" />
+
+<%def name="init()">
 <%
+    self.utils = utils
     class BlameHtmlFormatter(HtmlFormatter):
         def wrap(self, source, outfile):
             if not self.commit:
@@ -24,7 +26,7 @@
                 self.parity = 'odd'
             if self.last_commit != self.commit:
                 self.parity = self.parity == 'odd' and 'even' or 'odd'
-                show_hash = utils.commit_link(self.project,
+                show_hash = self.utils.commit_link(self.project,
                                     text=self.commit[Commit.ID][:8],
                                     commit=self.commit)
             else:
@@ -49,64 +51,51 @@
                     yield t, line
             self.last_commit = self.commit
 
-    formatter = BlameHtmlFormatter(encoding='utf-8', nobackground=True)
-    formatter.project = project
-    repo = __repos.get(project, __repos['default'])
-    c = Commit(commit_id, obj=repo)
+    self.formatter = BlameHtmlFormatter(encoding='utf-8', nobackground=True)
+    self.formatter.project = project
+    self.formatter.utils = self.utils
+    self.c = Commit(commit_id, obj=repo)
     try:
-        lexer = get_lexer_for_filename(os.path.basename(path),
+        self.lexer = get_lexer_for_filename(os.path.basename(path),
                                         encoding='utf-8')
     except:
-        lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
+        self.lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
 %>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+</%def>
+
+<%def name="css()" >
     <link rel="stylesheet" type="text/css"
           href="/static/standard_table.css" />
-    <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <title>${repo.name} - ${path}
-            Pyrite web interface.</title>
     <style type="text/css">
-    ${ formatter.get_style_defs('.highlight') }
-        .highlighttable pre
-        {
-            padding: 0;
-            margin: 0;
-        }
-        .left_side > .heading
-        {
-            margin-right: 15px;
-            margin-left: 10px;
-        }
-        .commit_id { padding: 2px 0px 2px 0px; }
+    ${ self.formatter.get_style_defs('.highlight') }
+    .highlighttable pre
+    {
+        padding: 0;
+        margin: 0;
+    }
+    .left_side > .heading
+    {
+        margin-right: 15px;
+        margin-left: 10px;
+    }
+    .commit_id { padding: 2px 0px 2px 0px; }
     </style>
-</head>
-<body>
-    <%include file="header.html" args="project=project, repo=repo" />
+</%def>
 
-<table>
-    <tr>
-        <td class="left_side">
-            ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
-            <div class="heading indent">${ path }</div>
-            <hr>
-            <%
-                for entry in repo.blame(path[1:], commit_id):
-                    num, commit_data, line, dummy = entry
-                    formatter.linenostart = int(num)
-                    formatter.commit = commit_data
-                    context.write( highlight( line, lexer, formatter) )
-                formatter.commit = None
-                context.write( highlight('', lexer, formatter) )
-            %>
-        </td>
-        <td class="right_side">
-            <%include file="right_panel.html"
-                        args="project=project, repo=repo, ref=None" />
-        </td>
-    </tr>
-</table>
-<%include file="footer.html" />
-</body>
-</html>
+<%def name="title()" >
+    ${ ' %s -- %s Pyrite web.' % (self.repo.name, path) }
+</%def>
+
+${ self.utils.commit_info(self.project, self.c.raw,
+                        'As of commit: ' + self.c.short) }
+<div class="heading indent">${ path }</div>
+<hr>
+<%
+    for entry in self.repo.blame(path[1:], commit_id):
+        num, commit_data, line, dummy = entry
+        self.formatter.linenostart = int(num)
+        self.formatter.commit = commit_data
+        context.write( highlight( line, self.lexer, self.formatter) )
+    self.formatter.commit = None
+    context.write( highlight('', self.lexer, self.formatter) )
+%>

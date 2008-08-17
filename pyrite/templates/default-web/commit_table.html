@@ -1,10 +1,10 @@
 <%!
-from pyrite.git.commit import Commit
-from pyrite.utils.stringopts import relative_date
-data = [Commit.ID, Commit.REFS]
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import relative_date
+    data = [Commit.ID, Commit.REFS]
 %>
 <%namespace name="utils" file="utils.html" />
-<%page args="project, repo, ref, page=0" />
+<%page args="params" />
 <div class="table_wrapper">
 <table class="standard_table">
     <tr class="data_row">
@@ -13,13 +13,13 @@ data = [Commit.ID, Commit.REFS]
         <td class="col_header">Subject</td>
     </tr>
     <%
-        page = page * 100
+        page = params['page'] * 100
         if ref:
-            gen = Commit.get_commits(repo, None, ref, 100, skip=page,
-                                        data=data) 
+            gen = Commit.get_commits(params['repo'], None, params['ref'], 100,
+                                    skip=page, data=data) 
         else:
-            gen = Commit.get_commits(repo, None, None, 100, skip=page,
-                                        data=data, all=True) 
+            gen = Commit.get_commits(params['repo'], None, None, 100,
+                                    skip=page, data=data, all=True) 
     %>
     % for i, c in enumerate(gen):
     <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
@@ -33,6 +33,6 @@ data = [Commit.ID, Commit.REFS]
         </td>
     </tr>
     % endfor
+    <% params['i'] = i %>
 </table>
 </div>
-${ utils.table_pager(page // 100, '/%s/%%d' % project, i == 99) }
