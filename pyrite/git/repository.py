@@ -15,6 +15,7 @@
 
 from gitobject import *
 from commit import Commit
+from time import strptime
 
 class Repo(GitObject):
     _status = {
@@ -924,3 +925,36 @@ class Repo(GitObject):
         if proc.wait():
             raise GitError(_('Failed to read blob: %s' %
                              proc.stderr.read()))
+
+    def refs(self, type, limit=-1, sort='newest', extended=False):
+        self.validate()
+        args = ['git', 'for-each-ref']
+        if limit > 0:
+            args.append('--count=%d' % limit)
+        if sort == 'newest':
+            args.append('--sort=-creatordate')
+        if extended:
+            args.append('--format=%(refname) %(objectname) %(taggerdate)'
+                        '%(authordate) %(subject)')
+        else:
+            args.append('--format=%(refname)')
+        if type:
+            args.append('refs/' + type)
+        proc = self._popen(args)
+        for line in proc.stdout.readlines():
+            if extended:
+                tag, sha, rest = line.split(None, 2)
+                try:
+                    t = strptime(rest[:24].strip())
+                except:
+                    # appears to be a bad tag
+                    continue
+                offset = int(rest[24:29].strip())
+                subj = rest[30:].strip()
+                tag = '/'.join(tag.split('/')[2:])
+                yield tag, t, offset, subj, sha
+            else:
+                yield '/'.join(line.split('/')[2:]).strip()
+        if proc.wait():
+            raise GitError(_('Failed to get tags list: %s') %
+                           proc.stderr.read())
