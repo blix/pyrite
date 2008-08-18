@@ -23,7 +23,6 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" type="text/css" href="/static/common.css" />
-    <link rel="stylesheet" type="text/css" href="/static/header.css" />
     <title>${repo.description} - ${path}
             Pyrite web interface.</title>
     <style type="text/css">
@@ -32,6 +31,7 @@
 </head>
 <%namespace name="header" file="header.html" />
 <%namespace name="rp" file="right_panel.html" />
+<%namespace name="ft" file="footer.html" />
 <body>
     ${header.header(project, repo)}
 
@@ -45,5 +45,6 @@
         </td>
     </tr>
 </table>
+${ ft.footer() }
 </body>
 </html>

@@ -1,0 +1,83 @@
+.standard_table
+{
+    border-spacing: 0px;
+    border: solid 1px black;
+    width: 100%;
+}
+
+.table_wrapper
+{
+    margin-top: 30px;
+    margin-bottom: 5px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.cell
+{
+    text-align: left;
+    padding: 2px 1em 2px 1em;
+}
+
+.col_header
+{
+    text-align: center;
+    background-color: #698B69;
+    font-weight: bold;
+    padding: 2px;
+}
+
+.data_row[parity="True"]
+{
+    background-color: #8FBC8F;
+}
+
+.data_row[parity="False"]
+{
+    background-color: #9BCD9B;
+}
+
+.data_row:hover
+{
+    background-color: #C1FFC1;
+}
+
+
+.cell a:link, .cell a:visited
+{
+    color: black;
+}
+
+.cell a:hover
+{
+    color: #528B8B;
+}
+
+
+.tag, .head
+{
+    border: solid 1px black;
+    padding: 0px 3px 0px 3px;
+}
+
+.tag
+{
+    background-color: yellow;
+}
+
+.head
+{
+    background-color: lightgreen;
+}
+
+.previous
+{
+    margin-left: 20px;
+    float: left;
+}
+
+.next
+{
+    margin-right: 20px;
+    float: right;
+}

@@ -1,3 +1,27 @@
+
+body
+{
+    margin: 0px;
+}
+
+#header
+{
+    height: 6em;
+    background-color: #528B8B;
+    width: 100%;
+    border-bottom: solid 2px black;
+    padding: 0px;
+    margin: 0px;
+}
+
+#name
+{
+    margin-left: 20px;
+    line-height: 4em;
+    font-size: x-large;
+    font-weight: bold;
+}
+
 .left_side
 {
     width:100%;
@@ -44,4 +68,16 @@ a:hover
 {
     color: #330099;
     font-weight: bold;
+}
+
+.footer
+{
+    width: 100%;
+    background-color: #528B8B;
+    border-top: solid 1px black;
+}
+
+.about_pyrite
+{
+    text-align: left;
 }
