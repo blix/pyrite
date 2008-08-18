@@ -6,5 +6,6 @@ url_map = (
         'tree.html'),
     (r'^(?P<project>.*)/blob/(?P<blob_id>[a-z0-9]*)\?path=(?P<path>.*)$',
      'blob.html'),
+    (r'^(?P<project>.*)/ref/(?P<ref_id>[a-z0-9]*)$', 'ref.html'),
 )
 
