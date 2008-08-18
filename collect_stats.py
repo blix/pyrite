@@ -60,18 +60,18 @@ for f in py_files:
 print 'Total number of python code lines: %s\n' % num_lines
 
 from pyrite.git.repository import Repo
+from pyrite.git.commit import Commit
 
 def print_branch_stats(repo, branch, others):
-    hist = repo.get_history(None, branch, -1, [Repo.AUTHOR,
-                                               Repo.AUTHOR_EMAIL])
+    hist = repo[:branch]
     count = 0
     authors = {}
     for commit in hist:
         count += 1
-        if commit[Repo.AUTHOR] in authors:
-            authors[commit[Repo.AUTHOR]][0] += 1
+        if commit.author_name in authors:
+            authors[commit.author_name][0] += 1
         else:
-            authors[commit[Repo.AUTHOR]] = [1, commit[Repo.AUTHOR_EMAIL]]
+            authors[commit.author_name] = [1, commit.author]
 
     print 'Number of commits in %s: %d' % (branch, count)
     print 'Total number of authors is: %d' % len(authors)
@@ -80,9 +80,9 @@ def print_branch_stats(repo, branch, others):
     for name, info in authors.items():
         num = info[0]
         if num in num_sorted:
-            num_sorted[num].append(name + ' <' + info[1] + '>')
+            num_sorted[num].append(info[1])
         else:
-            num_sorted[num] = [name + ' <' + info[1] + '>']
+            num_sorted[num] = [info[1]]
 
     for n in sorted(num_sorted.keys()):
         for a in sorted(num_sorted[n]):
@@ -90,7 +90,7 @@ def print_branch_stats(repo, branch, others):
     print ''
 
     def show_changes(t1, t2):
-        hist = repo.get_history(t1, t2, -1)
+        hist = repo[t1:t2]
         count = 0
         for commit in hist:
             count += 1
@@ -107,7 +107,8 @@ def print_branch_stats(repo, branch, others):
             return True
         return False
 
-    tag, dummy, dummy = repo.describe(branch)
+    print branch
+    tag, dummy, dummy = Commit.describe_commit(repo, branch)
     if not show_changes(tag, branch):
         tag, dummy, dummy = repo.describe(branch + '^')
         show_changes(tag, branch)
@@ -121,6 +122,6 @@ print ''
 print_branch_stats(repo, 'next', ('master',))
 print ''
 cur_branch = repo.branch()
-if cur_branch not in ('master', ('next',)):
+if cur_branch not in ('master', 'next'):
     print_branch_stats(repo, cur_branch, ('master', 'next'))
     print ''
