@@ -5,6 +5,8 @@
     from pyrite.git.commit import Commit
     from pyrite.git.repository import Repo
     __repos = {'default': Repo()}
+    branch = ''
+    project = 'default'
 %>
 <% repo = __repos.get(path, __repos['default']) %>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -32,39 +34,29 @@
     </style>
 </head>
 <%namespace name="header" file="header.html" />
+<%namespace name="tbl" file="commit_table.html" />
 <body>
     ${header.header(repo)}
 
 <div class="left_side">
-    <table id="commits_table">
-        <tr>
-            <td class="col_header">Date</td>
-            <td class="col_header">User</td>
-            <td class="col_header">Subject</td>
-        </tr>
-        % for i, c in enumerate(repo['HEAD~50':]):
-        <tr class="data_row" parity="${ i % 2 and 'True' or 'False' }">
-            <td class="cell date_cell">
-                ${ stringopts.relative_date(c.raw[Commit.COMMIT_DATE]) }
-            </td>
-            <td class="cell">${ c.author_name }</td>
-            <td class="cell subj_cell">
-                <a href="default/commit/${c.id}">${ c.subject }</a>
-            </td>
-        </tr>
-        % endfor
-    </table>
+    ${ tbl.table(project, repo, branch)}
 </div>
 <div class="right_side">
-    Branches:<br>
-        <% cur = repo.branch() %>
-        % for b in repo.branches():
-        %    if cur == b:
-               <b>${ b }</b><br>
-        %    else:
-               ${ b }<br>
-        %    endif
-        % endfor
+    <div class="branches">
+        <div class="branch_name">Branches:</div>
+        <br />
+    % for b in repo.branches():
+    %    if branch == b:
+        <div class="branch_current">
+            <a href="${'/%s/ref/%s' % (project, b)}">${ b }</a>
+       </div>
+    %    else:
+        <div class="branch">
+            <a href="${'/%s/ref/%s' % (project, b)}">${ b }</a>
+       </div>
+    %    endif
+    % endfor
+    </div>
 </div>
 </body>
 </html>

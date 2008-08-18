@@ -1,0 +1,29 @@
+<%!
+from pyrite.git.commit import Commit
+from pyrite.utils.stringopts import relative_date
+%>
+<%def name="table(project, repo, branch)">
+<table id="commits_table">
+    <tr>
+        <td class="col_header">Date</td>
+        <td class="col_header">User</td>
+        <td class="col_header">Subject</td>
+    </tr>
+    % if branch:
+    <%    gen = Commit.get_commits(repo, branch, None, 50) %>
+    % else:
+    <%    gen = Commit.get_commits(repo, None, None, 50, all=True) %>
+    % endif
+    % for i, c in enumerate(gen):
+    <tr class="data_row" parity="${ i % 2 and 'True' or 'False' }">
+        <td class="cell date_cell">
+            ${ relative_date(c.raw[Commit.COMMIT_DATE]) }
+        </td>
+        <td class="cell">${ c.author_name }</td>
+        <td class="cell subj_cell">
+            <a href="${'/%s/commit/%s' % (project, c.id)}">${ c.subject |h }</a>
+        </td>
+    </tr>
+    % endfor
+</table>
+</%def>
