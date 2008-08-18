@@ -129,6 +129,8 @@ class Commit(GitObject):
     @staticmethod
     def describe_commit(gitobj, id, commit=None):
         gitobj.validate()
+        if not id:
+            id = 'HEAD'
         proc = gitobj._popen(('git', 'describe', '--abbrev=40', id))
         parts = proc.stdout.read().split('-')
         if proc.wait():
