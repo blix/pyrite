@@ -23,12 +23,9 @@ data = [Commit.ID, Commit.REFS]
     %>
     % for i, c in enumerate(gen):
     <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
-        <td class="cell">
-            ${ relative_date(c.raw[Commit.COMMIT_DATE]) }
-        </td>
+        <td class="cell">${ relative_date(c.raw[Commit.COMMIT_DATE]) }</td>
         <td class="cell">${ c.author_name }</td>
-        <td class="cell">
-            <a href="${'/%s/commit/%s' % (project,
+        <td class="cell expand"><a href="${'/%s/commit/%s' % (project,
                         c.id)}">${ c.subject |h }</a>
             % for r in c.refs:
                 ${ utils.ref_link(project, r) }&nbsp;

@@ -34,12 +34,12 @@
             for t, line in source:
                 if t:
                     yield t, '<tr class="data_row  %s">' \
-                                '<td class="cell linenos shrink">' \
+                                '<td class="cell linenos">' \
                                     '<pre>%s</pre>' \
                                 '</td>' \
-                                '<td class="commit_id shrink">' \
+                                '<td class="cell commit_id">' \
                                     '<pre>%s</pre></td>' \
-                                '<td class="cell code">' \
+                                '<td class="cell code expand">' \
                                     '<div class="highlight">' \
                                         '<pre>%s</pre>' \
                                     '</div>' \
@@ -79,7 +79,9 @@
         .left_side > .heading
         {
             margin-right: 15px;
+            margin-left: 10px;
         }
+        .commit_id { padding: 2px 0px 2px 0px; }
     </style>
 </head>
 <body>
@@ -87,7 +89,7 @@
 
 <table>
     <tr>
-        <td class="left_side indent">
+        <td class="left_side">
             ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
             <div class="heading indent">${ path }</div>
             <hr>

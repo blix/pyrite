@@ -23,8 +23,7 @@
                 commit[Commit.SUBJECT], project,
                 commit[Commit.ID], text)
     else:
-        return '<a href="/%s/commit/%s">%s</a>' % \
-                (project, id, text)
+        return '<a href="/%s/commit/%s">%s</a>' %  (project, id, text)
 %>
 </%def>
 <%def name="dummy()" >
@@ -38,7 +37,7 @@
         % endif
     </div>
     <div class="indent">
-        <a href="$ {'/%s/commit/%s' % (project, commit[Commit.ID]) }">
+        <a href="${'/%s/commit/%s' % (project, commit[Commit.ID]) }">
             Subject: ${ commit[Commit.SUBJECT] }
         </a>
     </div>

@@ -9,7 +9,6 @@
 {
     margin-top: 30px;
     margin-bottom: 5px;
-    margin-right: 15px;
 }
 
 .cell
@@ -17,14 +16,19 @@
     text-align: left;
     padding: 2px 1em 2px 1em;
     margin: 0;
+    overflow: hidden;
+    font-size: small;
+    width: 1px;
+    white-space: nowrap;
 }
 
 .col_header
 {
-    text-align: center;
+    text-align: left;
     background-color: #528B8B;
     font-weight: bold;
-    padding: 2px;
+    padding: 2px 1em 2px 1em;
+    font-size: small;
 }
 
 .odd
@@ -72,12 +76,12 @@
 
 .previous
 {
-    margin-left: 20px;
     float: left;
 }
 
 .next
 {
-    margin-right: 20px;
     float: right;
 }
+
+.expand { width: auto; }

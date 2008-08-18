@@ -27,7 +27,10 @@
     .commit_props
     {
         margin-top: 20px;
+        margin-left: 10px;
     }
+    .main { margin-left: 10px; }
+    .pad { padding: 2px 1ex 2px 1ex; }
     .commit_props li
     {
         list-style-type: none;
@@ -41,10 +44,6 @@
         margin-top: 0px;
         margin-bottom: 0px;
         padding-left: 0px;
-    }
-    .left_side
-    {
-        padding-left: 10px;
     }
     ${ formatter.get_style_defs('.highlight') }
     </style>
@@ -135,7 +134,9 @@
                 % endfor
             </table>
             <hr>
-            ${ highlight(''.join(commit.patch), lexer, formatter) }
+            <div class="main">
+                ${ highlight(''.join(commit.patch), lexer, formatter) }
+            </div>
         </td>
         <td class="right_side">
             <%include file="right_panel.html"
