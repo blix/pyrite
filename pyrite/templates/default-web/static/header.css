@@ -1,0 +1,23 @@
+
+body
+{
+    margin: 0px;
+}
+
+#header
+{
+    height: 6em;
+    background-color: #99CCFF;
+    width: 100%;
+    border-bottom: solid 2px black;
+    padding: 0px;
+    margin: 0px;
+}
+
+#name
+{
+    margin-left: 20px;
+    line-height: 4em;
+    font-size: x-large;
+    font-weight: bold;
+}

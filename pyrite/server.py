@@ -15,21 +15,30 @@
 
 from twisted.internet import reactor
 from twisted.web import server, resource, http
+from twisted.web.static import File as StaticFile
+from twisted.python.filepath import FilePath
+from twisted.web.woven import page
 from mako.template import Template
 from mako.lookup import TemplateLookup
 import re, os
 
-_mime_types = {
-    'css': 'text/css',
-}
+class ErrorPage(page.Page):
+    def render(self, request):
+        request.setResponseCode(http.NOT_ALLOWED)
+        return 'Access Denied.'
 
-class WebServer(resource.Resource):
-    isLeaf = True
-    def __init__(self, port, template, io):
+class FileWithoutDir(StaticFile):
+   """Acts just like static.File but won't return directory listings"""
+
+   def directoryListing(self):
+       return ErrorPage()
+
+class Root(resource.Resource, FilePath):
+    def __init__(self, port, path, io):
+        resource.Resource.__init__(self)
         self._port = port
-        self._template_dir = template
         self._io = io
-        if not self._template_dir:
+        if not path:
             filedir = os.path.dirname(__file__)
             self._template_dir = os.path.abspath(os.path.join(
                                  filedir, 'templates', 'default-web'))
@@ -41,61 +50,52 @@ class WebServer(resource.Resource):
             raise ValueError(_('template parameter %s does not have'
                                ' a valid configuration file '
                                '"__config__.py"') % self._template_dir)
-        if not self._parse_setup(config_file):
-            io.error_out(_('Failed to load config file %s') % config_file)
+        self._file_access = FilePath(self._template_dir)
+        try:
+            self._parse_setup()
+        except IOError, e:
+            io.error_out(_('Failed to load config file %s: %s') %
+                         (config_file, e))
+        self.putChild(self._config['static_path'], 
+                      FileWithoutDir(self._config['static_path_full']))
 
-    def _parse_setup(self, path):
+    def _parse_setup(self):
         self._config = {}
-        execfile(path, {}, self._config)
+        execfile(os.path.join(self._file_access.path, '__config__.py'), {},
+                              self._config)
         if 'url_map' not in self._config:
-            return False
+            raise IOError(_('Missing url_map.'))
         self._mappings = []
-        for exp, f in self._config['url_map']:
-            f = f.split('/')
-            f.insert(0, self._template_dir)
+        for exp, orig in self._config['url_map']:
+            f = orig.split('/')
             f = os.path.join(*f)
+            f = self._file_access.child(f)
+            if not f.exists():
+                raise IOError(_('Path %s is not under template dir.') % orig)
             self._mappings.append((re.compile(exp), f))
-        return True
+        if 'static_path' not in self._config:
+            self._config['static_path'] = 'static'
+
+        fullpath = self._file_access.child(self._config['static_path'])
+        self._config['static_path_full'] = fullpath.path
+
+    def getChild(self, name, request):
+        return self
 
     def render_GET(self, request):
         path = request.path[1:]
         uri = request.uri[1:]
-        for x in dir(request):
-            y = getattr(request, x)
-            if isinstance(y, str):
-                print x, y
         for mapping, f in self._mappings:
             match = mapping.match(uri)
             if match:
                 vars = match.groupdict()
-                print 'serving:', f
+                self._io.info('serving: '+ f.path)
                 lookup = TemplateLookup(directories=['/'])
-                return Template(filename=f, lookup=lookup).render(**vars)
-        path = os.path.join(self._template_dir, path)
-        if os.path.isfile(path):
-            f = None
-            try:
-                idx = path.rfind('.')
-                print 'serving static:', path, path[idx + 1:]
-                type = _mime_types.get(path[idx + 1:], 'text/plain')
-                request.setHeader('content-type', type)
-                print request.headers, type
-                f = file(path, 'r')
-                return f.read()
-            except:
-                print 'failed to serve:', path
-                raise
-            finally:
-                if f:
-                    f.close()
-        else:
-            print '%s does not exist' % path
-        request.setResponseCode(404)
+                return Template(filename=f.path, disable_unicode=True, input_encoding='utf-8',
+                                lookup=lookup).render(**vars)
+        print 'not serving:', uri
 
     def run(self):
         s = server.Site(self)
         reactor.listenTCP(self._port, s)
         reactor.run()
-
-
-

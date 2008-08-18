@@ -13,7 +13,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyrite.server import WebServer
+from pyrite.server import Root
 
 options = [
 ('p', 'port', _('Specify a port.'), 1),
@@ -42,4 +42,4 @@ def run(cmd, args, flags, io, settings, repo):
     if not template:
         template = settings.get_option('web.template')
 
-    WebServer(port, template, io).run()
+    Root(port, template, io).run()
