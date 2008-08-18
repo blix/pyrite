@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+
+    __repos = {'default': Repo()}
+%>
+<%
+    repo = __repos.get(project, __repos['default'])
+    c = Commit(commit_id, obj=repo)
+%>
+<%namespace name="utils" file="utils.html" />
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
+    <link rel="stylesheet" type="text/css" href="/static/common.css" />
+    <title>${repo.description} - Pyrite web interface.</title>
+</head>
+<body>
+    <%include file="header.html" args="project=project, repo=repo" />
+
+<table>
+    <tr>
+        <td class="left_side">
+            <%
+            p = int(page) * 100
+            if ref:
+                gen = Commit.get_commits(repo, None, commit_id, 50,
+                                            paths=[path], skip=p)
+            else:
+                gen = Commit.get_commits(repo, None, None, 50,
+                                            paths=[path], skip=p, all=True) 
+            %>
+            % for i, c in enumerate(gen):
+            ${ utils.commit_info(project, c.raw, 'Commit: ' + c.short) }
+            % endfor
+            ${ utils.table_pager(p // 100, '/%s/log/%s/%%d/%s' % (project,
+                                    c.id, path), i == 49) }
+        </td>
+        <td class="right_side">
+            <%include file="right_panel.html"
+                        args="project=project, repo=repo, ref=None" />
+        </td>
+    </tr>
+</table>
+<%include file="footer.html" />
+</body>
+</html>

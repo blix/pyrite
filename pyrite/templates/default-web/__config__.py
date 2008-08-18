@@ -16,6 +16,8 @@ url_map = (
     (r'^(?P<project>.*)/reflist/(?P<type>.*)$', 'all_type_refs.html'),
     (r'^(?P<project>.*)/blame/(?P<commit_id>[a-z0-9]*)'
         '\?path=(?P<path>.*)$', 'blame.html'),
+    (r'^(?P<project>[^/]*)/log/(?P<commit_id>[a-z0-9]*)/'
+        '(?P<page>[0-9]+)/?(?P<path>.*)$', 'log.html'),
     # add line for tag viewer ()
 )
 

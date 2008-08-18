@@ -79,6 +79,10 @@
                     </td>
                     <td class="cell" />
                     % endif
+                    <td class="cell">
+                        <a href="${ '/%s/log/%s/0%s/%s' % (project,
+                                    c.id, path, name) }">history</a>
+                    </td>
                 </tr>
             % endfor
             </table>
