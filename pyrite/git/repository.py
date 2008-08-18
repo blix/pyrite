@@ -142,18 +142,44 @@ class Repo(GitObject):
     def _read_branches(self):
         self._branches = []
         self._current_branch = None
-        proc = self._popen(('git', 'branch'))
-        for b in proc.stdout.readlines():
-            status = b[0]
-            branch = b[2:].strip()
-            if status == '*':
-                self._current_branch = branch
-            self._branches.append(branch)
-        if proc.wait():
-            raise GitError(_('Could not get branch list: %s') %
-                                proc.stderr.read())
+        branchdir = os.path.join(self._git_dir, 'refs', 'heads')
+        headfile = os.path.join(self._git_dir, 'HEAD')
+        f = None
+        if os.path.isfile(headfile):
+            try:
+                f = file(headfile, 'r')
+                self._current_branch = f.read().strip()
+                if self._current_branch.startswith('ref:'):
+                    dummy, path = self._current_branch.split(None, 1)
+                    dummy, dummy, self._current_branch = path.split('/', 2)
+            finally:
+                f.close()
+        else:
+            self._current_branch = None
+        for root, dirs, files in os.walk(branchdir):
+            fixedroot = root[len(branchdir) + 1:]
+            fixedroot = fixedroot.replace(os.path.pathsep, '/')
+            for f in files:
+                branch = fixedroot and fixedroot + '/' + f or f
+                self._branches.append(branch)
+                f = file(os.path.join(root, f))
 
-    def branches(self):
+        packedfile = os.path.join(self._git_dir, 'packed-refs')
+        if os.path.isfile(packedfile):
+            try:
+                f = file(packedfile)
+                for line in f.readlines():
+                    parts = line.split(None, 1)
+                    if len(parts) > 1 and parts[1].startswith('refs/heads/'):
+                        ref = parts[1][len('refs/heads/'):].strip()
+                        if ref not in self._branches:
+                            self._branches.append(ref)
+            finally:
+                if f:
+                    f.close()
+        self._branches.sort()
+
+    def branches(self, track=False):
         self.validate()
         if not self._branches:
             self._read_branches()
