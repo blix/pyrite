@@ -85,19 +85,28 @@ class Root(resource.Resource, FilePath):
     def render_GET(self, request):
         path = request.path[1:]
         uri = request.uri[1:]
-        for mapping, f in self._mappings:
-            match = mapping.match(uri)
+        lookup = TemplateLookup(directories=['/'], default_filters=[],
+                                input_encoding='utf-8')
+        for regex, f in self._mappings:
+            match = regex.match(uri)
             if match:
                 vars = match.groupdict()
                 self._io.info('serving: '+ f.path)
-                lookup = TemplateLookup(directories=['/'])
-                t = Template(filename=f.path, disable_unicode=True,
-                            input_encoding='utf-8', lookup=lookup)
                 request.setHeader('Content-Type', 'text/html; charset=utf-8')
-                return t.render(**vars)
+                t = Template(filename=f.path, default_filters=[],
+                             input_encoding='utf-8', lookup=lookup)
+                try:
+                    return t.render(**vars)
+                except BaseException, e:
+                    for num, line in enumerate(t.code.splitlines()):
+                        print '%d: %s' % (num, line)
+                    raise
         print 'not serving:', uri
 
     def run(self):
         s = server.Site(self)
         reactor.listenTCP(self._port, s)
-        reactor.run()
+        try:
+            reactor.run()
+        except:
+            pass
