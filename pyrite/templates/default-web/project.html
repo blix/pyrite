@@ -18,6 +18,7 @@
     <title>${ repo.description } -- Pyrite web.</title>
 </head>
 <%namespace name="tbl" file="commit_table.html" />
+<%namespace name="utils" file="utils.html" />
 <body>
     <%include file="header.html" args="project=project, repo=repo" />
 <table>
@@ -25,12 +26,6 @@
         <td class="left_side">
             <%include file="commit_table.html"
                 args="project=project, repo=repo, ref=ref_id, page=p" />
-            % if p > 0:
-            <a class="previous" href="${ '/%s/%d' % (project,
-                                            p - 1) }">&lt;- Prev</a>
-            % endif
-            <a class="next" href="${ '/%s/%d' % (project,
-                                            p + 1) }">Next -&gt;</a>
         </td>
         <td class="right_side">
             <%include file="right_panel.html"

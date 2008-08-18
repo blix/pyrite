@@ -8,6 +8,7 @@
     repo = __repos.get(project, __repos['default'])
     p = page and int(page) or 0
 %>
+<%namespace name="utils" file="utils.html" />
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <link rel="stylesheet" type="text/css"
@@ -24,12 +25,6 @@
         <td class="left_side">
             <%include file="commit_table.html"
                 args="project=project, repo=repo, ref=ref_id, page=p" />
-            % if p > 0:
-            <a class="previous" href="${ '/%s/ref/%s/%d' % (project,
-                                        ref_id, p - 1) }">&lt;- Prev</a>
-            % endif
-            <a class="next" href="${ '/%s/ref/%s/%d' % (project,
-                                        ref_id, p + 1) }">Next -&gt;</a>
         </td>
         <td class="right_side">
             <%include file="right_panel.html"

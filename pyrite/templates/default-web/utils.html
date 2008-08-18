@@ -53,3 +53,12 @@
     </pre>
 </div>
 </%def>
+
+<%def name="table_pager(page, url, next)" >
+    % if page > 0:
+        <a class="previous" href="${ url % (page - 1) }">&lt;- Prev</a>
+    % endif
+    % if next:
+        <a class="next" href="${ url % (page + 1) }">Next -&gt;</a>
+    % endif
+</%def>
