@@ -91,8 +91,10 @@ class Root(resource.Resource, FilePath):
                 vars = match.groupdict()
                 self._io.info('serving: '+ f.path)
                 lookup = TemplateLookup(directories=['/'])
-                return Template(filename=f.path, disable_unicode=True, input_encoding='utf-8',
-                                lookup=lookup).render(**vars)
+                t = Template(filename=f.path, disable_unicode=True,
+                            input_encoding='utf-8', lookup=lookup)
+                request.setHeader('Content-Type', 'text/html; charset=utf-8')
+                return t.render(**vars)
         print 'not serving:', uri
 
     def run(self):
