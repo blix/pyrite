@@ -91,7 +91,9 @@ class Root(resource.Resource, FilePath):
             match = regex.match(uri)
             if match:
                 vars = match.groupdict()
-                self._io.info('serving: '+ f.path)
+                self._io.info('matched: ' + regex.pattern)
+                self._io.info('vars: ' + str(vars))
+                self._io.info('serving: ' + f.path)
                 request.setHeader('Content-Type', 'text/html; charset=utf-8')
                 t = Template(filename=f.path, default_filters=[],
                              input_encoding='utf-8', lookup=lookup)
