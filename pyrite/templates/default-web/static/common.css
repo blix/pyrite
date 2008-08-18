@@ -47,20 +47,15 @@ body
     margin-left: 10px;
 }
 
-a:link, a:visited, a:link, a:visited
+a:link, a:visited
 {
-    color: #666699;
+    color: #79CDCD;
     text-decoration: none;
-}
-
-a:link
-{
-    color: #666699;
 }
 
 a:hover
 {
-    color: DarkRed;
+    color: #A2CD5A;
     text-decoration: underline;
 }
 

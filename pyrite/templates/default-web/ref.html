@@ -4,7 +4,10 @@
     from pyrite.git.repository import Repo
     __repos = {'default': Repo()}
 %>
-<% repo = __repos.get(project, __repos['default']) %>
+<%
+    repo = __repos.get(project, __repos['default'])
+    p = page and int(page) or 0
+%>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <link rel="stylesheet" type="text/css"
@@ -23,7 +26,13 @@
 <table>
     <tr>
         <td class="left_side">
-            ${ tbl.table(project, repo, ref_id) }
+            ${ tbl.table(project, repo, ref_id, p) }
+            % if p > 0:
+            <a class="previous" href="${ '/%s/ref/%s/%d' % (project,
+                                        ref_id, p - 1) }">&lt;- Prev</a>
+            % endif
+            <a class="next" href="${ '/%s/ref/%s/%d' % (project,
+                                        ref_id, p + 1) }">Next -&gt;</a>
         </td>
         <td class="right_side">
             ${ rp.content(project, repo, ref_id) }

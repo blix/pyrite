@@ -13,6 +13,8 @@
 %>
 <%
     repo = __repos.get(project, __repos['default'])
+    c1 = Commit(v1, obj=repo)
+    c2 = Commit(v2, obj=repo)
 %>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -20,6 +22,31 @@
     <title>${ repo.description } -
             Pyrite web interface.</title>
     <style type="text/css">
+    .commit_info
+    {
+        margin-top: 30px;
+    }
+    .base, .update, .divide
+    {
+        display: inline-block;
+        vertical-align: top;
+        height: 100%;
+    }
+    .indent
+    {
+        padding-left: 5px;
+    }
+    .heading
+    {
+        margin-bottom: 10px;
+        width: 100%;
+        background-color: #66CDAA;
+        border: solid 1px black;
+    }
+    .left_side
+    {
+        padding-left: 20px;
+    }
     ${ formatter.get_style_defs('.highlight') }
     </style>
 </head>
@@ -32,7 +59,44 @@
 <table>
     <tr>
         <td class="left_side">
-            ${ highlight(''.join(repo.diff(v1, v2, paths=[f])), lexer, formatter) }
+            <div class="commit_info">
+                <div class="base">
+                    <div class="heading indent">Parent</div>
+                    <div class="indent">
+                        <a href="$ {'/%s/commit/%s' % (project,v1) }">
+                            Subject: ${ c1.subject }
+                        </a>
+                    </div>
+                    <br><br>
+                    <div class="indent">
+                        ${ c1.author | h}
+                        ${ humandate(c1.raw[Commit.AUTHOR_DATE]) }<br>
+                    </div>
+                    <pre>
+                        ${ ''.join(indent(c1.body)) | h }
+                    </pre>
+                </div>
+                <div class="divide"></div>
+                <div class="update">
+                    <div class="heading indent">Current</div>
+                    <div class="indent">
+                        <a href="$ {'/%s/commit/%s' % (project,v2) }">
+                            Subject: ${ c2.subject }
+                        </a>
+                    </div>
+                    <br><br>
+                    <div class="indent">
+                        ${ c2.author | h}
+                        ${ humandate(c2.raw[Commit.AUTHOR_DATE]) }<br>
+                    </div>
+                    <pre>
+                        ${ ''.join(indent(c2.body)) | h }
+                    </pre>
+                </div>
+            </div>
+            <hr>
+            ${ highlight(''.join(repo.diff(v1, v2, paths=[f])),
+                        lexer, formatter) }
         </td>
         <td class="right_side">
             ${ rp.content(project, repo, None) }
