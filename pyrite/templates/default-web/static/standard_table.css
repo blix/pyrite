@@ -27,12 +27,12 @@
     padding: 2px;
 }
 
-.data_row[parity="True"]
+.odd
 {
     background-color: #D1EEEE;
 }
 
-.data_row[parity="False"]
+.even
 {
     background-color: #E0FFFF;
 }

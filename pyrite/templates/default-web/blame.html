@@ -23,9 +23,9 @@
             if not self.last_commit:
                 yield 0, '<table class="highlighttable standard_table ' \
                             'strip">'
-                self.parity = True
+                self.parity = 'odd'
             if self.last_commit != self.commit:
-                self.parity = not self.parity
+                self.parity = self.parity == 'odd' and 'even' or 'odd'
                 show_hash = utils.commit_link(self.project,
                                     text=self.commit[Commit.ID][:8],
                                     commit=self.commit)
@@ -33,7 +33,7 @@
                 show_hash = '&nbsp;'
             for t, line in source:
                 if t:
-                    yield t, '<tr class="data_row" parity="%s">' \
+                    yield t, '<tr class="data_row  %s">' \
                                 '<td class="cell linenos shrink">' \
                                     '<pre>%s</pre>' \
                                 '</td>' \

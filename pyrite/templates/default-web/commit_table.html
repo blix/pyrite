@@ -22,7 +22,7 @@ data = [Commit.ID, Commit.REFS]
                                         data=data, all=True) 
     %>
     % for i, c in enumerate(gen):
-    <tr class="data_row" parity="${ i % 2 and 'True' or 'False' }">
+    <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
         <td class="cell">
             ${ relative_date(c.raw[Commit.COMMIT_DATE]) }
         </td>

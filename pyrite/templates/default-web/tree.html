@@ -61,8 +61,7 @@
             <hr>
             <table class="standard_table">
             % for i, (perm, type, id, name) in enumerate(repo.tree(tree_id)):
-                <tr class="data_row"
-                    parity="${ i % 2 and 'True' or 'False' }">
+                <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
                     <td class="cell">${perm}</td>
                     % if type == Repo.BLOB:
                     <td class="cell">

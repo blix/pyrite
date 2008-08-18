@@ -31,8 +31,7 @@
                     <td class="col_header">View</td>
                 </tr>
                 % for i, ref in enumerate(repo.refs(type, extended=True)):
-                <tr class="data_row"
-                    parity="${ i % 2 and 'True' or 'False' }">
+                <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
                     <td class="cell">
                         ${ relative_date(str(int(mktime(ref[1])))) }
                     </td>
