@@ -204,6 +204,7 @@ class Commit(GitObject):
             else:
                 args.append(last)
         if paths:
+            args.append('--full-history')
             args.append('--')
             args.extend(paths)
         proc = gitobj._popen(args)
