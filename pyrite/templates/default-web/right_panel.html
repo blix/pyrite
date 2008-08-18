@@ -2,7 +2,7 @@
 from pyrite.git.commit import Commit
 from pyrite.utils.stringopts import relative_date
 %>
-<%def name="content(project, repo, ref)">
+<%page args="project, repo, ref" />
 <div class="refs">
     Branches:
     <br><br>
@@ -39,4 +39,3 @@ from pyrite.utils.stringopts import relative_date
         <a href="${'/%s/reflist/%s' % (project, 'tags')}">(all)</a>
    </li>
 </div>
-</%def>

@@ -50,12 +50,9 @@
     ${ formatter.get_style_defs('.highlight') }
     </style>
 </head>
-<%namespace name="header" file="header.html" />
-<%namespace name="rp" file="right_panel.html" />
-<%namespace name="ft" file="footer.html" />
 <%namespace name="utils" file="utils.html" />
 <body>
-    ${ header.header(project, repo) }
+    <%include file="header.html" args="project=project, repo=repo" />
 
 <table>
     <tr>
@@ -100,10 +97,11 @@
                         lexer, formatter) }
         </td>
         <td class="right_side">
-            ${ rp.content(project, repo, None) }
+            <%include file="right_panel.html"
+                        args="project=project, repo=repo, ref=None" />
         </td>
     </tr>
 </table>
-${ ft.footer() }
+<%include file="footer.html" />
 </body>
 </html>

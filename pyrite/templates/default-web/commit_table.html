@@ -4,7 +4,7 @@ from pyrite.utils.stringopts import relative_date
 data = [Commit.ID, Commit.REFS]
 %>
 <%namespace name="utils" file="utils.html" />
-<%def name="table(project, repo, branch, page=0)">
+<%page args="project, repo, ref, page=0" />
 <div class="table_wrapper">
 <table class="standard_table">
     <tr class="data_row">
@@ -14,8 +14,8 @@ data = [Commit.ID, Commit.REFS]
     </tr>
     <%
         page = page * 100
-        if branch:
-            gen = Commit.get_commits(repo, None, branch, 100, skip=page,
+        if ref:
+            gen = Commit.get_commits(repo, None, ref, 100, skip=page,
                                         data=data) 
         else:
             gen = Commit.get_commits(repo, None, None, 100, skip=page,
@@ -38,4 +38,3 @@ data = [Commit.ID, Commit.REFS]
     % endfor
 </table>
 </div>
-</%def>

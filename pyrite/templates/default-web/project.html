@@ -17,16 +17,14 @@
     <link rel="stylesheet" type="text/css" href="/static/common.css" />
     <title>${ repo.description } -- Pyrite web.</title>
 </head>
-<%namespace name="header" file="header.html" />
 <%namespace name="tbl" file="commit_table.html" />
-<%namespace name="rp" file="right_panel.html" />
-<%namespace name="ft" file="footer.html" />
 <body>
-    ${ header.header(project, repo) }
+    <%include file="header.html" args="project=project, repo=repo" />
 <table>
     <tr>
         <td class="left_side">
-            ${ tbl.table(project, repo, None, p) }
+            <%include file="commit_table.html"
+                args="project=project, repo=repo, ref=ref_id, page=p" />
             % if p > 0:
             <a class="previous" href="${ '/%s/%d' % (project,
                                             p - 1) }">&lt;- Prev</a>
@@ -35,11 +33,12 @@
                                             p + 1) }">Next -&gt;</a>
         </td>
         <td class="right_side">
-            ${ rp.content(project, repo, None) }
+            <%include file="right_panel.html"
+                        args="project=project, repo=repo, ref=None" />
         </td>
     </tr>
 </table>
-${ ft.footer() }
+<%include file="footer.html" />
 </body>
 </html>
 

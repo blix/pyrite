@@ -1,6 +1,5 @@
-<%def name="header(project, repo, branch=None)">
+<%page args="project, repo" />
 <div id="header">
 <div id="name">*** <a href="/${ project }"> ${ repo.description }</a>
 ${ branch and ' / ' +  branch or '' } ***</div>
 </div>
-</%def>

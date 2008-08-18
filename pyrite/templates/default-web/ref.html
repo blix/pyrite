@@ -16,17 +16,14 @@
     <title>${ '%s -- %s -- Pyrite web.' % (repo.description,
                                             ref_id) }</title>
 </head>
-<%namespace name="header" file="header.html" />
-<%namespace name="tbl" file="commit_table.html" />
-<%namespace name="rp" file="right_panel.html" />
-<%namespace name="ft" file="footer.html" />
 <body>
-    ${ header.header(project, repo, ref_id) }
+    <%include file="header.html" args="project=project, repo=repo" />
 
 <table>
     <tr>
         <td class="left_side">
-            ${ tbl.table(project, repo, ref_id, p) }
+            <%include file="commit_table.html"
+                args="project=project, repo=repo, ref=ref_id, page=p" />
             % if p > 0:
             <a class="previous" href="${ '/%s/ref/%s/%d' % (project,
                                         ref_id, p - 1) }">&lt;- Prev</a>
@@ -35,11 +32,12 @@
                                         ref_id, p + 1) }">Next -&gt;</a>
         </td>
         <td class="right_side">
-            ${ rp.content(project, repo, ref_id) }
+            <%include file="right_panel.html"
+                        args="project=project, repo=repo, ref=ref_id" />
         </td>
     </tr>
 </table>
-${ ft.footer() }
+<%include file="footer.html" />
 </body>
 </html>
 
