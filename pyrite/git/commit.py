@@ -164,16 +164,16 @@ class Commit(GitObject):
     @classmethod
     def get_commits(cls, gitobj, first, last, limit=-1, data=None,
                     follow=False, paths=None, skip=0, incoming=False,
-                    reverse=False, reflog=False, ordered=False):
+                    reverse=False, reflog=False, ordered=False, all=False):
         for c in Commit.get_raw_commits(gitobj, first, last, limit, data,
                                         follow, paths, skip, incoming,
-                                        reverse, reflog, ordered):
+                                        reverse, reflog, ordered, all):
             yield Commit(data=data, raw_commit=c, obj=gitobj)
 
     @classmethod
     def get_raw_commits(cls, gitobj, first, last, limit=-1, data=None,
                         follow=False, paths=None, skip=0, incoming=False,
-                        reverse=False, reflog=False, ordered=False):
+                        reverse=False, reflog=False, ordered=False, all=False):
         gitobj.validate()
         args = ['git', 'log']
         if not data:
@@ -194,12 +194,15 @@ class Commit(GitObject):
             args.append('-g')
         if ordered:
             args.append('--topo-order')
-        if not last:
-            last = 'HEAD'
-        if first:
-            args.append(first + (incoming and '...' or '..') + last)
+        if all:
+            args.append('--all')
         else:
-            args.append(last)
+            if not last:
+                last = 'HEAD'
+            if first:
+                args.append(first + (incoming and '...' or '..') + last)
+            else:
+                args.append(last)
         if paths:
             args.append('--')
             args.extend(paths)
@@ -267,6 +270,7 @@ class Commit(GitObject):
     @staticmethod
     def _parse_patch(commit, firstline, stream):
         if firstline.startswith('commit'):
+            commit[Commit.PATCH] = ''
             return firstline
         buf = [firstline]
         append = buf.append
@@ -324,8 +328,12 @@ class Commit(GitObject):
             line = cls._parse_message(commit, line, stream)
             if Commit.DIFFSTAT in prop_types:
                 line = cls._parse_diffstat(commit, line, stream)
+            else:
+                commit[Commit.DIFFSTAT] = ''
             if Commit.PATCH in prop_types:
                 line = cls._parse_patch(commit, line, stream)
+            else:
+                commit[Commit.PATCH] = ''
             while line == '\n':
                 line = stream.readline()
             yield commit
