@@ -9,8 +9,8 @@ url_map = (
      '\?path=(?P<path>.*)$', 'blob.html'),
     (r'^(?P<project>.*)/ref/(?P<ref_id>[^/]*)/?(?P<page>[0-9]*)$',
                                                         'ref.html'),
-    (r'^(?P<project>.*)/diff/(?P<v1>[a-z0-9]*)/(?P<v2>[a-z0-9]*)/(?P<f>.*)$',
-                                                        'diff.html'),
+    (r'^(?P<project>.*)/diff/(?P<v1>[a-z0-9]*)/(?P<v2>[a-z0-9]*)'
+        '/?(?P<f>.*)$', 'diff.html'),
     (r'^(?P<project>.*)/ssdiff/(?P<v1>.*)/(?P<v2>.*)/(?P<f>.*)$',
                                                         'ssdiff.html'),
     (r'^(?P<project>.*)/reflist/(?P<type>.*)$', 'all_type_refs.html'),

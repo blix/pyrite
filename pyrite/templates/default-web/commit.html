@@ -71,10 +71,15 @@
                 <tr>
                     <td class="parents">Parents:</td>
                     <td><ul>
+                        <% count = len(commit.parent_ids) %>
                         % for p in commit.parent_ids:
                         <li class="parent_li">
                             <a href="${'/%s/commit/%s' % (project,
                                         p) }">${ p }</a>
+                            % if count > 1:
+                            <a href="${'/%s/diff/%s/%s' % (project,
+                                        p, commit.id) }">diff</a>
+                            % endif
                         </li>
                         % endfor
                     </ul></td>
