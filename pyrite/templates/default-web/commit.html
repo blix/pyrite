@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+    from time import strftime
+    from pygments import highlight
+    from pygments.lexers import get_lexer_by_name
+    from pygments.formatters import HtmlFormatter
+    __repos = {'default': Repo()}
+    lexer = get_lexer_by_name('diff')
+    formatter = HtmlFormatter()
+%>
+<%
+    repo = __repos.get(project, __repos['default'])
+    commit = Commit(commit_id, data=[Commit.ID, Commit.REFS,
+                                    Commit.PATCH], obj=repo)
+%>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="/header.css" />
+    <title>${repo.description} - ${commit.subject}
+            Pyrite web interface.</title>
+    <style type="text/css">
+    ${ formatter.get_style_defs('.highlight') }
+    </style>
+</head>
+<%namespace name="header" file="header.html" />
+<body>
+    <pre>
+    ${header.header(repo)}
+    Commit: ${commit.id}
+    Author: ${commit.author_name} &lt;${ commit.author_email }&gt;
+    Date: ${ strftime('%a, %d %b %Y %H:%M:%S',
+                    commit.authored_date[0]) } ${ commit.authored_date[1] }
+    Files: <a href="/${ project }/tree/${ commit.tree }?path=">files</a>
+    Subject: ${commit.subject}
+    % if commit.body:
+    ${'    '.join(commit.body)}
+    % endif
+    </pre>
+    <hr>
+    ${ highlight(''.join(commit.patch), lexer, formatter) }
+</body>
+</html>

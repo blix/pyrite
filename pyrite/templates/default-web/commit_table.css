@@ -1,0 +1,37 @@
+#commits_table
+{
+    margin-top: 30px;
+    margin-left: 20px;
+    border-spacing: 0px;
+}
+
+.cell
+{
+    border: solid 1px black;
+    padding: 2px;
+}
+
+.col_header
+{
+    text-align: center;
+    background-color: #66CCCC;
+    font-weight: bold;
+    border: solid 1px black;
+    padding: 2px;
+}
+
+.data_row
+{
+    text-align: left;
+    padding: 2px;
+}
+
+.data_row[parity="True"]
+{
+    background-color: #66CC99;
+}
+
+.data_row[parity="False"]
+{
+    background-color: #66CC66;
+}

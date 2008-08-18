@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pygments import highlight
+    from pygments.lexers import get_lexer_for_filename
+    from pygments.formatters import HtmlFormatter
+    from pyrite.git.repository import Repo
+    import os
+
+    __repos = {'default': Repo()}
+    formatter = HtmlFormatter(linenos='table')
+%>
+<%
+    repo = __repos.get(project, __repos['default'])
+    lexer = get_lexer_for_filename(os.path.basename(path))
+%>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="/header.css" />
+    <title>${repo.description} - ${path}
+            Pyrite web interface.</title>
+    <style type="text/css">
+    ${ formatter.get_style_defs('.highlight') }
+    </style>
+</head>
+<%namespace name="header" file="header.html" />
+<body>
+    ${header.header(repo)}
+    <br>
+    ${ highlight(''.join(repo.blob(blob_id)), lexer, formatter) }
+</body>
+</html>

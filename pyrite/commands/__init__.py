@@ -69,6 +69,8 @@ _commands = {
             _('Resolve a merge conflict')),
 ('revert',): ('revert', 0,
             _('Revert a change in the history by applying a new commit')),
+('serve', 'web'): ('serve', 0,
+              _('Start a web server for ad-hoc sharing.')),
 ('show',): ('show', 0,
             _('show files, tags and commits')),
 ('status',): ('status', 1,

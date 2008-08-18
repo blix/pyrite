@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pyrite.git.repository import Repo
+    __repos = {'default': Repo()}
+%>
+<% repo = __repos.get(path, __repos['default']) %>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" type="text/css" href="commit_table.css" />
+    <title>${ repo.description} -- Pyrite web interface.</title>
+</head>
+<%namespace name="header" file="header.html" />
+<body>
+    ${header.header(repo)}
+
+<table id="commits_table">
+    <tr>
+        <td class="col_header">ID</td>
+        <td class="col_header">User</td>
+        <td class="col_header">Subject</td>
+    </tr>
+    % for i, c in enumerate(repo['HEAD~50':]):
+    <tr class="data_row" parity="${ i % 2 and 'True' or 'False' }">
+        <td class="cell">
+            <a href="default/commit/${c.id}">${ c.id[:8] }</a>
+        </td>
+        <td class="cell">${ c.author_name }</td>
+        <td class="cell">${ c.subject }</td>
+    </tr>
+    % endfor
+<table>
+</body>
+</html>
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pyrite.git.repository import Repo
+    __repos = {'default': Repo()}
+%>
+<%
+    repo = __repos.get(project, __repos['default'])
+%>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <link rel="stylesheet" href="/header.css" />
+    <title>${repo.description} - ${path}
+            Pyrite web interface.</title>
+</head>
+<%namespace name="header" file="header.html" />
+<body>
+    ${header.header(repo)}
+
+    <table>
+    % for perm, type, id, name in repo.tree(tree_id):
+        <tr>
+            <td>${perm}</td>
+            % if type == Repo.BLOB:
+                <td><a href="${'/%s/blob/%s?path=%s/%s' % \
+                (project, id, path, name)}">${name}</a></td>
+            % else:
+                <td><a href="${'/%s/tree/%s?path=%s/%s' % \
+                (project, id, path, name)}">${name}/</a></td>
+            % endif
+    % endfor
+</body>
+</html>
