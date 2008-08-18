@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<%!
+    from pygments import highlight
+    from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
+    from pygments.formatters import HtmlFormatter
+    from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import ctimedate, humandate, indent
+    import os
+
+    __repos = {'default': Repo()}
+%>
+<%namespace name="utils" file="utils.html" />
+<%
+    class BlameHtmlFormatter(HtmlFormatter):
+        def wrap(self, source, outfile):
+            if not self.commit:
+                yield 0, '</table>'
+                return
+            if not hasattr(self, 'last_commit'):
+                self.last_commit = None
+            if not self.last_commit:
+                yield 0, '<table class="highlighttable standard_table ' \
+                            'strip">'
+                self.parity = True
+            if self.last_commit != self.commit:
+                self.parity = not self.parity
+                show_hash = utils.commit_link(self.project,
+                                    text=self.commit[Commit.ID][:8],
+                                    commit=self.commit)
+            else:
+                show_hash = '&nbsp;'
+            for t, line in source:
+                if t:
+                    yield t, '<tr class="data_row" parity="%s">' \
+                                '<td class="cell linenos shrink">' \
+                                    '<pre>%s</pre>' \
+                                '</td>' \
+                                '<td class="commit_id shrink">' \
+                                    '<pre>%s</pre></td>' \
+                                '<td class="cell code">' \
+                                    '<div class="highlight">' \
+                                        '<pre>%s</pre>' \
+                                    '</div>' \
+                                '</td>' \
+                                '</tr>' % \
+                                (self.parity, self.linenostart,
+                                show_hash, line)
+                else:
+                    yield t, line
+            self.last_commit = self.commit
+
+    formatter = BlameHtmlFormatter(encoding='utf-8', nobackground=True)
+    formatter.project = project
+    repo = __repos.get(project, __repos['default'])
+    c = Commit(commit_id, obj=repo)
+    try:
+        lexer = get_lexer_for_filename(os.path.basename(path),
+                                        encoding='utf-8')
+    except:
+        lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
+%>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
+    <link rel="stylesheet" type="text/css" href="/static/common.css" />
+    <title>${repo.description} - ${path}
+            Pyrite web interface.</title>
+    <style type="text/css">
+    ${ formatter.get_style_defs('.highlight') }
+        .highlighttable pre
+        {
+            padding: 0;
+            margin: 0;
+        }
+        .left_side > .heading
+        {
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<%namespace name="header" file="header.html" />
+<%namespace name="rp" file="right_panel.html" />
+<%namespace name="ft" file="footer.html" />
+${ utils.dummy() }
+<body>
+    ${header.header(project, repo)}
+
+<table>
+    <tr>
+        <td class="left_side indent">
+            ${ utils.commit_info(project, c.raw, 'As of commit: ', c.short) }
+            <div class="heading indent">${ path }</div>
+            <hr>
+            <%
+                for entry in repo.blame(path[1:], commit_id):
+                    num, commit_data, line, dummy = entry
+                    formatter.linenostart = int(num)
+                    formatter.commit = commit_data
+                    context.write( highlight( line, lexer, formatter) )
+                formatter.commit = None
+                context.write( highlight('', lexer, formatter) )
+            %>
+        </td>
+        <td class="right_side">
+            ${ rp.content(project, repo, None) }
+        </td>
+    </tr>
+</table>
+${ ft.footer() }
+</body>
+</html>

@@ -9,7 +9,7 @@
     from pygments.formatters import HtmlFormatter
     __repos = {'default': Repo()}
     lexer = get_lexer_by_name('diff', encoding='utf-8')
-    formatter = HtmlFormatter(encoding='utf-8')
+    formatter = HtmlFormatter(encoding='utf-8', nobackground=True)
 %>
 <%
     repo = __repos.get(project, __repos['default'])
@@ -24,7 +24,7 @@
     <style type="text/css">
     .commit_info
     {
-        margin-top: 30px;
+        margin-top: 20px;
     }
     .base, .update, .divide
     {
@@ -45,7 +45,7 @@
     }
     .left_side
     {
-        padding-left: 20px;
+        padding-left: 10px;
     }
     ${ formatter.get_style_defs('.highlight') }
     </style>
@@ -53,6 +53,7 @@
 <%namespace name="header" file="header.html" />
 <%namespace name="rp" file="right_panel.html" />
 <%namespace name="ft" file="footer.html" />
+<%namespace name="utils" file="utils.html" />
 <body>
     ${ header.header(project, repo) }
 

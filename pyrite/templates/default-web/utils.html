@@ -1,0 +1,56 @@
+<%!
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import ctimedate, humandate, indent
+    from mako.filters import html_escape
+%>
+<%def name="ref_link(project, ref)" >
+<%
+    dummy, type, ref = ref.split('/', 2)
+    if type == 'tags':
+        return '<a class="tag" href="/%s/ref/%s">%s</a>' % (project,
+                                                            ref, ref)
+    return '<a class="head" href="/%s/ref/%s">%s</a>' % (project,
+                                                        ref, ref)
+%>
+</%def>
+
+<%def name="commit_link(project, id=None, text=None, commit=None)" >
+<%
+    if commit:
+        return '<a title="%s %s \n%s" href="/%s/commit/%s">%s</a>' % \
+                (commit[Commit.AUTHOR],
+                ctimedate(commit[Commit.AUTHOR_DATE]),
+                commit[Commit.SUBJECT], project,
+                commit[Commit.ID], text)
+    else:
+        return '<a href="/%s/commit/%s">%s</a>' % \
+                (project, id, text)
+%>
+</%def>
+<%def name="dummy()" >
+</%def>
+
+<%def name="commit_info(project, commit, heading, commit_msg=None)" >
+<div class="commit_info">
+    <div class="heading indent">${ heading }
+        % if commit_msg:
+        ${ commit_link(project, text=commit_msg, commit=commit) }
+        % endif
+    </div>
+    <div class="indent">
+        <a href="$ {'/%s/commit/%s' % (project, commit[Commit.ID]) }">
+            Subject: ${ commit[Commit.SUBJECT] }
+        </a>
+    </div>
+    <br>
+    <div class="indent">
+        ${ '"%s" <%s>' % (commit[Commit.AUTHOR],
+                            commit[Commit.AUTHOR_EMAIL]) | h}
+        ${ humandate(commit[Commit.AUTHOR_DATE]) }<br>
+    </div>
+    <pre>
+        <% map(context.write, map(html_escape,
+                indent(commit[Commit.BODY]))) %>
+    </pre>
+</div>
+</%def>

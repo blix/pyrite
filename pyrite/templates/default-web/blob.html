@@ -6,13 +6,17 @@
     from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
     from pygments.formatters import HtmlFormatter
     from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import humandate, indent
     import os
 
     __repos = {'default': Repo()}
-    formatter = HtmlFormatter(linenos='table', encoding='utf-8')
+    formatter = HtmlFormatter(linenos='table', encoding='utf-8',
+    nobackground=True)
 %>
 <%
     repo = __repos.get(project, __repos['default'])
+    c = Commit(commit_id, obj=repo)
     try:
         lexer = get_lexer_for_filename(os.path.basename(path),
                                         encoding='utf-8')
@@ -27,6 +31,21 @@
             Pyrite web interface.</title>
     <style type="text/css">
     ${ formatter.get_style_defs('.highlight') }
+        .commit_info
+        {
+            margin-top: 20px;
+            margin-right: 15px;
+        }
+        .indent, .left_side
+        {
+            padding-left: 10px;
+        }
+        .heading
+        {
+            margin-bottom: 10px;
+            background-color: #66CDAA;
+            border: solid 1px black;
+        }
     </style>
 </head>
 <%namespace name="header" file="header.html" />
@@ -38,6 +57,24 @@
 <table>
     <tr>
         <td class="left_side">
+            <div class="commit_info">
+                <div class="heading indent">Commit</div>
+                <div class="indent">
+                    <a href="$ {'/%s/commit/%s' % (project, commit_id) }">
+                        Subject: ${ c.subject }
+                    </a>
+                </div>
+                <br>
+                <div class="indent">
+                    ${ c.author | h}
+                    ${ humandate(c.raw[Commit.AUTHOR_DATE]) }<br>
+                </div>
+                <pre>
+                    ${ ''.join(indent(c.body)) | h }
+                </pre>
+            </div>
+            <div class="heading indent">${ path }</div>
+            <hr>
             ${ highlight(''.join(repo.blob(blob_id)), lexer, formatter) }
         </td>
         <td class="right_side">

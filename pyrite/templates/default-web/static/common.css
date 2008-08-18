@@ -2,6 +2,14 @@
 body
 {
     margin: 0px;
+    background-color: #D1EEEE;
+}
+
+body > table
+{
+    padding:0;
+    margin: 0;
+    border-spacing: 0px;
 }
 
 #header
@@ -26,6 +34,8 @@ body
 {
     width:100%;
     vertical-align: top;
+    padding: 0;
+    padding-bottom: 10px;
 }
 
 .right_side
@@ -33,6 +43,7 @@ body
     min-width:160px;
     vertical-align: top;
     border-left: solid 1px black;
+    padding-bottom: 10px;
 }
 
 .refs
@@ -49,13 +60,31 @@ body
 
 a:link, a:visited
 {
-    color: #79CDCD;
+    color: #528B8B;
     text-decoration: none;
 }
 
-a:hover
+#header a:link, #header a:visited, .footer a:link, .footer a:visited
+{
+    color: #D1EEEE;
+    text-decoration: none;
+}
+
+a:hover, #header a:hover, .footer a:hover
 {
     color: #A2CD5A;
+    text-decoration: underline;
+}
+
+.heading a:link, .heading a:visited
+{
+    color: #2F4F4F;
+    text-decoration: none;
+}
+
+.heading a:hover
+{
+    color: #528B8B;
     text-decoration: underline;
 }
 
@@ -75,4 +104,33 @@ a:hover
 .about_pyrite
 {
     text-align: left;
+}
+
+.commit_info
+{
+    margin-top: 20px;
+    margin-right: 15px;
+}
+
+.indent
+{
+    padding-left: 10px;
+}
+
+.heading
+{
+    margin-bottom: 10px;
+    background-color: #66CDAA;
+    border: solid 1px black;
+}
+
+.strip
+{
+    padding: 0;
+    margin: 0;
+}
+
+.shrink
+{
+    width: 1px;
 }

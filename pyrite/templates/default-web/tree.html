@@ -2,16 +2,38 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%!
     from pyrite.git.repository import Repo
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import humandate, indent
     __repos = {'default': Repo()}
 %>
 <%
     repo = __repos.get(project, __repos['default'])
+    c = Commit(commit_id, obj=repo)
 %>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+    <link rel="stylesheet" type="text/css"
+          href="/static/standard_table.css" />
     <link rel="stylesheet" type="text/css" href="/static/common.css" />
     <title>${repo.description} - ${path}
             Pyrite web interface.</title>
+    <style type="text/css">
+        .left_side
+        {
+            padding-top: 20px;
+            padding-right: 15px;
+        }
+        .indent, .left_side
+        {
+            padding-left: 10px;
+        }
+        .heading
+        {
+            margin-bottom: 10px;
+            background-color: #66CDAA;
+            border: solid 1px black;
+        }
+    </style>
 </head>
 <%namespace name="header" file="header.html" />
 <%namespace name="rp" file="right_panel.html" />
@@ -22,16 +44,44 @@
 <table>
     <tr>
         <td class="left_side">
-            <table class="files_table">
-            % for perm, type, id, name in repo.tree(tree_id):
-                <tr>
-                    <td class="perm">${perm}</td>
+            <div class="heading indent">Commit</div>
+            <div class="commit_info">
+                <div class="indent">
+                    <a href="$ {'/%s/commit/%s' % (project, commit_id) }">
+                        Subject: ${ c.subject }
+                    </a>
+                </div>
+                <br>
+                <div class="indent">
+                    ${ c.author | h}
+                    ${ humandate(c.raw[Commit.AUTHOR_DATE]) }<br>
+                </div>
+                <pre>
+                    ${ ''.join(indent(c.body)) | h }
+                </pre>
+            </div>
+            <div class="heading indent">${ path and path or '/' }</div>
+            <hr>
+            <table class="standard_table">
+            % for i, (perm, type, id, name) in enumerate(repo.tree(tree_id)):
+                <tr class="data_row"
+                    parity="${ i % 2 and 'True' or 'False' }">
+                    <td class="cell">${perm}</td>
                     % if type == Repo.BLOB:
-                        <td><a href="${'/%s/blob/%s?path=%s/%s' % \
-                        (project, id, path, name)}">${name}</a></td>
+                    <td class="cell">
+                        <a href="${'/%s/blob/%s/%s?path=%s/%s' % \
+                        (project, commit_id, id, path, name)}">${name}</a>
+                    </td>
+                    <td class="cell">
+                        <a href="${ '/%s/blame/%s?path=%s/%s' % (project,
+                                    commit_id, path, name)}">blame</a>
+                    </td>
                     % else:
-                        <td><a href="${'/%s/tree/%s?path=%s/%s' % \
-                        (project, id, path, name)}">${name}/</a></td>
+                    <td class="cell">
+                        <a href="${'/%s/tree/%s/%s?path=%s/%s' % \
+                        (project, commit_id, id, path, name)}">${name}/</a>
+                    </td>
+                    <td class="cell" />
                     % endif
                 </tr>
             % endfor

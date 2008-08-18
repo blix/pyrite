@@ -2,13 +2,8 @@
 from pyrite.git.commit import Commit
 from pyrite.utils.stringopts import relative_date
 data = [Commit.ID, Commit.REFS]
-
-def format_ref(ref):
-    dummy, type, ref = ref.split('/', 2)
-    if type == 'tags':
-        return '<span class="tag">%s</span>' % ref
-    return '<span class="head">%s</span>' % ref
 %>
+<%namespace name="utils" file="utils.html" />
 <%def name="table(project, repo, branch, page=0)">
 <div class="table_wrapper">
 <table class="standard_table">
@@ -34,11 +29,10 @@ def format_ref(ref):
         <td class="cell">${ c.author_name }</td>
         <td class="cell">
             <a href="${'/%s/commit/%s' % (project,
-                        c.id)}">${ c.subject |h }
+                        c.id)}">${ c.subject |h }</a>
             % for r in c.refs:
-                ${ format_ref(r) }&nbsp;
+                ${ utils.ref_link(project, r) }&nbsp;
             % endfor
-            </a>
         </td>
     </tr>
     % endfor
