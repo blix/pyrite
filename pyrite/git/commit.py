@@ -30,6 +30,7 @@ class Commit(GitObject):
     BODY = 'BODY'
     DIFFSTAT = 'DIFFSTAT'
     PATCH = 'PATCH'
+    TREE = 'TREE'
     FILES = 'FILES'
     REFS = 'REFS'
     AUTHOR_DATE_OFFSET = 'AUTHOR_DATE_OFFSET'
@@ -59,6 +60,10 @@ class Commit(GitObject):
     @property
     def id(self):
         return self._raw_commit[Commit.ID]
+
+    @property
+    def short(self):
+        return self._raw_commit[Commit.ID][:8]
 
     @property
     def author(self):
@@ -99,6 +104,10 @@ class Commit(GitObject):
     @property
     def parent_ids(self):
         return self._raw_commit[Commit.PARENTS]
+
+    @property
+    def tree(self):
+        return self._raw_commit[Commit.TREE]
 
     @property
     def subject(self):
@@ -278,7 +287,7 @@ class Commit(GitObject):
             if not part.startswith('refs'):
                 continue
             refs.append(part)
-        stream.readline()
+        commit[Commit.TREE] = stream.readline().split()[1].strip()
         line = stream.readline()
         while line[:3] == 'Ref':
             line = stream.readline()
