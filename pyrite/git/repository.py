@@ -26,6 +26,14 @@ class Repo(GitObject):
         'A': 'added'
     }
 
+    BLOB = 1
+    TREE = 2
+
+    _types = {
+        'blob': BLOB,
+        'tree': TREE,
+    }
+
     def __init__(self, settings=None, io=None, location=None, obj=None):
         GitObject.__init__(self, settings, io, location, obj)
         self._branches = None
@@ -49,7 +57,19 @@ class Repo(GitObject):
         elif isinstance(key, str):
             return Commit(key, obj=self)
         else:
-            raise TypeError()
+            raise TypeError(str(type(key)) + " " + str(key))
+
+    @property
+    def description(self):
+        if self._settings:
+            desc = self._settings.get_option('gitweb.description')
+            if desc:
+                return desc
+
+        if self.is_bare():
+            return os.path.split(self.get_git_dir())[1]
+        return os.path.split(os.path.abspath(os.path.join(self.get_git_dir(),
+                            '..')))[1]
 
     def refresh(self):
         self._branches = None
@@ -885,3 +905,22 @@ class Repo(GitObject):
             if cat_to.__class__ == ''.__class__:
                 stream.close()
         return True
+
+    def tree(self, id):
+        self.validate()
+        proc = self._popen(('git', 'cat-file', '-p', id))
+        for line in proc.stdout.readlines():
+            perms, type, id, name = line.split(None, 3)
+            yield perms, Repo._types[type], id, name
+        if proc.wait():
+            raise GitError(_('Failed to parse tree: %s') %
+                           proc.stderr.read())
+
+    def blob(self, id):
+        self.validate()
+        proc = self._popen(('git', 'cat-file', '-p', id))
+        for line in proc.stdout.readlines():
+            yield line
+        if proc.wait():
+            raise GitError(_('Failed to read blob: %s' %
+                             proc.stderr.read()))
