@@ -10,9 +10,9 @@ from pyrite.utils.stringopts import relative_date
         <td class="col_header">Subject</td>
     </tr>
     % if branch:
-    <%    gen = Commit.get_commits(repo, branch, None, 50) %>
+    <%    gen = Commit.get_commits(repo, None, branch, 100) %>
     % else:
-    <%    gen = Commit.get_commits(repo, None, None, 50, all=True) %>
+    <%    gen = Commit.get_commits(repo, None, None, 100, all=True) %>
     % endif
     % for i, c in enumerate(gen):
     <tr class="data_row" parity="${ i % 2 and 'True' or 'False' }">
@@ -21,7 +21,8 @@ from pyrite.utils.stringopts import relative_date
         </td>
         <td class="cell">${ c.author_name }</td>
         <td class="cell subj_cell">
-            <a href="${'/%s/commit/%s' % (project, c.id)}">${ c.subject |h }</a>
+            <a href="${'/%s/commit/%s' % (project,
+                        c.id)}">${ c.subject |h }</a>
         </td>
     </tr>
     % endfor

@@ -1,0 +1,47 @@
+.left_side
+{
+    width:100%;
+    vertical-align: top;
+}
+
+.right_side
+{
+    min-width:160px;
+    vertical-align: top;
+    border-left: solid 1px black;
+}
+
+.refs
+{
+    list-style-type: none;
+    margin-left: 10px;
+    margin-top: 20px;
+}
+
+.ref, .current_ref
+{
+    margin-left: 10px;
+}
+
+a:link, a:visited, a:link, a:visited
+{
+    color: #666699;
+    text-decoration: none;
+}
+
+a:link
+{
+    color: #666699;
+}
+
+a:hover
+{
+    color: DarkRed;
+    text-decoration: underline;
+}
+
+.current_ref a
+{
+    color: #330099;
+    font-weight: bold;
+}

@@ -30,17 +30,6 @@
     padding: 2px;
 }
 
-.data_row a:link, .data_row a:visited
-{
-    color: black;
-    text-decoration: none;
-}
-
-.data_row a:hover
-{
-    color: DarkRed;
-    text-decoration: underline;
-}
 
 .data_row[parity="True"]
 {
@@ -57,13 +46,19 @@
     background-color: #66FF99;
 }
 
-.date_cell
+.cell
 {
     text-align: left;
     padding-left: 1em;
     padding-right: 1em;
 }
 
-.subj_cell
+.subj_cell a
 {
+    width: 100%;
+}
+
+.cell a:link, .cell a:visited
+{
+    color: black;
 }

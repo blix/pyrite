@@ -1,30 +1,24 @@
-## -*- coding: utf-8 -*-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%!
-    from pygments import highlight
-    from pygments.lexers import get_lexer_for_filename, get_lexer_for_mimetype
-    from pygments.formatters import HtmlFormatter
     from pyrite.git.repository import Repo
-    import os
-
+    from pyrite.git.commit import Commit
+    from pyrite.utils.stringopts import humandate, indent
+    from pygments import highlight
+    from pygments.lexers import get_lexer_by_name
+    from pygments.formatters import HtmlFormatter
     __repos = {'default': Repo()}
-    formatter = HtmlFormatter(linenos='table', encoding='utf-8')
+    lexer = get_lexer_by_name('diff', encoding='utf-8')
+    formatter = HtmlFormatter(encoding='utf-8')
 %>
 <%
     repo = __repos.get(project, __repos['default'])
-    try:
-        lexer = get_lexer_for_filename(os.path.basename(path),
-                                        encoding='utf-8')
-    except:
-        lexer = get_lexer_for_mimetype('text/plain', encoding='utf-8')
 %>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" type="text/css" href="/static/common.css" />
     <link rel="stylesheet" type="text/css" href="/static/header.css" />
-    <title>${repo.description} - ${path}
+    <title>${ repo.description } -
             Pyrite web interface.</title>
     <style type="text/css">
     ${ formatter.get_style_defs('.highlight') }
@@ -33,12 +27,12 @@
 <%namespace name="header" file="header.html" />
 <%namespace name="rp" file="right_panel.html" />
 <body>
-    ${header.header(project, repo)}
+    ${ header.header(project, repo) }
 
 <table>
     <tr>
         <td class="left_side">
-            ${ highlight(''.join(repo.blob(blob_id)), lexer, formatter) }
+            ${ highlight(''.join(repo.diff(v1, v2, paths=[f])), lexer, formatter) }
         </td>
         <td class="right_side">
             ${ rp.content(project, repo, None) }

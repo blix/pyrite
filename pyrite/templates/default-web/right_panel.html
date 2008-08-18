@@ -1,0 +1,42 @@
+<%!
+from pyrite.git.commit import Commit
+from pyrite.utils.stringopts import relative_date
+%>
+<%def name="content(project, repo, ref)">
+<div class="refs">
+    Branches:
+    <br><br>
+% for b in repo.refs('heads', limit=30):
+%    if ref == b:
+    <li class="current_ref">
+        <a href="${'/%s/ref/%s' % (project, b)}">${ b }</a>
+   </li>
+%    else:
+    <li class="ref">
+        <a href="${'/%s/ref/%s' % (project, b)}">${ b }</a>
+   </li>
+%    endif
+% endfor
+    <li class="ref">
+        <a href="${'/%s/reflist/%s' % (project, 'heads')}">(all)</a>
+   </li>
+</div>
+<div class="refs">
+    Tags:
+    <br><br>
+% for t in repo.refs('tags', limit=20, sort='newest'):
+%    if ref == t:
+    <li class="current_ref">
+        <a href="${'/%s/ref/%s' % (project, t)}">${ t }</a>
+   </li>
+%    else:
+    <li class="ref">
+        <a href="${'/%s/ref/%s' % (project, t)}">${ t }</a>
+   </li>
+%    endif
+% endfor
+    <li class="ref">
+        <a href="${'/%s/reflist/%s' % (project, 'tags')}">(all)</a>
+   </li>
+</div>
+</%def>
