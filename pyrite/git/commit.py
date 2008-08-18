@@ -232,6 +232,7 @@ class Commit(GitObject):
         options = ['--pretty=raw']
         if Commit.PATCH in data:
             options.append('-p')
+            options.append('-c')
         if Commit.DIFFSTAT in data:
             options.append('--stat')
         if Commit.REFS in data:
