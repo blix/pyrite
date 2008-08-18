@@ -94,5 +94,5 @@ def run(cmd, args, flags, io, settings, repo):
             else:
                 repo.create_branch(args[0], force=is_force,
                                             track=is_tracking)
-    except pyrite.git.repository.RepoError, inst:
+    except pyrite.git.gitobject.GitError, inst:
         io.error_out(inst)
