@@ -85,8 +85,12 @@ class Root(resource.Resource, FilePath):
     def render_GET(self, request):
         path = request.path[1:]
         uri = request.uri[1:]
-        lookup = TemplateLookup(directories=['/'], default_filters=[],
-                                input_encoding='utf-8')
+        if hasattr(os, 'winver'):
+            lookup = TemplateLookup(directories=[self._file_access.path],
+                                default_filters=[], input_encoding='utf-8')
+        else:
+            lookup = TemplateLookup(directories=['/'],
+                                default_filters=[], input_encoding='utf-8')
         for regex, f in self._mappings:
             match = regex.match(uri)
             if match:
