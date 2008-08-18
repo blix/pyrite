@@ -129,6 +129,10 @@ class Commit(GitObject):
     def refs(self):
         return self._raw_commit[Commit.REFS]
 
+    @property
+    def raw(self):
+        return self._raw_commit
+
     def describe(self):
         if not self._description:
             self._description = Commit.describe_commit(self,
