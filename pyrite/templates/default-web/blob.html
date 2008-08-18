@@ -62,7 +62,8 @@
             ${ utils.commit_info(project, c.raw, 'As of commit: ' + c.short) }
             <div class="heading indent">${ path }</div>
             <hr>
-            ${ highlight(''.join(repo.blob(blob_id)), lexer, formatter) }
+            ${ highlight(''.join(repo.show(c.id, files=[path])),
+                                lexer, formatter) }
         </td>
         <td class="right_side">
             <%include file="right_panel.html"

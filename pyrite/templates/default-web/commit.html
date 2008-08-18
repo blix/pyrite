@@ -102,19 +102,35 @@
             % endif
             </pre>
             <table class="standard_table">
+                <tr class="col_header">
+                    <td class="cell expand">File</td>
+                    <td class="cell expand">View</td>
+                    % for p in commit.parent_ids:
+                    <td class="cell">
+                        Diff vs ${ commit.short }
+                    </td>
+                    % endfor
+                </tr>
                 % for i, f in enumerate(repo.changed_files(commit.id)):
                 <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
-                    <td class="cell">${ f[1] }</td>
-                    <td class="cell">
-                        <a href="${ '/%s/diff/%s/%s/%s' % (project,
-                                    commit.parent_ids[0], commit.id,
-                                    f[1]) }">diff</a>
+                    <td class="cell expand">
+                        <a href="${ '/%s/blob/%s/%s' % (project,
+                                commit.id, f[1]) }">${ f[1] }</a>
                     </td>
                     <td class="cell">
-                        <a href="${ '/%s/ssdiff/%s/%s/%s' % (project,
-                                    commit.parent_ids[0], commit.id,
-                                    f[1]) }">side-by-side diff</a>
+                        <a href="${ '/%s/blame/%s?path=%s' % (project,
+                                    commit_id, '/' + f[1])}">blame</a>
                     </td>
+                    % for p in commit.parent_ids:
+                    <td class="cell">
+                        <a class="pad" href="${ '/%s/diff/%s/%s/%s' % \
+                                            (project, p, commit.id,
+                                            f[1]) }">diff</a> /
+                        <a class="pad" href="${ '/%s/ssdiff/%s/%s/%s' % \
+                                            (project, commit.parent_ids[0],
+                                            commit.id, f[1]) }">SxS diff</a>
+                    </td>
+                    % endfor
                 </tr>
                 % endfor
             </table>

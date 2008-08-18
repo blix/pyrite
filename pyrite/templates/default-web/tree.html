@@ -64,9 +64,9 @@
                 <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
                     <td class="cell">${perm}</td>
                     % if type == Repo.BLOB:
-                    <td class="cell">
-                        <a href="${'/%s/blob/%s/%s?path=%s/%s' % \
-                        (project, commit_id, id, path, name)}">${name}</a>
+                    <td class="cell expand">
+                        <a href="${'/%s/blob/%s%s/%s' % \
+                        (project, commit_id, path, name)}">${name}</a>
                     </td>
                     <td class="cell">
                         <a href="${ '/%s/blame/%s?path=%s/%s' % (project,
