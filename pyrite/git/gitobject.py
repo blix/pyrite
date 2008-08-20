@@ -41,6 +41,10 @@ class GitObject(object):
     def set_settings(self, settings):
         self._settings = settings
 
+    @property
+    def settings(self):
+        return self._settings
+
     def refresh(self):
         self._git_dir = None
         self._is_in_repo = not not self.get_git_dir()
