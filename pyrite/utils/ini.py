@@ -79,8 +79,8 @@ class IniParser(object):
         return default
 
     def items(self, section):
-        if section in self._options.keys():
-           for name, values in self._options[section][0].items():
+        if section in self._options.iterkeys():
+           for name, values in self._options[section][0].iteritems():
                for v in values:
                    yield name, v[0]
 
@@ -90,13 +90,13 @@ class IniParser(object):
         f = None
         try:
             f = open(filename + '.tmp', 'w+')
-            for section, names in self._options.items():
+            for section, names in self._options.iteritems():
                 if names[1]:
                     f.write('\n')
                     f.write(names[1])
                 else:
                     f.write('\n[%s]\n' % section)
-                for name, values in names[0].items():
+                for name, values in names[0].iteritems():
                     for v in values:
                        if v[1]:
                            f.write(v[1])
@@ -132,7 +132,7 @@ class IniParser(object):
               del self._options[section]
 
     def sections(self):
-        for section in self._options.keys():
+        for section in self._options.iterkeys():
             yield section
 
 

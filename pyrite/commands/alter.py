@@ -230,7 +230,7 @@ def run(cmd, args, flags, io, settings, repo):
     except SequencerMergeNeeded:
         io.info(_('\nOne or more files have conflicting changes.'))
         io.info(_('\nThe following files need resolving'))
-        for f in repo.get_unresolved().keys():
+        for f in repo.get_unresolved().iterkeys():
             io.info('..' + f)
         io.info(_('\nRun "pyt resolve" to run a merge program.\n\n'))
 

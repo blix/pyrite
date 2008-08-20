@@ -98,7 +98,7 @@ class Settings(object):
             for k, v in self._items(category, self.repo_config):
                 items[k] = v
 
-        for k, v in items.items():
+        for k, v in items.iteritems():
             yield k, v
 
     def update_ignore(self, item, remove):

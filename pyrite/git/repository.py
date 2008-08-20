@@ -292,7 +292,9 @@ class Repo(GitObject):
         else:
             proc = self._popen(('git', 'diff',
                                 '--name-status', 'HEAD'))
-        retval = set((line[0], line[2:-1]) for line in proc.stdout.readlines())
+        retval = {}
+        for line in proc.stdout.readlines():
+            retval[line[2:].strip()] = self._status[line[0]]
         if proc.wait():
             raise GitError(_('Failed to get changed files: %s') %
                                 proc.stderr.read())
@@ -568,7 +570,7 @@ class Repo(GitObject):
             proc = self._popen(('git', 'diff', '--name-status', 'HEAD'))
             for line in proc.stdout.readlines():
                 status, filename = line.split()
-                files[filename.strip()] = Commit._status[status[0]]
+                files[filename.strip()] = Repo._status[status[0]]
 
         proc.wait()
         return files

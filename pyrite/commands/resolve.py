@@ -66,7 +66,7 @@ def run(cmd, args, flags, io, settings, repo):
     if not toolspec:
         toolspec = 'vimdiff -f -- {mine} {result} {theirs}'
 
-    for f in files_to_resolve.keys():
+    for f in files_to_resolve.iterkeys():
         base = None
         mine = None
         theirs = None

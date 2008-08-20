@@ -78,8 +78,8 @@ def run(cmd, args, flags, io, settings, repo):
                                 ''.join(commit.body)
             amend = commit.id
             if args:
-                for f in repo.changed_files('HEAD'):
-                    args.append(f[1])
+                for f in repo.changed_files('HEAD').iterkeys():
+                    args.append(f)
             diff = [l for l in repo.diff('HEAD^', 'HEAD',
                                                 None, binary=True)]
             repo.move_head_to('HEAD^')
@@ -94,7 +94,7 @@ def run(cmd, args, flags, io, settings, repo):
                                     settings.get_user()
 
         if edit:
-            for x in repo.changed_files():
+            for x in repo.changed_files().iterkeys():
                 if not args or x[1] in args:
                     extra.append('  ' + ' '.join(x))
 

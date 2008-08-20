@@ -77,14 +77,14 @@ def print_branch_stats(repo, branch, others):
     print 'Total number of authors is: %d' % len(authors)
     print 'They are...'
     num_sorted = {}
-    for name, info in authors.items():
+    for name, info in authors.iteritems():
         num = info[0]
         if num in num_sorted:
             num_sorted[num].append(info[1])
         else:
             num_sorted[num] = [info[1]]
 
-    for n in sorted(num_sorted.keys()):
+    for n in sorted(num_sorted.iterkeys()):
         for a in sorted(num_sorted[n]):
             print a + ': ' + str(n)
     print ''

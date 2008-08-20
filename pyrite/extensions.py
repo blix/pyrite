@@ -33,13 +33,13 @@ def on_load(io, commands, settings):
             _extensions[name] = module
 
 def on_before_command(module, cmd, args, flags, io, settings, repo):
-    for e in _extensions.values():
+    for e in _extensions.itervalues():
         if hasattr(e, 'on_before_command'):
             e.on_before_command(module, cmd, args, flags, io,
                                 settings, repo)
 
 def on_after_command(module, cmd, args, flags, io, settings, repo):
-    for e in _extensions.values():
+    for e in _extensions.itervalues():
         if hasattr(e, 'on_after_command'):
             e.on_after_command(module, cmd, args, flags, io,
                                settings, repo)

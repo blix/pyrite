@@ -110,7 +110,7 @@ class Sequencer(object):
                 _('Changed Files...'),
                 _('  ')
             ]
-            for x in repo.changed_files():
+            for x in repo.changed_files().iterkeys():
                 extra.append('  ' + ' '.join(x))
             self._message = io.edit(self._message, extra,
                                             'pyt-message')
@@ -192,8 +192,7 @@ class Sequencer(object):
                 if not commit:
                     return False
                 self._squashed.append(commit)
-                changed_files = [ f.strip() for m, f in
-                                 self._repo.changed_files('HEAD')]
+                changed_files = self._repo.changed_files('HEAD').keys()
                 self._repo.move_head_to('HEAD^')
                 for l in self._repo.add_files(False, False, changed_files):
                     pass
@@ -229,7 +228,7 @@ class Sequencer(object):
             _('  ')
         ]
 
-        for x in self._repo.changed_files():
+        for x in self._repo.changed_files().iterkeys():
             extra.append('  ' + ' '.join(x))
         return message, extra
 

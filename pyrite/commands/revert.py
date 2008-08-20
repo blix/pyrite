@@ -67,7 +67,7 @@ def run(cmd, args, flags, io, settings, repo):
         changed = changed - repo.changed_files()
         if changed:
             io.info(_('Reverted the following files:'))
-            for status, filename in changed:
+            for filename in changed.iterkeys():
                 io.info(filename)
         else:
             io.info(_('No files reverted.'))

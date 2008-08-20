@@ -33,11 +33,11 @@ def show_help(prefix, template, threshold, suffix, io):
 
     io.info(prefix)
     commands = {}
-    for c, options in pyrite.commands._commands.items():
+    for c, options in pyrite.commands._commands.iteritems():
         if 2 > options[1] >= threshold:
             commands[c[0]] = template % (c[0].ljust(10), options[2])
-    for c in sorted(commands.keys()):
-        io.info(commands[c])
+    for c in sorted(commands.itervalues()):
+        io.info(c)
     io.info(suffix)
 
 def show_full_help(io):
@@ -77,7 +77,7 @@ def show_extensions(io):
     io.info(_(' name:').ljust(31) + _(' description'))
     io.info('-' * 80 + '\n\n')
     
-    for name, module in pyrite.extensions.extensions().items():
+    for name, module in pyrite.extensions.extensions().iteritems():
         io.info(' ' + (name + ':').ljust(30) + ' ' + module.description)
     io.info('')
     io.info(_('For help on an extension, type "%s"\n\n') %
@@ -99,8 +99,8 @@ def on_help_error(err, io):
             for c, info in pyrite.commands.iteritems():
                 cmd = c[0]
                 messages[cmd] = ', '.join(c) + ':\n\t' + info[2] + '\n\n'
-            for m in sorted(messages.keys()):
-                io.info(messages[m])
+            for m in sorted(messages.itervalues()):
+                io.info(m)
         else:
             show_help(_('Basic commands...\n'), _(' %s %s'), 1,
                       _('\n' + _('For more options type "%s"\n\n') %

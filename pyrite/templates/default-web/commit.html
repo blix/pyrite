@@ -106,24 +106,24 @@ ${ ''.join(indent(self.commit.body)) }
         </td>
         % endfor
     </tr>
-    % for i, f in enumerate(self.repo.changed_files(self.commit.id)):
+    % for i, f in enumerate(self.repo.changed_files(self.commit.id).iterkeys()):
     <tr class="data_row ${ i % 2 and 'even' or 'odd' }">
         <td class="cell expand">
             <a href="${ '/%s/blob/%s/%s' % (project,
-                    self.commit.id, f[1]) }">${ f[1] }</a>
+                    self.commit.id, f) }">${ f }</a>
         </td>
         <td class="cell">
             <a href="${ '/%s/blame/%s?path=%s' % (project,
-                        commit_id, '/' + f[1])}">blame</a>
+                        commit_id, '/' + f)}">blame</a>
         </td>
         % for p in self.commit.parent_ids:
         <td class="cell">
             <a class="pad" href="${ '/%s/diff/%s/%s/%s' % \
                                 (project, p, self.commit.id,
-                                f[1]) }">diff</a> /
+                                f) }">diff</a> /
             <a class="pad" href="${ '/%s/ssdiff/%s/%s/%s' % \
                                 (project, self.commit.parent_ids[0],
-                                self.commit.id, f[1]) }">SxS diff</a>
+                                self.commit.id, f) }">SxS diff</a>
         </td>
         % endfor
     </tr>
