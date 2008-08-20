@@ -57,23 +57,27 @@ class Settings(object):
     def del_user_option(self, item, is_all):
         self._del_option(self.user_config, self.user_config_path, item, is_all)
 
-    def get_option(self, item, is_all=False):
+    def get_option(self, item, default=None, is_all=False):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise SettingsError(_missing_config_arg)
         value = None
         if self.repo.is_in_repo():
             value = self.repo_config.get(category, name)
-        if not value:
+        if value == None:
             value = self.user_config.get(category, name)
+            if value == None:
+                value = default
         return value
 
-    def get_repo_option(self, item, is_all=False):
+    def get_repo_option(self, item, default=None, is_all=False):
         category, name = self._split_option(item)
         if category == None or name == None:
             raise SettingsError(_missing_config_arg)
         if self.repo.is_in_repo():
             return self.repo_config.get(category, name)
+        if default:
+            return default
         raise SettingsError(_not_under_repo_error)
 
     def _items(self, category, config):
