@@ -148,7 +148,7 @@ class Commit(GitObject):
         parts = proc.stdout.read().split('-')
         if proc.wait():
             c = commit and commit or Commit(id, obj=gitobj)
-            return None, 0, c.id()
+            return None, 0, c.id
         if len(parts) == 3:
             return parts[0], int(parts[1]), parts[2].strip()[1:]
         tag = parts[0].strip()
