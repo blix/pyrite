@@ -10,3 +10,4 @@ pyrite/__version__.py
 test/testdata/
 STATS
 *~
+*.orig
