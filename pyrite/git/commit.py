@@ -76,7 +76,7 @@ class Commit(GitObject):
 
     @property
     def author_email(self):
-        self._raw_commit[Commit.AUTHOR_EMAIL]
+        return self._raw_commit[Commit.AUTHOR_EMAIL]
 
     @property
     def authored_date(self):
@@ -98,7 +98,7 @@ class Commit(GitObject):
 
     @property
     def commited_date(self):
-        return time.gmtime(int(self._raw_commit[Commit.COMMIT_DATE])), \
+        return humandate(self._raw_commit[Commit.COMMIT_DATE]) + ' ' + \
                 self._raw_commit[Commit.COMMITER_DATE_OFFSET]
 
     @property
