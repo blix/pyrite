@@ -270,7 +270,7 @@ class Commit(GitObject):
             append(line)
 
     @staticmethod
-    def _parse_patch(commit, firstline, stream):
+    def _parse_patch(commit, firstline, stream, parse_files=False):
         if firstline.startswith('commit'):
             commit[Commit.PATCH] = ''
             return firstline
@@ -278,12 +278,36 @@ class Commit(GitObject):
         append = buf.append
         readline = stream.readline
         type = Commit.PATCH
-        while True:
-            line = readline()
-            if not line or line[0] == 'c':
-                commit[type] = buf
-                return line
-            append(line)
+
+        def parse_normal():
+            while True:
+                line = readline()
+                if not line or line[0] == 'c':
+                    commit[type] = buf
+                    return line
+                append(line)
+
+        def parse_with_files():
+            in_header = False
+            while True:
+                line = readline()
+                if not line or line[0] == 'c':
+                    commit[type] = buf
+                    return line
+                if line.startswith('diff '):
+                    in_header = True
+                elif line[0] == '@':
+                    in_header = False
+                if in_header and (line.startswith('+++ ') or
+                                  line.startswith('--- ')):
+                    if line[4:] != '/dev/null':
+                        commit[Commit.FILES].add(line[4:])
+                append(line)
+
+        if parse_files:
+            return parse_with_files()
+        else:
+            return parse_normal()
 
     @staticmethod
     def _parse_raw_header(commit, firstline, stream):
@@ -333,7 +357,8 @@ class Commit(GitObject):
             else:
                 commit[Commit.DIFFSTAT] = ''
             if Commit.PATCH in prop_types:
-                line = cls._parse_patch(commit, line, stream)
+                line = cls._parse_patch(commit, line, stream,
+                                        Commit.FILES in prop_types)
             else:
                 commit[Commit.PATCH] = ''
             while line == '\n':
