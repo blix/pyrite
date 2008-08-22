@@ -59,9 +59,9 @@ class GitObject(object):
             stdin = None
         if os.environ.get('PYTDBG'):
             if not self._io or self._io == True:
-                print args
+                print ' '.join(args)
             else:
-                self._io.info(str(args))
+                self._io.info(' '.join(args))
         return Popen(args, cwd=cwd, stdout=stdout, stderr=stderr,
                      stdin=stdin)
 
