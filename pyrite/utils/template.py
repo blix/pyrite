@@ -18,6 +18,7 @@ from pyrite.git.commit import Commit
 from datetime import datetime
 import time
 import os.path
+from pyrite.utils.io import color_diff, color_diffstat
 
 class Template(object):
     def __init__(self, style, color):
@@ -155,12 +156,12 @@ class Template(object):
     def color_diff(self, item):
         if not self.color:
             return item
-        return io.color_diff(item)
+        return color_diff(item)
 
     def color_diffstat(self, item):
         if not self.color:
             return item
-        return io.color_diffstat(item)
+        return color_diffstat(item)
 
     def _get_data(self, data, repo, what):
         if what in data:
