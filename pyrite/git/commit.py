@@ -139,6 +139,13 @@ class Commit(GitObject):
                                     self._raw_commit[Commit.ID], self)
         return self._description
 
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return '<%s.%s id="%s">' % (Commit.__module__, Commit.__name__,
+                                    self.id)
+
     @staticmethod
     def describe_commit(gitobj, id, commit=None):
         gitobj.validate()
@@ -219,17 +226,8 @@ class Commit(GitObject):
         if proc.wait():
             raise GitError(_('Failed to get log: %s') % proc.stderr.read())
 
-    def __str__(self):
-        return self.id
-
-    def __repr__(self):
-        return '<%s.%s id="%s">' % (Commit.__module__, Commit.__name__,
-                                    self.id)
-
     @staticmethod
     def _get_format_args(data):
-        #if len(data) == 1 and Commit.ID in data:
-        #    return ['--pretty=format:commit %H\n']
         options = ['--pretty=raw']
         if Commit.PATCH in data:
             options.append('-p')
